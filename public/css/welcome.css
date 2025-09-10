@@ -1,0 +1,152 @@
+/* ===== Base / Reset ===== */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+               Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  color: #2c2c2c;
+  background: #f6f7f9;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+}
+
+/* ===== Tokens ===== */
+:root{
+  --brand: #6c2a6c;
+  --brand-ink:#4d1d4d;
+  --ink:#2c2c2c;
+  --muted:#8d8d8d;
+  --line:#d3d6db;
+  --icon:#9aa0a6;
+  --hover:#f6f4f7;
+  --shadow: 0 26px 60px rgba(25, 8, 25, .16);
+  --overlay:#602f41;
+  --danger:#c03434;
+  --danger-bg:#fde3e3;
+  --ok:#18a06e;
+}
+
+/* ===== Card principal (2 colunas) ===== */
+.card{
+  width: min(1200px, 100%);
+  min-height: 620px;
+  background: #fff;
+  border-radius: 26px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ===== Coluna esquerda (foto com overlay e headline) ===== */
+.media{ position: relative; background: var(--overlay); isolation: isolate; }
+.media .photo{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  z-index: 0;
+}
+.media::after{
+  content:""; position:absolute; inset:0;
+  background: rgba(96, 47, 66, .70);
+  z-index: 1; pointer-events: none;
+}
+.media-inner{
+  position:absolute; inset:0; z-index: 2;
+  display:flex; align-items:flex-end; justify-content:flex-end;
+  padding: 36px 34px; text-align:right;
+}
+.brand-mark{ height: 26px; margin-bottom: 12px; filter: brightness(0) invert(1); opacity:.95; }
+.headline{
+  color:#fff; font-weight:700; line-height:1.15;
+  text-transform:uppercase; font-size: 28px; max-width: 460px;
+  text-shadow: 0 8px 20px rgba(0,0,0,.25);
+}
+
+/* ===== Coluna direita (login) ===== */
+.login{ display:flex; align-items:center; justify-content:center; padding: 40px 52px; background:#fff; }
+.login-wrap{ width: 480px; max-width: 100%; display:flex; flex-direction:column; align-items:center; }
+.logo{ width: 220px; max-width: 80%; height:auto; object-fit: contain; margin: 8px auto 22px; }
+
+/* Mensagens */
+.ok{
+  width:100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background:#e8fbf3;
+  color:#137a58;
+  border:1px solid #c8f1e4;
+  font-size: 13px;
+  text-align:center;
+  margin-bottom: 12px;
+}
+.alert{
+  width:100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid #f6c9c9;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+/* Formulário */
+.form{ width:100%; display:grid; gap: 12px; }
+.field{ position: relative; }
+.input{
+  width: 100%; height: 54px;
+  border: 1px solid var(--line);
+  background: #f2f2f2;
+  border-radius: 12px;
+  padding: 0 44px;
+  font-size: 15px;
+  color: #2c2c2c;
+  outline: none;
+  transition: box-shadow .15s ease, background .15s ease, border-color .15s ease;
+}
+.input::placeholder{ color:#8a8a8a; }
+.input:focus{
+  box-shadow: 0 0 0 4px rgba(90,97,105,.15);
+  border-color: #cfd2d8;
+  background: #f8f8f8;
+}
+.icon{
+  position:absolute; left:14px; top:50%; transform: translateY(-50%);
+  width:18px; height:18px; color: var(--icon); pointer-events: none;
+}
+.toggle{
+  position:absolute; right:12px; top:50%; transform: translateY(-50%);
+  width: 22px; height: 22px; color: var(--icon);
+  background: transparent; border: none; cursor: pointer; display: grid; place-items: center;
+}
+.hint{ margin-top: 2px; width: 100%; text-align: right; font-size: 12px; color: #98a0aa; }
+.hint a{ color: var(--brand); text-decoration: none; }
+.hint a:hover{ text-decoration: underline; }
+.hint.signup{ text-align:center; margin-top: 8px; }
+
+/* Botão */
+.btn{
+  margin: 8px auto 0;
+  padding: 12px 22px;
+  border: none; border-radius: 12px;
+  background: var(--brand);
+  color: #fff; font-weight: 700; font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 18px 40px rgba(108,42,108,.28);
+  transition: transform .06s ease, box-shadow .2s ease, background-color .2s ease;
+}
+.btn:hover{ transform: translateY(-1px); box-shadow: 0 22px 48px rgba(108,42,108,.33); }
+.btn:active{ transform: translateY(0); }
+
+/* ===== Responsivo ===== */
+@media (max-width: 980px){
+  .card{ grid-template-columns: 1fr; }
+  .media{ height: 52svh; min-height: 360px; }
+  .media-inner{ justify-content: center; text-align: center; }
+  .login{ padding: 28px 22px; }
+  .logo{ margin: 4px auto 18px; }
+  .headline{ font-size: 26px; max-width: 520px; }
+}

@@ -1,0 +1,161 @@
+/* ===== Paleta e base ===== */
+:root{
+  --brand:#6c2a6c;
+  --ink:#1f2937;
+  --muted:#6b7280;
+  --paper:#ffffff;
+  --bg:#f4f6fb;
+  --line:#e6e7ef;
+  --focus:rgba(108,42,108,.22);
+}
+
+*{ box-sizing:border-box; font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial }
+html,body{ height:100% }
+body{
+  margin:0;
+  background:linear-gradient(120deg,#f7f9fd 0%, #eef2f9 100%);
+  color:var(--ink);
+  font-size:14.5px;
+  line-height:1.45;
+  padding:24px 12px 40px;
+}
+
+/* ===== Título ===== */
+h1{
+  width:min(980px,100%);
+  margin:8px auto 12px;
+  font-size:28px;
+  color:#1f2a37;
+}
+
+/* ===== “Folha” do formulário ===== */
+form{
+  width:min(980px,100%);
+  margin:0 auto;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:14px;
+  box-shadow:0 14px 36px rgba(20,20,40,.08);
+  padding:16px;
+}
+
+/* ===== Fieldsets ===== */
+fieldset{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px;
+  margin:12px 0;
+  background:#fff;
+
+  /* GRID compacto (2 colunas, quebra em 1 no mobile) */
+  display:grid;
+  grid-template-columns:repeat(2,minmax(260px,1fr));
+  gap:10px 14px;
+}
+@media (max-width:720px){
+  fieldset{ grid-template-columns:1fr }
+  h1{ font-size:24px }
+}
+
+legend{
+  font-weight:700;
+  color:var(--brand);
+  padding:0 6px;
+  letter-spacing:.2px;
+  font-size:15px;
+}
+
+/* o HTML coloca <br> entre labels — escondemos pra não criar buracos */
+fieldset br{ display:none }
+
+/* ===== Labels + campos ===== */
+label{
+  display:block;
+  font-weight:600;
+  color:#374151;
+  font-size:13.5px;
+}
+label input,
+label select,
+label textarea{
+  width:100%;
+  margin-top:6px;
+  padding:9px 10px;
+  border:1px solid #d7dbe7;
+  border-radius:10px;
+  background:#fafbff;
+  font-size:14px;
+  color:inherit;
+  outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+label input:focus,
+label select:focus,
+label textarea:focus{
+  border-color:var(--brand);
+  box-shadow:0 0 0 3px var(--focus);
+  background:#fff;
+}
+
+/* Específicos */
+input[type="number"], input[type="month"]{ max-width:180px }
+input[type="file"]{ padding:8px; border-style:dashed; background:#fcfcff }
+input[type="radio"]{
+  width:auto; display:inline-block; margin-right:6px;
+  accent-color:var(--brand);
+}
+
+/* ===== Bloco de antecipações (os <div> dentro do fieldset) ===== */
+fieldset > div{
+  grid-column:1 / -1;
+  border:1px dashed #dcd3e6;
+  border-radius:10px;
+  padding:10px;
+  background:#fff;
+
+  display:grid;
+  grid-template-columns:repeat(2,minmax(200px,1fr));
+  gap:10px 14px;
+}
+fieldset > div p{ margin:0 0 6px; grid-column:1 / -1; color:#4c3450 }
+fieldset > div label{ margin:0 }
+
+@media (max-width:720px){
+  fieldset > div{ grid-template-columns:1fr }
+}
+
+/* Separador suave (entre as linhas geradas no @for) */
+fieldset hr{
+  border:0; height:1px; background:var(--line);
+  margin:10px 0;
+}
+
+/* Textarea */
+textarea{ min-height:90px; resize:vertical }
+
+/* ===== Ações (botões + link) ===== */
+form > p{
+  display:flex; gap:10px; align-items:center; justify-content:flex-end;
+  margin:6px 0 2px;
+}
+button{
+  appearance:none; border:1px solid transparent;
+  background:var(--brand); color:#fff;
+  padding:10px 16px; border-radius:10px;
+  font-weight:700; cursor:pointer; font-size:14px;
+  box-shadow:0 6px 14px rgba(108,42,108,.25);
+  transition:filter .15s ease, transform .1s ease;
+}
+button:hover{ filter:brightness(.98); transform:translateY(-1px) }
+
+form a{
+  text-decoration:none; font-weight:600; color:var(--brand);
+  padding:9px 12px; border:1px solid #eadff0; border-radius:10px; background:#fff;
+}
+form a:hover{ background:#f8f5fb }
+
+/* ===== Impressão ===== */
+@media print{
+  body{ background:#fff; padding:0 }
+  form{ box-shadow:none; border:none; border-radius:0; padding:0 }
+}

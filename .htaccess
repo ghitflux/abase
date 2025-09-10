@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # NÃO reescrever:
+    # - Desafios do Let's Encrypt (.well-known)
+    # - Tudo que estiver dentro de /abasepi (ou o próprio /abasepi)
+    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
+    RewriteCond %{REQUEST_URI} !^/abasepi(?:/|$)
+
+    # Para o resto, encaminha para /public
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
