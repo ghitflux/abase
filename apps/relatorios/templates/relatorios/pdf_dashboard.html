@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ title }}</h1>
+        <p>Gerado em: {% now "d/m/Y H:i" %}</p>
+    </div>
+    
+    <div class="metrics">
+        <div class="metric-card">
+            <div class="metric-value">{{ qtd_efetivados }}</div>
+            <div class="metric-label">Associados Efetivados</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">{{ qtd_fila }}</div>
+            <div class="metric-label">Em Análise</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">R$ {{ soma_total|floatformat:2 }}</div>
+            <div class="metric-label">Total Contribuições</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">R$ {{ soma_doacoes|floatformat:2 }}</div>
+            <div class="metric-label">Total Doações</div>
+        </div>
+    </div>
+    
+    <h3>Top 10 Órgãos Públicos</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Órgão Público</th>
+                <th>Qtde Associados</th>
+                <th>Total Contribuições (R$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for orgao in top_orgaos %}
+            <tr>
+                <td>{{ orgao.orgao_publico|default:"Não informado" }}</td>
+                <td>{{ orgao.qtd }}</td>
+                <td>R$ {{ orgao.soma|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center;">Nenhum órgão encontrado</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <h3>Aprovações por Mês (Últimos 6 meses)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Mês</th>
+                <th>Qtde Aprovações</th>
+                <th>Total Contribuições (R$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mes in aprov_por_mes %}
+            <tr>
+                <td>{{ mes.mes }}</td>
+                <td>{{ mes.qtd }}</td>
+                <td>R$ {{ mes.soma|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center;">Nenhuma aprovação encontrada</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="summary">
+        <h3>Tempo Médio de Análise (TMA)</h3>
+        <p><strong>TMA Análise:</strong> {{ tma_analise }}</p>
+        <p><strong>TMA Pagamento:</strong> {{ tma_pagto }}</p>
+    </div>
+    
+    <div class="footer">
+        <p>Relatório gerado pelo Sistema ABASE</p>
+    </div>
+</body>
+</html>

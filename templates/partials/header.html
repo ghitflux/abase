@@ -1,0 +1,31 @@
+<header class="bg-card border-b border-border px-6 py-4">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <h2 class="text-lg font-semibold">{% block page_title %}Sistema ABASE{% endblock %}</h2>
+    </div>
+    
+    <div class="flex items-center gap-4">
+      {% if user.is_authenticated %}
+        <div class="flex items-center gap-2">
+          <i data-lucide="user" class="w-4 h-4 text-muted-foreground"></i>
+          <span class="text-sm">{{ user.username }}</span>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button class="btn btn-ghost p-2">
+            <i data-lucide="bell" class="w-4 h-4"></i>
+          </button>
+          
+          <a href="{% url 'accounts:logout' %}" class="btn btn-ghost p-2" title="Sair">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </a>
+        </div>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="btn btn-primary">
+          <i data-lucide="log-in" class="w-4 h-4 mr-2"></i>
+          Entrar
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</header>

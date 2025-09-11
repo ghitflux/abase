@@ -1,0 +1,25 @@
+<div class="space-y-3">
+  {% for d in docs %}
+    <div class="flex items-center justify-between bg-white border border-gray-200 rounded-lg">
+      <div class="px-4 py-3">
+        <div class="text-sm font-medium text-gray-900">{{ d.tipo }}</div>
+        <div class="text-sm text-gray-500">{{ d.arquivo.name|slice:"-60:" }}</div>
+      </div>
+      <div class="pr-4">
+        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                hx-post="{% url 'documentos:draft-delete' d.id %}"
+                hx-target="#draft-list"
+                title="Remover este anexo">
+          Remover
+        </button>
+      </div>
+    </div>
+  {% empty %}
+    <div class="text-center py-4">
+      <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg>
+      <p class="mt-1 text-sm text-gray-500">Nenhum arquivo anexado.</p>
+    </div>
+  {% endfor %}
+</div>

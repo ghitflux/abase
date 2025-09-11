@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ title }}</h1>
+        <p>Gerado em: {% now "d/m/Y H:i" %}</p>
+    </div>
+    
+    <div class="summary">
+        <h3>Resumo Geral</h3>
+        <p><strong>Total de Órgãos:</strong> {{ total_orgaos }}</p>
+        <p><strong>Total de Associados:</strong> {{ total_associados }}</p>
+        <p><strong>Total de Contribuições:</strong> R$ {{ total_contribuicoes|floatformat:2 }}</p>
+        <p><strong>Total de Doações:</strong> R$ {{ total_doacoes|floatformat:2 }}</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Órgão Público</th>
+                <th>Qtde Associados</th>
+                <th>Total Contribuições (R$)</th>
+                <th>Total Doações (R$)</th>
+                <th>% do Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for orgao in orgaos %}
+            <tr>
+                <td>{{ orgao.orgao_publico|default:"Não informado" }}</td>
+                <td>{{ orgao.qtd }}</td>
+                <td>R$ {{ orgao.total|floatformat:2 }}</td>
+                <td>R$ {{ orgao.doacoes|floatformat:2 }}</td>
+                <td>
+                    {% if total_contribuicoes > 0 %}
+                        {{ orgao.total|mul:100|div:total_contribuicoes|floatformat:1 }}%
+                    {% else %}
+                        0.0%
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center;">Nenhum órgão encontrado</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="footer">
+        <p>Relatório gerado pelo Sistema ABASE</p>
+    </div>
+</body>
+</html>

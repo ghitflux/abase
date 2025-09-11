@@ -1,0 +1,21 @@
+{
+  "name": "abase-system",
+  "version": "1.0.0",
+  "description": "Sistema de Gestão Empresarial ABASE",
+  "scripts": {
+    "build-css": "tailwindcss -i ./assets/tailwind.css -o ./static/css/app.css",
+    "watch-css": "tailwindcss -i ./assets/tailwind.css -o ./static/css/app.css --watch",
+    "build-css-prod": "tailwindcss -i ./assets/tailwind.css -o ./static/css/app.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  },
+  "keywords": [
+    "django",
+    "tailwindcss",
+    "business-management",
+    "shadcn-ui"
+  ],
+  "author": "Equipe ABASE",
+  "license": "MIT"
+}

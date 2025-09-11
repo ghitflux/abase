@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+{% load form_utils %}
+{% block title %}Novo Cadastro • ABASE{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Novo Cadastro</h1>
+        <a href="{% url 'cadastros:agente-list' %}" 
+           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Voltar
+        </a>
+    </div>
+
+<form method="post" class="space-y-6">
+  {% csrf_token %}
+
+  <!-- ========== DADOS CADASTRAIS ========== -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-900">Dados Cadastrais</h2>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-2">
+          <label for="{{ form.tipo_pessoa.id_for_label }}" class="block text-sm font-medium text-gray-700">Tipo de Documento (PF/PJ)</label>
+          {{ form.tipo_pessoa|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-3">
+          <label for="cpf" class="block text-sm font-medium text-gray-700">CPF</label>
+          <input name="cpf" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" inputmode="numeric" maxlength="14" placeholder="___.___.___-__" id="cpf" value="{{ form.instance.cpf|default_if_none:'' }}">
+        </div>
+        <div class="col-span-3">
+          <label for="cnpj" class="block text-sm font-medium text-gray-700">CNPJ</label>
+          <input name="cnpj" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" inputmode="numeric" maxlength="18" placeholder="__.___.___/____-__" id="cnpj" value="{{ form.instance.cnpj|default_if_none:'' }}">
+        </div>
+        <div class="col-span-2">
+          <label for="{{ form.rg.id_for_label }}" class="block text-sm font-medium text-gray-700">RG</label>
+          {{ form.rg|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-2">
+          <label for="{{ form.orgao_expedidor.id_for_label }}" class="block text-sm font-medium text-gray-700">Órgão Expedidor</label>
+          {{ form.orgao_expedidor|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+
+        <div class="col-span-6">
+          <label for="{{ form.nome_razao_social.id_for_label }}" class="block text-sm font-medium text-gray-700">Nome/Razão Social</label>
+          {{ form.nome_razao_social|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-6">
+          <label for="{{ form.nome_completo.id_for_label }}" class="block text-sm font-medium text-gray-700">Nome completo</label>
+          {{ form.nome_completo|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Data de nascimento</label>
+          {{ form.data_nascimento|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-5">
+          <label class="block text-sm font-medium text-gray-700">Profissão</label>
+          {{ form.profissao|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-4">
+          <label class="block text-sm font-medium text-gray-700">Estado civil</label>
+          {{ form.estado_civil|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== ENDEREÇO ========== -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-900">Endereço</h2>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700">CEP</label>
+          <input name="cep" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="cep" placeholder="00000-000" maxlength="9" inputmode="numeric" value="{{ form.instance.cep|default_if_none:'' }}">
+        </div>
+        <div class="col-span-6">
+          <label class="block text-sm font-medium text-gray-700">Endereço</label>
+          {{ form.endereco|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Nº</label>
+          {{ form.numero|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Complemento</label>
+          {{ form.complemento|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+
+        <div class="col-span-4">
+          <label class="block text-sm font-medium text-gray-700">Bairro</label>
+          {{ form.bairro|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-6">
+          <label class="block text-sm font-medium text-gray-700">Cidade</label>
+          {{ form.cidade|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700">UF</label>
+          {{ form.uf|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== DADOS BANCÁRIOS ========== -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-900">Dados Bancários</h2>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-5">
+          <label class="block text-sm font-medium text-gray-700">Banco</label>
+          {{ form.banco|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Agência</label>
+          <input name="agencia" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="0001-9" value="{{ form.instance.agencia|default_if_none:'' }}">
+        </div>
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Conta</label>
+          <input name="conta" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="123456-7" value="{{ form.instance.conta|default_if_none:'' }}">
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Tipo de Conta</label>
+          {{ form.tipo_conta|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+
+        <div class="col-span-12">
+          <label class="block text-sm font-medium text-gray-700">Chave Pix</label>
+          {{ form.chave_pix|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <p class="text-xs text-muted-foreground mt-1">Use a chave PIX principal do associado para futuros pagamentos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== CONTATO E VÍNCULO PÚBLICO ========== -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-900">Contato e Vínculo Público</h2>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Celular</label>
+          {{ form.celular|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-5">
+          <label class="block text-sm font-medium text-gray-700">E-mail</label>
+          {{ form.email|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-4">
+          <label class="block text-sm font-medium text-gray-700">Órgão Público</label>
+          {{ form.orgao_publico|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Situação do Servidor</label>
+          {{ form.situacao_servidor|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-4">
+          <label class="block text-sm font-medium text-gray-700">Matrícula do Servidor Público</label>
+          {{ form.matricula_servidor|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MARGEM (cálculos automáticos) ========== -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-900">Dados para cálculo de margem (pré-validação)</h2>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Valor Bruto Total</label>
+          {{ form.valor_bruto_total|add_class:"input w-full money" }}
+        </div>
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Valor Líquido (contra-cheque)</label>
+          {{ form.valor_liquido|add_class:"input w-full money" }}
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Prazo de Antecipação (meses)</label>
+          {{ form.prazo_antecipacao_meses|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700">30% do Bruto</label>
+          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="trinta_bruto" readonly>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Margem (Liq − 30%)</label>
+          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="margem_calc" readonly>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== DETALHES DO CONTRATO (cálculos automáticos) ========== -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-900">Detalhes do Contrato</h2>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Contribuição Associativa (R$)</label>
+          {{ form.mensalidade_associativa|add_class:"input w-full money" }}
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Taxa de Antecipação (%)</label>
+          <input name="taxa_antecipacao_percent" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="30,00" readonly>
+        </div>
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Repasse ao Associado (R$)</label>
+          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="disponivel" readonly>
+        </div>
+        <div class="col-span-4">
+          <label class="block text-sm font-medium text-gray-700">Total das 3 Cotas (R$)</label>
+          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="valor_total_ant" readonly>
+        </div>
+
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Data da Aprovação</label>
+          {{ form.data_aprovacao|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Data da primeira contribuição</label>
+          {{ form.data_primeira_mensalidade|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Mês de Averbação (AAAA-MM)</label>
+          {{ form.mes_averbacao|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Doação do Associado (R$)</label>
+          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="doacao" readonly>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== AGENTE / FILIAL ========== -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-900">Agente / Filial</h2>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">Data do Envio</label>
+          {{ form.data_envio|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== DOCUMENTOS (rascunho) ========== -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-900">Documentos (imagem/PDF até 10MB)</h2>
+    </div>
+    <div class="p-6">
+      <div class="flex flex-wrap gap-2 mb-3">
+        <select id="tipo_doc" class="mt-1 block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+          <option value="DOC_FRENTE">Documento (frente)</option>
+          <option value="DOC_VERSO">Documento (verso)</option>
+          <option value="COMP_ENDERECO">Comprovante de endereço</option>
+          <option value="COMP_RENDA">Comprovante de renda</option>
+          <option value="CONTRACHEQUE_ATUAL">Contracheque atual</option>
+          <option value="TERMO_ADESAO">Termo de Adesão</option>
+          <option value="TERMO_ANTECIPACAO">Termo de Antecipação</option>
+        </select>
+        <input id="arquivo_doc" type="file" class="mt-1 block w-[380px] text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+        <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                hx-post="{% url 'documentos:draft-upload' %}"
+                hx-encoding="multipart/form-data"
+                hx-vals='js:{"tipo": document.getElementById("tipo_doc").value}'
+                hx-include="#arquivo_doc"
+                hx-target="#draft-list">
+          Adicionar
+        </button>
+      </div>
+      <div id="draft-list">
+        {% include "documentos/_draft_list.html" with docs=docs %}
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-end space-x-3">
+    <a href="{% url 'cadastros:agente-list' %}" 
+       class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        Cancelar
+    </a>
+    <button type="submit" 
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        Enviar Cadastro
+    </button>
+  </div>
+</div>
+</form>
+
+<!-- ======= Scripts de máscara, CEP e cálculos ======= -->
+<script>
+function onlyDigits(s){ return (s||"").replace(/\D+/g,""); }
+
+function maskCPF(v){ v = onlyDigits(v).slice(0,11);
+  return v.replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2")
+          .replace(/(\d{3})(\d{1,2})$/,"$1-$2"); }
+
+function maskCNPJ(v){ v = onlyDigits(v).slice(0,14);
+  return v.replace(/^(\d{2})(\d)/,"$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/,"$1.$2.$3")
+          .replace(/\.(\d{3})(\d)/,".$1/$2").replace(/(\d{4})(\d)/,"$1-$2"); }
+
+function maskCEP(v){ v = onlyDigits(v).slice(0,8); return v.replace(/(\d{5})(\d)/,"$1-$2"); }
+
+function toMoneyInput(el){
+  el.addEventListener('input', e=>{
+    let v = onlyDigits(el.value);
+    if(!v) { el.value=""; recalc(); return; }
+    v = (parseInt(v,10)/100).toFixed(2);    // sempre 2 casas
+    el.value = v.replace(".", ",");         // formato BR
+    recalc();
+  });
+}
+function parseMoney(s){
+  if(!s) return 0;
+  s = (s+"").replace(/\./g,"").replace(",",".");
+  let n = parseFloat(s); return isNaN(n)?0:n;
+}
+
+function recalc(){
+  const bruto = parseMoney(document.querySelector('[name="valor_bruto_total"]').value);
+  const liquido = parseMoney(document.querySelector('[name="valor_liquido"]').value);
+  const mensal = parseMoney(document.querySelector('[name="mensalidade_associativa"]').value);
+
+  const trinta = +(bruto * 0.30).toFixed(2);
+  const margem = +(liquido - trinta).toFixed(2);
+  const total = +(mensal * 3).toFixed(2);
+  const doacao = +(total * 0.30).toFixed(2);
+  const disp = +(total * 0.70).toFixed(2);
+
+  const f = n => n.toLocaleString('pt-BR', {minimumFractionDigits:2});
+  document.getElementById('trinta_bruto').value = f(trinta);
+  document.getElementById('margem_calc').value = f(margem);
+  document.getElementById('valor_total_ant').value = f(total);
+  document.getElementById('doacao').value = f(doacao);
+  document.getElementById('disponivel').value = f(disp);
+}
+
+const cpf = document.getElementById('cpf');
+const cnpj = document.getElementById('cnpj');
+if(cpf){ cpf.addEventListener('input',()=>cpf.value=maskCPF(cpf.value)); }
+if(cnpj){ cnpj.addEventListener('input',()=>cnpj.value=maskCNPJ(cnpj.value)); }
+
+const cep = document.getElementById('cep');
+if(cep){
+  cep.addEventListener('input', ()=> cep.value = maskCEP(cep.value));
+  cep.addEventListener('blur', async ()=>{
+    const v = cep.value.replace(/\D/g,"");
+    if(v.length===8){
+      try {
+        const r = await fetch(`https://viacep.com.br/ws/${v}/json/`);
+        const j = await r.json();
+        if(!j.erro){
+          document.querySelector('[name="endereco"]').value = j.logradouro || "";
+          document.querySelector('[name="bairro"]').value = j.bairro || "";
+          document.querySelector('[name="cidade"]').value = j.localidade || "";
+          document.querySelector('[name="uf"]').value = j.uf || "";
+        }
+      } catch(e){}
+    }
+  });
+}
+
+document.querySelectorAll('.money').forEach(toMoneyInput);
+document.addEventListener('DOMContentLoaded', recalc);
+</script>
+{% endblock %}

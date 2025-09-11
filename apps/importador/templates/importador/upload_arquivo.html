@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Importar Mensalidades{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h1 class="text-xl font-semibold text-gray-900">Importar Mensalidades</h1>
+                <p class="mt-1 text-sm text-gray-600">Faça upload de arquivos CSV ou TXT para importar mensalidades</p>
+            </div>
+            
+            <div class="p-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Formato dos Arquivos</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <p><strong>CSV:</strong> Deve conter cabeçalhos: cpf, matricula, valor</p>
+                                <p><strong>TXT:</strong> Formato: CPF|MATRÍCULA|VALOR (separado por pipe)</p>
+                                <p><strong>Tamanho máximo:</strong> 50MB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label for="{{ form.competencia.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Competência
+                            </label>
+                            {{ form.competencia }}
+                            {% if form.competencia.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.competencia.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500">Formato: YYYY-MM (ex: 2024-01)</p>
+                        </div>
+                        
+                        <div>
+                            <label for="{{ form.tipo_arquivo.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Tipo de Arquivo
+                            </label>
+                            {{ form.tipo_arquivo }}
+                            {% if form.tipo_arquivo.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.tipo_arquivo.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label for="{{ form.arquivo.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Arquivo
+                            </label>
+                            {{ form.arquivo }}
+                            {% if form.arquivo.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.arquivo.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <a href="{% url 'importador:listar_importacoes' %}" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Cancelar
+                        </a>
+                        <button type="submit" 
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Importar Arquivo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

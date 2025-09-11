@@ -1,0 +1,83 @@
+/* Tokens no padrão shadcn/ui - tema dark com primária #682D44 */
+:root {
+  --radius: 0.5rem;
+  /* base (para light, caso necessário no futuro) */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --primary: 338 41% 29%; /* #682D44 em HSL aproximado */
+  --primary-foreground: 355 100% 97%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 338 41% 29%;
+}
+
+.dark {
+  --background: 240 10% 4%;
+  --foreground: 0 0% 95%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 4%;
+  --popover-foreground: 0 0% 95%;
+  --card: 240 10% 7%;
+  --card-foreground: 0 0% 95%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 338 41% 29%;           /* ABASE vinho (#682D44) */
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 338 41% 29%;
+}
+
+/* Componentes shadcn-like (HTML server-rendered) */
+.btn{ @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none h-10 px-4 py-2; }
+.btn-primary{ @apply bg-primary text-primary-foreground hover:opacity-90; }
+.btn-secondary{ @apply bg-secondary text-secondary-foreground hover:bg-secondary/80; }
+.btn-outline{ @apply border border-input bg-transparent hover:bg-accent hover:text-accent-foreground; }
+.btn-ghost{ @apply hover:bg-accent hover:text-accent-foreground; }
+.btn-destructive{ @apply bg-destructive text-destructive-foreground hover:bg-destructive/90; }
+
+.input{ @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring; }
+.textarea{ @apply w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring; }
+.select{ @apply h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground; }
+.label{ @apply text-sm text-muted-foreground mb-1; }
+.badge{ @apply inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold transition-colors; }
+
+.card{ @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm; }
+.card-body{ @apply p-4; }
+.card-header{ @apply p-4 border-b border-border; }
+.card-title{ @apply text-lg font-semibold; }
+.card-desc{ @apply text-sm text-muted-foreground; }
+
+.table{ @apply w-full text-sm; }
+.table th{ @apply text-left text-muted-foreground border-b border-border py-2; }
+.table td{ @apply border-b border-border/50 py-2; }
+
+.tabs{ @apply flex items-center gap-2; }
+.tab{ @apply inline-flex items-center rounded-md border border-transparent px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground; }
+.tab-active{ @apply bg-primary text-primary-foreground; }
+
+.alert{ @apply rounded-md border border-border p-4; }
+.alert-title{ @apply font-medium mb-1; }
+.alert-desc{ @apply text-sm text-muted-foreground; }
+
+.dialog-backdrop{ @apply fixed inset-0 bg-black/50 z-40 hidden; }
+.dialog{ @apply fixed z-50 inset-0 flex items-center justify-center p-4; }
+.dialog-panel{ @apply w-full max-w-lg rounded-lg border border-border bg-popover text-popover-foreground shadow-lg; }
+.dialog-actions{ @apply p-4 border-t border-border flex justify-end gap-2; }

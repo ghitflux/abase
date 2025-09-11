@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ title }}</h1>
+        <p>Gerado em: {% now "d/m/Y H:i" %}</p>
+    </div>
+    
+    <div class="summary">
+        <h3>Resumo Geral</h3>
+        <p><strong>Total de Associados:</strong> {{ total_associados }}</p>
+        <p><strong>Total de Contribuições:</strong> R$ {{ total_contribuicoes|floatformat:2 }}</p>
+        <p><strong>Total de Doações:</strong> R$ {{ total_doacoes|floatformat:2 }}</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome/Razão Social</th>
+                <th>CPF/CNPJ</th>
+                <th>Matrícula</th>
+                <th>Órgão Público</th>
+                <th>Status</th>
+                <th>Contribuição (R$)</th>
+                <th>Doação (R$)</th>
+                <th>Disponível (R$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for associado in associados %}
+            <tr>
+                <td>{{ associado.id }}</td>
+                <td>{{ associado.nome_razao_social }}</td>
+                <td>{{ associado.cpf|default:associado.cnpj|default:"—" }}</td>
+                <td>{{ associado.matricula_servidor|default:"—" }}</td>
+                <td>{{ associado.orgao_publico|default:"—" }}</td>
+                <td>{{ associado.get_status_display }}</td>
+                <td>R$ {{ associado.valor_total_antecipacao|floatformat:2 }}</td>
+                <td>R$ {{ associado.doacao_associado|floatformat:2 }}</td>
+                <td>R$ {{ associado.disponivel|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="text-align: center;">Nenhum associado encontrado</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="footer">
+        <p>Relatório gerado pelo Sistema ABASE</p>
+    </div>
+</body>
+</html>
