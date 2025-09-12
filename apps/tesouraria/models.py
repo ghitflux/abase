@@ -134,3 +134,100 @@ class ReconciliacaoLog(models.Model):
     
     def __str__(self):
         return f"Reconciliação {self.data_execucao.strftime('%d/%m/%Y %H:%M')}"
+
+
+class StatusProcessoTesouraria(models.TextChoices):
+    """Status possíveis para processos na tesouraria"""
+    PENDENTE = 'pendente', 'Pendente de Processamento'
+    EM_PROCESSAMENTO = 'em_processamento', 'Em Processamento'
+    PROCESSADO = 'processado', 'Processado com Sucesso'
+    REJEITADO = 'rejeitado', 'Rejeitado'
+    
+
+class ProcessoTesouraria(models.Model):
+    """
+    Modelo para processos que chegam da análise para a tesouraria.
+    
+    Representa cadastros aprovados na análise que precisam ser
+    processados pela tesouraria.
+    """
+    
+    # Relacionamentos
+    cadastro = models.OneToOneField(
+        'cadastros.Cadastro',
+        on_delete=models.CASCADE,
+        related_name='processo_tesouraria',
+        verbose_name='Cadastro'
+    )
+    
+    origem_analise = models.ForeignKey(
+        'analise.AnaliseProcesso',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='processos_tesouraria',
+        verbose_name='Origem da Análise'
+    )
+    
+    # Status e controle
+    status = models.CharField(
+        max_length=20,
+        choices=StatusProcessoTesouraria.choices,
+        default=StatusProcessoTesouraria.PENDENTE,
+        verbose_name='Status do Processo'
+    )
+    
+    # Informações da análise
+    observacoes_analise = models.TextField(
+        blank=True,
+        verbose_name='Observações da Análise',
+        help_text='Observações vindas do processo de análise'
+    )
+    
+    # Agente responsável pelo cadastro
+    agente_responsavel = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='processos_tesouraria_agente',
+        verbose_name='Agente Responsável',
+        help_text='Agente que fez o cadastro original'
+    )
+    
+    # Datas de controle
+    data_entrada = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Data de Entrada na Tesouraria'
+    )
+    
+    data_processamento = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Data do Processamento'
+    )
+    
+    # Responsável pelo processamento
+    processado_por = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='processos_tesouraria_processados',
+        verbose_name='Processado por'
+    )
+    
+    # Observações da tesouraria
+    observacoes_tesouraria = models.TextField(
+        blank=True,
+        verbose_name='Observações da Tesouraria',
+        help_text='Observações internas da tesouraria'
+    )
+    
+    class Meta:
+        verbose_name = 'Processo da Tesouraria'
+        verbose_name_plural = 'Processos da Tesouraria'
+        ordering = ['-data_entrada']
+        
+    def __str__(self):
+        return f'Processo #{self.id} - {self.cadastro.nome_completo}'

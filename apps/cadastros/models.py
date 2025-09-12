@@ -22,8 +22,7 @@ class Cadastro(models.Model):
     rg                   = models.CharField("RG", max_length=20, blank=True)
     orgao_expedidor      = models.CharField("Órgão Expedidor", max_length=20, blank=True)
 
-    nome_razao_social    = models.CharField("Nome/Razão Social", max_length=180)
-    nome_completo        = models.CharField("Nome completo", max_length=180, blank=True)       # PF
+    nome_completo        = models.CharField("Nome Completo", max_length=180)
     data_nascimento      = models.DateField("Data de nascimento", null=True, blank=True)
     profissao            = models.CharField("Profissão", max_length=120, blank=True)
     estado_civil         = models.CharField("Estado civil", max_length=20, choices=EstadoCivil.choices, blank=True)
@@ -49,7 +48,7 @@ class Cadastro(models.Model):
     email                = models.EmailField("E-mail", blank=True)
     orgao_publico        = models.CharField("Órgão Público", max_length=120, blank=True)
     situacao_servidor    = models.CharField("Situação do Servidor", max_length=20, choices=SituacaoServidor.choices, blank=True)
-    matricula_servidor   = models.CharField("Matrícula do Servidor Público", max_length=30, db_index=True)
+    matricula_servidor   = models.CharField("Matrícula do Servidor Público", max_length=30, blank=True, db_index=True)
 
     # ---- Dados para cálculo de margem (pré-validação) ----
     valor_bruto_total    = models.DecimalField("Valor Bruto Total", max_digits=12, decimal_places=2, null=True, blank=True)
@@ -74,6 +73,7 @@ class Cadastro(models.Model):
     agente_responsavel      = models.ForeignKey(User, on_delete=models.PROTECT, related_name="cadastros", verbose_name="Agente Responsável")
     agente_padrao           = models.BooleanField("Agente Padrão", default=False)
     auxilio_agente_taxa_percent = models.DecimalField("Auxílio do Agente (%)", max_digits=5, decimal_places=2, default=Decimal("10.00"))  # sempre 10%
+    auxilio_agente_valor    = models.DecimalField("Auxílio do Agente (R$)", max_digits=12, decimal_places=2, default=Decimal("0.00"))
     data_envio              = models.DateField("Data do Envio", null=True, blank=True)
 
     # ---- Fluxo ----
@@ -107,14 +107,22 @@ class Cadastro(models.Model):
         self.valor_total_antecipacao = (mensal * Decimal("3")).quantize(Decimal("0.01"))
         self.doacao_associado = (self.valor_total_antecipacao * Decimal("0.30")).quantize(Decimal("0.01"))
         self.disponivel = (self.valor_total_antecipacao * Decimal("0.70")).quantize(Decimal("0.01"))
+        # Cálculo do auxílio do agente: 10% do valor liberado para o associado
+        self.auxilio_agente_taxa_percent = Decimal("10.00")  # sempre 10%
+        self.auxilio_agente_valor = (self.disponivel * Decimal("0.10")).quantize(Decimal("0.01"))
 
     def save(self, *args, **kwargs):
         self.recalc()
         super().save(*args, **kwargs)
 
+    @property
+    def cpf_cnpj(self):
+        """Retorna CPF ou CNPJ, o que estiver preenchido"""
+        return self.cpf or self.cnpj or "—"
+    
     def __str__(self):
         doc = self.cpf or self.cnpj or "—"
-        return f"{self.nome_razao_social} • {doc} • {self.get_status_display()}"
+        return f"{self.nome_completo} • {doc} • {self.get_status_display()}"
 
 class ParcelaAntecipacao(models.Model):
     cadastro   = models.ForeignKey(Cadastro, on_delete=models.CASCADE, related_name="parcelas")

@@ -1,8 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseBadRequest
-from apps.accounts.decorators import admin_required
+from django.contrib import messages
+from apps.accounts.decorators import admin_required, group_required
 from apps.documentos.models import Documento, DocumentoRascunho
 from apps.documentos.views import ensure_draft_token
 from .forms import CadastroForm
@@ -10,14 +11,62 @@ from .models import Cadastro, ParcelaAntecipacao
 from .choices import StatusParcela, StatusCadastro
 
 @login_required
+@group_required('AGENTE')
 def agente_list(request):
-    return render(request, "cadastros/agente_list.html", {})
+    """Lista todos os cadastros do agente logado"""
+    cadastros = Cadastro.objects.filter(
+        agente_responsavel=request.user
+    ).select_related().order_by('-created_at')
+    
+    # Cadastros pendentes de revisão (devolvidos pelo analista)
+    cadastros_pendentes = cadastros.filter(status=StatusCadastro.PENDING_AGENT)
+    
+    context = {
+        'cadastros': cadastros,
+        'cadastros_pendentes': cadastros_pendentes,
+        'total_cadastros': cadastros.count(),
+        'total_pendentes': cadastros_pendentes.count(),
+    }
+    return render(request, "cadastros/agente_list.html", context)
+
 
 @login_required
+@group_required('AGENTE')
+def agente_detail(request, cadastro_id):
+    """Visualização detalhada de um cadastro do agente"""
+    cadastro = get_object_or_404(
+        Cadastro.objects.select_related('agente_responsavel'),
+        id=cadastro_id,
+        agente_responsavel=request.user
+    )
+    
+    # Buscar parcelas relacionadas
+    parcelas = cadastro.parcelas.all().order_by('numero')
+    
+    # Buscar documentos relacionados
+    documentos = cadastro.documentos.all()
+    
+    # Buscar processo de análise se existir
+    try:
+        processo_analise = cadastro.analise_processo
+    except AttributeError:
+        processo_analise = None
+    
+    context = {
+        'cadastro': cadastro,
+        'parcelas': parcelas,
+        'documentos': documentos,
+        'processo_analise': processo_analise,
+    }
+    
+    return render(request, "cadastros/agente_detail.html", context)
+
+@login_required
+@group_required('AGENTE')
 @require_http_methods(["GET","POST"])
 def agente_create(request):
     """
-    Tela do Agente para criar novo cadastro:
+    Tela do Agente para criar novo cadastro ou editar existente:
     - exibe formulários
     - cálculos automáticos via JS e revalidados no save()
     - uploads em rascunho (persistem em caso de erro)
@@ -25,43 +74,129 @@ def agente_create(request):
     - cria 3 parcelas padrão (pendentes)
     """
     draft_token = ensure_draft_token(request)
+    
+    # Verificar se é edição
+    edit_id = request.GET.get('edit') or request.POST.get('edit_id')
+    cadastro = None
+    if edit_id:
+        cadastro = get_object_or_404(
+            Cadastro.objects.prefetch_related('documentos'),
+            id=edit_id,
+            agente_responsavel=request.user
+        )
 
     if request.method == "GET":
-        form = CadastroForm(initial={
-            "tipo_pessoa": "PF",
-            "prazo_antecipacao_meses": 3,
-            "taxa_antecipacao_percent": "30.00",
-        })
+        if cadastro:
+            # Carregando dados para edição
+            form = CadastroForm(instance=cadastro)
+            # Carregando documentos existentes como rascunhos
+            existing_docs = cadastro.documentos.all()
+        else:
+            # Criando novo cadastro
+            form = CadastroForm(initial={
+                "tipo_pessoa": "PF",
+                "prazo_antecipacao_meses": 3,
+                "taxa_antecipacao_percent": "30.00",
+            })
+            existing_docs = []
+            
         docs = DocumentoRascunho.objects.filter(user=request.user, draft_token=draft_token)
         return render(request, "cadastros/agente_form.html", {
-            "form": form, "draft_token": draft_token, "docs": docs
+            "form": form, 
+            "draft_token": draft_token, 
+            "docs": docs,
+            "existing_docs": existing_docs,
+            "cadastro": cadastro,
+            "is_edit": bool(cadastro)
         })
 
     # POST
-    form = CadastroForm(request.POST)
+    print(f"📧 POST REQUEST RECEIVED for user: {request.user}")
+    print(f"📋 POST DATA: {dict(request.POST)}")
+    
+    if cadastro:
+        # Editando cadastro existente
+        print(f"✏️ EDITING existing cadastro ID: {cadastro.id}")
+        form = CadastroForm(request.POST, instance=cadastro)
+        existing_docs = cadastro.documentos.all()
+    else:
+        # Criando novo cadastro
+        print("🆕 CREATING new cadastro")
+        form = CadastroForm(request.POST)
+        existing_docs = []
+        
     docs = DocumentoRascunho.objects.filter(user=request.user, draft_token=draft_token)
+    print(f"📄 Draft documents found: {docs.count()}")
 
+    print(f"🔍 FORM VALIDATION: {form.is_valid()}")
+    
     if not form.is_valid():
+        print("❌ FORM VALIDATION FAILED!")
+        print(f"🐛 FORM ERRORS: {form.errors}")
+        print(f"🐛 NON-FIELD ERRORS: {form.non_field_errors()}")
+        
+        # Adicionar mensagem de erro para o usuário
+        messages.error(request, 'Erro na validação do formulário. Verifique os campos destacados.')
         # mantém anexos no rascunho e reapresenta erros
         return render(request, "cadastros/agente_form.html", {
-            "form": form, "draft_token": draft_token, "docs": docs
+            "form": form, 
+            "draft_token": draft_token, 
+            "docs": docs,
+            "existing_docs": existing_docs,
+            "cadastro": cadastro,
+            "is_edit": bool(cadastro)
         }, status=400)
 
-    cad: Cadastro = form.save(commit=False)
-    cad.agente_responsavel = request.user
-    cad.save()  # dispara recalc() no model
+    print("✅ FORM VALIDATION PASSED! Saving cadastro...")
+    
+    try:
+        cad: Cadastro = form.save(commit=False)
+        print(f"📝 Form saved to object: {cad}")
+        
+        if not cadastro:  # Só para novos cadastros
+            cad.agente_responsavel = request.user
+            cad.status = StatusCadastro.SENT_REVIEW  # Enviar automaticamente para análise
+            print(f"🆕 New cadastro - Agent: {request.user}, Status: {cad.status}")
+        else:  # Para edições, manter status atual ou reenviar para análise se necessário
+            if cadastro.status == StatusCadastro.PENDING_AGENT:
+                cad.status = StatusCadastro.SENT_REVIEW  # Reenviar para análise após correção
+                print(f"🔄 Resubmitted - Status changed to: {cad.status}")
+                
+        cad.save()  # dispara recalc() no model
+        print(f"💾 Cadastro saved successfully with ID: {cad.id}")
+        
+    except Exception as e:
+        print(f"💥 ERROR saving cadastro: {e}")
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f'Erro ao salvar cadastro: {e}')
+        return render(request, "cadastros/agente_form.html", {
+            "form": form, 
+            "draft_token": draft_token, 
+            "docs": docs,
+            "existing_docs": existing_docs,
+            "cadastro": cadastro,
+            "is_edit": bool(cadastro)
+        }, status=500)
 
-    # cria 3 parcelas padrão com o valor da mensalidade
-    for n in (1,2,3):
-        ParcelaAntecipacao.objects.get_or_create(
-            cadastro=cad, numero=n,
-            defaults={"valor": cad.mensalidade_associativa, "status": StatusParcela.PENDENTE}
-        )
+    # cria 3 parcelas padrão com o valor da mensalidade (só para novos)
+    try:
+        if not cadastro:
+            for n in (1,2,3):
+                ParcelaAntecipacao.objects.get_or_create(
+                    cadastro=cad, numero=n,
+                    defaults={"valor": cad.mensalidade_associativa, "status": StatusParcela.PENDENTE}
+                )
+    except Exception as e:
+        messages.warning(request, f'Cadastro salvo mas erro ao criar parcelas: {e}')
 
     # promove rascunhos -> documentos definitivos
-    for d in docs:
-        Documento.objects.create(cadastro=cad, tipo=d.tipo, arquivo=d.arquivo)
-        d.delete()
+    try:
+        for d in docs:
+            Documento.objects.create(cadastro=cad, tipo=d.tipo, arquivo=d.arquivo)
+            d.delete()
+    except Exception as e:
+        messages.warning(request, f'Cadastro salvo mas erro ao processar documentos: {e}')
 
     # limpa token (opcional)
     try:
@@ -69,10 +204,20 @@ def agente_create(request):
     except KeyError:
         pass
 
+    # Mensagem de sucesso
+    if cadastro:
+        print("✅ UPDATE SUCCESS - Redirecting...")
+        messages.success(request, 'Cadastro atualizado com sucesso e enviado para análise!')
+    else:
+        print("✅ CREATE SUCCESS - Redirecting...")
+        messages.success(request, 'Cadastro criado com sucesso e enviado para análise!')
+
+    print("🔄 Redirecting to cadastros:agente-list")
     # redireciona para lista do agente (ou detalhe, conforme seu menu)
     return redirect("cadastros:agente-list")
 
 @login_required
+@group_required('AGENTE')
 def verificar_elegibilidade_renovacao(request, cadastro_id):
     """
     Verifica se um cadastro é elegível para renovação.
@@ -118,6 +263,7 @@ def verificar_elegibilidade_renovacao(request, cadastro_id):
     })
 
 @login_required
+@group_required('AGENTE')
 @require_http_methods(["GET", "POST"])
 def renovar_cadastro(request, cadastro_id):
     """
@@ -147,7 +293,6 @@ def renovar_cadastro(request, cadastro_id):
             "cnpj": cadastro_original.cnpj,
             "rg": cadastro_original.rg,
             "orgao_expedidor": cadastro_original.orgao_expedidor,
-            "nome_razao_social": cadastro_original.nome_razao_social,
             "nome_completo": cadastro_original.nome_completo,
             "data_nascimento": cadastro_original.data_nascimento,
             "profissao": cadastro_original.profissao,

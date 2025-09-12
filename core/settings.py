@@ -19,6 +19,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
 
+# CSRF Configuration for development
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+
 # Application definition
 
 DJANGO_APPS = [
@@ -34,6 +39,7 @@ LOCAL_APPS = [
     'apps.accounts',
     'apps.auditoria',
     'apps.cadastros',
+    'apps.analise',  # App de análise de cadastros
     'apps.documentos',
     'apps.tesouraria',  # Inclui funcionalidades de mensalidades e reconciliação
     'apps.importador',

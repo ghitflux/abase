@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Esteira de Análise{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-primary-foreground mb-2">Esteira de Análise</h1>
+    <p class="text-gray-600 dark:text-gray-400">Gerencie os processos de análise de cadastros</p>
+  </div>
+
+  <!-- Filtros Avançados -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6" x-data="filterManager()">
+    <!-- Barra de Filtros Básicos -->
+    <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+      <form method="get" class="flex flex-wrap items-end gap-3">
+        <!-- Status -->
+        <div class="min-w-0 flex-shrink-0">
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Status</label>
+          <select name="status" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+            <option value="">Todos</option>
+            <option value="pendente" {% if current_filters.status == 'pendente' %}selected{% endif %}>Pendente</option>
+            <option value="em_analise" {% if current_filters.status == 'em_analise' %}selected{% endif %}>Em Análise</option>
+            <option value="aprovado" {% if current_filters.status == 'aprovado' %}selected{% endif %}>Aprovado</option>
+            <option value="rejeitado" {% if current_filters.status == 'rejeitado' %}selected{% endif %}>Rejeitado</option>
+            <option value="suspenso" {% if current_filters.status == 'suspenso' %}selected{% endif %}>Suspenso</option>
+          </select>
+        </div>
+
+        <!-- Analista -->
+        <div class="min-w-0 flex-shrink-0">
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Analista</label>
+          <select name="analista" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+            <option value="">Todos</option>
+            <option value="sem_analista" {% if current_filters.analista == 'sem_analista' %}selected{% endif %}>Sem Analista</option>
+            {% for analista in analistas %}
+            <option value="{{ analista.id }}" {% if current_filters.analista == analista.id|stringformat:"s" %}selected{% endif %}>{{ analista.get_full_name|default:analista.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Busca -->
+        <div class="min-w-0 flex-1">
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Buscar</label>
+          <input type="text" name="search" value="{{ current_filters.search }}" 
+                 placeholder="Nome, CPF/CNPJ, matrícula..."
+                 class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+        </div>
+
+        <!-- Ações -->
+        <div class="flex gap-2">
+          <button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-sm font-medium transition-colors">
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Filtrar
+          </button>
+          <button type="button" @click="toggleAdvanced" class="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 text-sm font-medium transition-colors">
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+            </svg>
+            Avançado
+          </button>
+          {% if request.GET %}
+            <a href="?" class="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 text-sm font-medium transition-colors">
+              <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              Limpar
+            </a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+
+    <!-- Filtros Avançados (Ocultos por padrão) -->
+    <div x-show="showAdvanced" x-transition class="p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-600">
+      <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Prioridade -->
+        <div>
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Prioridade</label>
+          <select name="prioridade" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+            <option value="">Todas</option>
+            <option value="1" {% if current_filters.prioridade == '1' %}selected{% endif %}>Baixa</option>
+            <option value="2" {% if current_filters.prioridade == '2' %}selected{% endif %}>Normal</option>
+            <option value="3" {% if current_filters.prioridade == '3' %}selected{% endif %}>Alta</option>
+            <option value="4" {% if current_filters.prioridade == '4' %}selected{% endif %}>Urgente</option>
+          </select>
+        </div>
+
+        <!-- Data de Entrada -->
+        <div>
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Data de Entrada</label>
+          <div class="flex gap-2">
+            <input type="date" name="data_entrada_inicio" value="{{ current_filters.data_entrada_inicio }}"
+                   class="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+            <span class="text-xs text-gray-500 dark:text-gray-400 self-center">até</span>
+            <input type="date" name="data_entrada_fim" value="{{ current_filters.data_entrada_fim }}"
+                   class="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+          </div>
+        </div>
+
+        <!-- Tipo de Análise -->
+        <div>
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Tipo de Análise</label>
+          <select name="tipo_analise" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+            <option value="">Todos os tipos</option>
+            <option value="documental" {% if current_filters.tipo_analise == 'documental' %}selected{% endif %}>Documental</option>
+            <option value="dados" {% if current_filters.tipo_analise == 'dados' %}selected{% endif %}>Dados</option>
+            <option value="completa" {% if current_filters.tipo_analise == 'completa' %}selected{% endif %}>Completa</option>
+          </select>
+        </div>
+
+        <!-- Ordenação -->
+        <div>
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ordenar por</label>
+          <select name="ordenacao" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+            <option value="-prioridade,-data_entrada" {% if current_filters.ordenacao == '-prioridade,-data_entrada' %}selected{% endif %}>Padrão (Prioridade)</option>
+            <option value="-data_entrada" {% if current_filters.ordenacao == '-data_entrada' %}selected{% endif %}>Data (Mais recente)</option>
+            <option value="data_entrada" {% if current_filters.ordenacao == 'data_entrada' %}selected{% endif %}>Data (Mais antiga)</option>
+            <option value="cadastro__nome_completo" {% if current_filters.ordenacao == 'cadastro__nome_completo' %}selected{% endif %}>Nome (A-Z)</option>
+          </select>
+        </div>
+
+        <!-- Botões de ação avançados -->
+        <div class="lg:col-span-4 flex justify-end gap-2 pt-2">
+          <button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-sm font-medium transition-colors">
+            Aplicar Filtros
+          </button>
+          <button type="button" @click="resetAdvanced" class="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 text-sm font-medium transition-colors">
+            Limpar Avançados
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de Processos -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Processo</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tipo</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Analista</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Criado em</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          {% for processo in page_obj %}
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900 dark:text-primary-foreground">
+                #{{ processo.id }}
+              </div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                {{ processo.cadastro.nome_completo|truncatechars:30 }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                {% if processo.tipo_analise == 'completa' %}
+                  bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                {% elif processo.tipo_analise == 'documental' %}
+                  bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                {% else %}
+                  bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                {% endif %}">
+                {{ processo.get_tipo_analise_display }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                {% if processo.status == 'pendente' %}
+                  bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                {% elif processo.status == 'em_analise' %}
+                  bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                {% elif processo.status == 'aprovado' %}
+                  bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                {% elif processo.status == 'rejeitado' %}
+                  bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                {% else %}
+                  bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
+                {% endif %}">
+                {{ processo.get_status_display }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-primary-foreground">
+              {% if processo.analista_responsavel %}
+                {{ processo.analista_responsavel.get_full_name }}
+              {% else %}
+                <span class="text-gray-500 dark:text-gray-400">Não atribuído</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+              {{ processo.data_entrada|date:"d/m/Y H:i" }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <div class="flex space-x-2">
+                <a href="{% url 'analise:detalhe_processo' processo.id %}" 
+                   class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                  Ver
+                </a>
+                {% if processo.status == 'pendente' and not processo.analista_responsavel %}
+                <button onclick="assumirProcesso({{ processo.id }})" 
+                        class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
+                  Assumir
+                </button>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+              Nenhum processo encontrado.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Paginação -->
+  {% if page_obj.has_other_pages %}
+  <div class="mt-6 flex justify-center">
+    <nav class="flex items-center space-x-2">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+          Anterior
+        </a>
+      {% endif %}
+      
+      <span class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+      </span>
+      
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+          Próxima
+        </a>
+      {% endif %}
+    </nav>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+function assumirProcesso(processoId) {
+  if (confirm('Deseja assumir este processo?')) {
+    fetch(`/analise/processo/${processoId}/assumir/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Erro ao assumir processo: ' + data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Erro:', error);
+      alert('Erro ao assumir processo.');
+    });
+  }
+}
+
+// Filter manager
+function filterManager() {
+    return {
+        showAdvanced: false,
+        
+        toggleAdvanced() {
+            this.showAdvanced = !this.showAdvanced;
+        },
+        
+        resetAdvanced() {
+            const advancedForm = document.querySelectorAll('[x-show="showAdvanced"] input, [x-show="showAdvanced"] select');
+            advancedForm.forEach(field => {
+                if (field.type === 'date' || field.type === 'number' || field.type === 'text') {
+                    field.value = '';
+                } else if (field.tagName === 'SELECT') {
+                    field.selectedIndex = 0;
+                }
+            });
+        }
+    }
+}
+</script>
+{% endblock %}

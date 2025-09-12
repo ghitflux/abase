@@ -1,7 +1,8 @@
 /* Tokens no padrão shadcn/ui - tema dark com primária #682D44 */
 :root {
   --radius: 0.5rem;
-  /* base (para light, caso necessário no futuro) */
+  
+  /* Light theme (base) */
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
   --muted: 210 40% 96.1%;
@@ -23,61 +24,289 @@
   --ring: 338 41% 29%;
 }
 
+/* Dark theme */
 .dark {
-  --background: 240 10% 4%;
-  --foreground: 0 0% 95%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --popover: 240 10% 4%;
-  --popover-foreground: 0 0% 95%;
-  --card: 240 10% 7%;
-  --card-foreground: 0 0% 95%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --primary: 338 41% 29%;           /* ABASE vinho (#682D44) */
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --primary: 338 41% 29%; /* #682D44 mantido */
+  --primary-foreground: 355 100% 97%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
   --ring: 338 41% 29%;
 }
 
+
+
 /* Componentes shadcn-like (HTML server-rendered) */
-.btn{ @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none h-10 px-4 py-2; }
-.btn-primary{ @apply bg-primary text-primary-foreground hover:opacity-90; }
-.btn-secondary{ @apply bg-secondary text-secondary-foreground hover:bg-secondary/80; }
-.btn-outline{ @apply border border-input bg-transparent hover:bg-accent hover:text-accent-foreground; }
-.btn-ghost{ @apply hover:bg-accent hover:text-accent-foreground; }
-.btn-destructive{ @apply bg-destructive text-destructive-foreground hover:bg-destructive/90; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: colors 0.2s;
+  height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+}
 
-.input{ @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring; }
-.textarea{ @apply w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring; }
-.select{ @apply h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground; }
-.label{ @apply text-sm text-muted-foreground mb-1; }
-.badge{ @apply inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold transition-colors; }
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+}
 
-.card{ @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm; }
-.card-body{ @apply p-4; }
-.card-header{ @apply p-4 border-b border-border; }
-.card-title{ @apply text-lg font-semibold; }
-.card-desc{ @apply text-sm text-muted-foreground; }
+.btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
 
-.table{ @apply w-full text-sm; }
-.table th{ @apply text-left text-muted-foreground border-b border-border py-2; }
-.table td{ @apply border-b border-border/50 py-2; }
+.btn-primary {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
 
-.tabs{ @apply flex items-center gap-2; }
-.tab{ @apply inline-flex items-center rounded-md border border-transparent px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground; }
-.tab-active{ @apply bg-primary text-primary-foreground; }
+.btn-primary:hover {
+  opacity: 0.9;
+}
 
-.alert{ @apply rounded-md border border-border p-4; }
-.alert-title{ @apply font-medium mb-1; }
-.alert-desc{ @apply text-sm text-muted-foreground; }
+.btn-secondary {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
 
-.dialog-backdrop{ @apply fixed inset-0 bg-black/50 z-40 hidden; }
-.dialog{ @apply fixed z-50 inset-0 flex items-center justify-center p-4; }
-.dialog-panel{ @apply w-full max-w-lg rounded-lg border border-border bg-popover text-popover-foreground shadow-lg; }
-.dialog-actions{ @apply p-4 border-t border-border flex justify-end gap-2; }
+.btn-secondary:hover {
+  background-color: hsl(var(--secondary) / 0.8);
+}
+
+.btn-outline {
+  border: 1px solid hsl(var(--input));
+  background-color: transparent;
+}
+
+.btn-outline:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.btn-ghost:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.btn-destructive {
+  background-color: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+}
+
+.btn-destructive:hover {
+  background-color: hsl(var(--destructive) / 0.9);
+}
+
+.input {
+  display: flex;
+  height: 2.5rem;
+  width: 100%;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid hsl(var(--input));
+  background-color: hsl(var(--background));
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+}
+
+.input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+}
+
+.textarea {
+  width: 100%;
+  min-height: 80px;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid hsl(var(--input));
+  background-color: hsl(var(--background));
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  resize: vertical;
+}
+
+.textarea::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+}
+
+.select {
+  height: 2.5rem;
+  width: 100%;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid hsl(var(--input));
+  background-color: hsl(var(--background));
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+}
+
+.label {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid hsl(var(--border));
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: colors 0.2s;
+}
+
+.card {
+  border-radius: calc(var(--radius) + 2px);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.card-header {
+  padding: 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.card-desc {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.table {
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.table th {
+  text-align: left;
+  color: hsl(var(--muted-foreground));
+  border-bottom: 1px solid hsl(var(--border));
+  padding: 0.5rem 0;
+}
+
+.table td {
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  padding: 0.5rem 0;
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid transparent;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: colors 0.2s;
+}
+
+.tab:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.tab-active {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.alert {
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid hsl(var(--border));
+  padding: 1rem;
+}
+
+.alert-title {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.alert-desc {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgb(0 0 0 / 0.5);
+  z-index: 40;
+  display: none;
+}
+
+.dialog {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.dialog-panel {
+  width: 100%;
+  max-width: 32rem;
+  border-radius: calc(var(--radius) + 2px);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+.dialog-actions {
+  padding: 1rem;
+  border-top: 1px solid hsl(var(--border));
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

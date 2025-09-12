@@ -1,6 +1,83 @@
 {% extends "base.html" %}
 {% load form_utils %}
-{% block title %}Novo Cadastro • ABASE{% endblock %}
+{% block title %}{% if is_edit %}Editar Cadastro{% else %}Novo Cadastro{% endif %} • ABASE{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Aprimoramento dos títulos dos grupos */
+  .group-title {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    position: relative;
+  }
+  
+  .group-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+  }
+  
+  /* Aprimoramento dos inputs de data */
+  input[type="date"], input[type="month"] {
+    position: relative;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23667eea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+  }
+  
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="month"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    right: 12px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  
+  /* Hover effects para os grupos */
+  .group-container {
+    transition: all 0.3s ease;
+  }
+  
+  .group-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  /* Animação suave para os inputs */
+  .form-input {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .form-input:focus {
+    transform: translateY(-1px);
+  }
+  
+  /* Estilo para campos obrigatórios */
+  .required-field::after {
+    content: ' *';
+    color: #ef4444;
+    font-weight: bold;
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+{% endblock %}
 
 {% block content %}
 <div class="p-6">
@@ -12,288 +89,671 @@
         </a>
     </div>
 
-<form method="post" class="space-y-6">
+<form method="post" enctype="multipart/form-data" class="space-y-6">
   {% csrf_token %}
+  {% if is_edit %}
+    <input type="hidden" name="edit_id" value="{{ cadastro.id }}">
+  {% endif %}
+  
+  <!-- Campo tipo_pessoa fixado como PF -->
+  <select name="tipo_pessoa" style="display: none;">
+            <option value="PF" selected>Pessoa Física</option>
+          </select>
 
   <!-- ========== DADOS CADASTRAIS ========== -->
-  <div class="bg-white shadow rounded-lg">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-medium text-gray-900">Dados Cadastrais</h2>
+  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+    <div class="px-8 py-6 border-b border-gray-100">
+      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Dados Cadastrais</h2>
     </div>
     <div class="p-6">
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-2">
-          <label for="{{ form.tipo_pessoa.id_for_label }}" class="block text-sm font-medium text-gray-700">Tipo de Documento (PF/PJ)</label>
-          {{ form.tipo_pessoa|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
-        </div>
-        <div class="col-span-3">
-          <label for="cpf" class="block text-sm font-medium text-gray-700">CPF</label>
-          <input name="cpf" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" inputmode="numeric" maxlength="14" placeholder="___.___.___-__" id="cpf" value="{{ form.instance.cpf|default_if_none:'' }}">
-        </div>
-        <div class="col-span-3">
-          <label for="cnpj" class="block text-sm font-medium text-gray-700">CNPJ</label>
-          <input name="cnpj" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" inputmode="numeric" maxlength="18" placeholder="__.___.___/____-__" id="cnpj" value="{{ form.instance.cnpj|default_if_none:'' }}">
-        </div>
-        <div class="col-span-2">
-          <label for="{{ form.rg.id_for_label }}" class="block text-sm font-medium text-gray-700">RG</label>
-          {{ form.rg|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
-        </div>
-        <div class="col-span-2">
-          <label for="{{ form.orgao_expedidor.id_for_label }}" class="block text-sm font-medium text-gray-700">Órgão Expedidor</label>
-          {{ form.orgao_expedidor|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
-        </div>
-
-        <div class="col-span-6">
-          <label for="{{ form.nome_razao_social.id_for_label }}" class="block text-sm font-medium text-gray-700">Nome/Razão Social</label>
-          {{ form.nome_razao_social|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
-        </div>
-        <div class="col-span-6">
-          <label for="{{ form.nome_completo.id_for_label }}" class="block text-sm font-medium text-gray-700">Nome completo</label>
-          {{ form.nome_completo|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
-        </div>
-
-        <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Data de nascimento</label>
-          {{ form.data_nascimento|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
-        </div>
-        <div class="col-span-5">
-          <label class="block text-sm font-medium text-gray-700">Profissão</label>
-          {{ form.profissao|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
-        </div>
+      <div class="grid grid-cols-12 gap-6">
+        <!-- Campo CPF com design aprimorado -->
         <div class="col-span-4">
-          <label class="block text-sm font-medium text-gray-700">Estado civil</label>
-          {{ form.estado_civil|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="cpf" class="block text-sm font-medium text-gray-700 mb-2">CPF</label>
+          <input 
+            name="cpf" 
+            class="w-full px-4 py-3 text-sm border {% if form.cpf.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            inputmode="numeric" 
+            maxlength="14" 
+            placeholder="000.000.000-00" 
+            id="cpf" 
+            value="{{ form.instance.cpf|default_if_none:'' }}"
+            data-mask="000.000.000-00">
+          {% if form.cpf.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.cpf.errors.0 }}</p>
+          {% endif %}
+        </div>
+        
+        <!-- Nome completo -->
+        <div class="col-span-8">
+          <label for="{{ form.nome_completo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Nome completo</label>
+          <input 
+            type="text" 
+            name="nome_completo" 
+            maxlength="180" 
+            class="w-full px-4 py-3 text-sm border {% if form.nome_completo.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.nome_completo.id_for_label }}" 
+            value="{{ form.instance.nome_completo|default_if_none:'' }}" 
+            placeholder="Digite o nome completo">
+          {% if form.nome_completo.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.nome_completo.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Data de nascimento -->
+        <div class="col-span-3">
+          <label for="{{ form.data_nascimento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Data de nascimento</label>
+          <input 
+            type="date" 
+            name="data_nascimento" 
+            class="w-full px-4 py-3 text-sm border {% if form.data_nascimento.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.data_nascimento.id_for_label }}" 
+            value="{{ form.instance.data_nascimento|date:'Y-m-d'|default_if_none:'' }}">
+          {% if form.data_nascimento.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.data_nascimento.errors.0 }}</p>
+          {% endif %}
+        </div>
+        
+        <!-- Profissão -->
+        <div class="col-span-5">
+          <label for="{{ form.profissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Profissão</label>
+          <input 
+            type="text" 
+            name="profissao" 
+            maxlength="120" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.profissao.id_for_label }}" 
+            value="{{ form.instance.profissao|default_if_none:'' }}" 
+            placeholder="Digite a profissão">
+        </div>
+        
+        <!-- Estado civil -->
+        <div class="col-span-4">
+          <label for="{{ form.estado_civil.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Estado civil</label>
+          <select 
+            name="estado_civil" 
+            class="w-full px-4 py-3 text-sm border {% if form.estado_civil.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 bg-white" 
+            id="{{ form.estado_civil.id_for_label }}">
+            <option value="" {% if not form.instance.estado_civil %}selected{% endif %}>Selecione o estado civil</option>
+            <option value="SOLTEIRO" {% if form.instance.estado_civil == 'SOLTEIRO' %}selected{% endif %}>Solteiro(a)</option>
+            <option value="CASADO" {% if form.instance.estado_civil == 'CASADO' %}selected{% endif %}>Casado(a)</option>
+            <option value="DIVORCIADO" {% if form.instance.estado_civil == 'DIVORCIADO' %}selected{% endif %}>Divorciado(a)</option>
+            <option value="VIUVO" {% if form.instance.estado_civil == 'VIUVO' %}selected{% endif %}>Viúvo(a)</option>
+            <option value="UNIAO_ESTAVEL" {% if form.instance.estado_civil == 'UNIAO_ESTAVEL' %}selected{% endif %}>União Estável</option>
+          </select>
+          {% if form.estado_civil.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.estado_civil.errors.0 }}</p>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
 
   <!-- ========== ENDEREÇO ========== -->
-  <div class="bg-white shadow rounded-lg">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-medium text-gray-900">Endereço</h2>
+  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+    <div class="px-8 py-6 border-b border-gray-100">
+      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Endereço</h2>
     </div>
-    <div class="p-6">
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700">CEP</label>
-          <input name="cep" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="cep" placeholder="00000-000" maxlength="9" inputmode="numeric" value="{{ form.instance.cep|default_if_none:'' }}">
+    <div class="p-8">
+      <div class="grid grid-cols-12 gap-6">
+        <!-- CEP -->
+        <div class="col-span-3">
+          <label for="cep" class="block text-sm font-medium text-gray-700 mb-2">CEP</label>
+          <input 
+            name="cep" 
+            class="w-full px-4 py-3 text-sm border {% if form.cep.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="cep" 
+            placeholder="00000-000" 
+            maxlength="9" 
+            inputmode="numeric" 
+            value="{{ form.instance.cep|default_if_none:'' }}">
+          {% if form.cep.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.cep.errors.0 }}</p>
+          {% endif %}
         </div>
-        <div class="col-span-6">
-          <label class="block text-sm font-medium text-gray-700">Endereço</label>
-          {{ form.endereco|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+        
+        <!-- Endereço -->
+        <div class="col-span-5">
+          <label for="{{ form.endereco.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Endereço</label>
+          <input 
+            name="endereco" 
+            class="w-full px-4 py-3 text-sm border {% if form.endereco.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.endereco.id_for_label }}" 
+            value="{{ form.instance.endereco|default_if_none:'' }}" 
+            placeholder="Digite o endereço">
+          {% if form.endereco.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.endereco.errors.0 }}</p>
+          {% endif %}
         </div>
+        
+        <!-- Número -->
         <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Nº</label>
-          {{ form.numero|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.numero.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Nº</label>
+          <input 
+            name="numero" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.numero.id_for_label }}" 
+            value="{{ form.instance.numero|default_if_none:'' }}" 
+            placeholder="123">
         </div>
+        
+        <!-- Complemento -->
         <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Complemento</label>
-          {{ form.complemento|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.complemento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Complemento</label>
+          <input 
+            name="complemento" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.complemento.id_for_label }}" 
+            value="{{ form.instance.complemento|default_if_none:'' }}" 
+            placeholder="Apto 101">
         </div>
 
+        <!-- Bairro -->
         <div class="col-span-4">
-          <label class="block text-sm font-medium text-gray-700">Bairro</label>
-          {{ form.bairro|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.bairro.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Bairro</label>
+          <input 
+            name="bairro" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.bairro.id_for_label }}" 
+            value="{{ form.instance.bairro|default_if_none:'' }}" 
+            placeholder="Digite o bairro">
         </div>
+        
+        <!-- Cidade -->
         <div class="col-span-6">
-          <label class="block text-sm font-medium text-gray-700">Cidade</label>
-          {{ form.cidade|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.cidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
+          <input 
+            name="cidade" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.cidade.id_for_label }}" 
+            value="{{ form.instance.cidade|default_if_none:'' }}" 
+            placeholder="Digite a cidade">
         </div>
+        
+        <!-- UF -->
         <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700">UF</label>
-          {{ form.uf|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.uf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">UF</label>
+          <select 
+            name="uf" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 bg-white" 
+            id="{{ form.uf.id_for_label }}">
+            <option value="" {% if not form.instance.uf %}selected{% endif %}>Selecione o estado</option>
+            <option value="AC" {% if form.instance.uf == 'AC' %}selected{% endif %}>AC</option>
+            <option value="AL" {% if form.instance.uf == 'AL' %}selected{% endif %}>AL</option>
+            <option value="AP" {% if form.instance.uf == 'AP' %}selected{% endif %}>AP</option>
+            <option value="AM" {% if form.instance.uf == 'AM' %}selected{% endif %}>AM</option>
+            <option value="BA" {% if form.instance.uf == 'BA' %}selected{% endif %}>BA</option>
+            <option value="CE" {% if form.instance.uf == 'CE' %}selected{% endif %}>CE</option>
+            <option value="DF" {% if form.instance.uf == 'DF' %}selected{% endif %}>DF</option>
+            <option value="ES" {% if form.instance.uf == 'ES' %}selected{% endif %}>ES</option>
+            <option value="GO" {% if form.instance.uf == 'GO' %}selected{% endif %}>GO</option>
+            <option value="MA" {% if form.instance.uf == 'MA' %}selected{% endif %}>MA</option>
+            <option value="MT" {% if form.instance.uf == 'MT' %}selected{% endif %}>MT</option>
+            <option value="MS" {% if form.instance.uf == 'MS' %}selected{% endif %}>MS</option>
+            <option value="MG" {% if form.instance.uf == 'MG' %}selected{% endif %}>MG</option>
+            <option value="PA" {% if form.instance.uf == 'PA' %}selected{% endif %}>PA</option>
+            <option value="PB" {% if form.instance.uf == 'PB' %}selected{% endif %}>PB</option>
+            <option value="PR" {% if form.instance.uf == 'PR' %}selected{% endif %}>PR</option>
+            <option value="PE" {% if form.instance.uf == 'PE' %}selected{% endif %}>PE</option>
+            <option value="PI" {% if form.instance.uf == 'PI' %}selected{% endif %}>PI</option>
+            <option value="RJ" {% if form.instance.uf == 'RJ' %}selected{% endif %}>RJ</option>
+            <option value="RN" {% if form.instance.uf == 'RN' %}selected{% endif %}>RN</option>
+            <option value="RS" {% if form.instance.uf == 'RS' %}selected{% endif %}>RS</option>
+            <option value="RO" {% if form.instance.uf == 'RO' %}selected{% endif %}>RO</option>
+            <option value="RR" {% if form.instance.uf == 'RR' %}selected{% endif %}>RR</option>
+            <option value="SC" {% if form.instance.uf == 'SC' %}selected{% endif %}>SC</option>
+            <option value="SP" {% if form.instance.uf == 'SP' %}selected{% endif %}>SP</option>
+            <option value="SE" {% if form.instance.uf == 'SE' %}selected{% endif %}>SE</option>
+            <option value="TO" {% if form.instance.uf == 'TO' %}selected{% endif %}>TO</option>
+          </select>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ========== DADOS BANCÁRIOS ========== -->
-  <div class="bg-white shadow rounded-lg">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-medium text-gray-900">Dados Bancários</h2>
+  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+    <div class="px-8 py-6 border-b border-gray-100">
+      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Dados Bancários</h2>
     </div>
-    <div class="p-6">
-      <div class="grid grid-cols-12 gap-4">
+    <div class="p-8">
+      <div class="grid grid-cols-12 gap-6">
+        <!-- Banco -->
         <div class="col-span-5">
-          <label class="block text-sm font-medium text-gray-700">Banco</label>
-          {{ form.banco|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.banco.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Banco</label>
+          <select 
+            name="banco" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 bg-white" 
+            id="{{ form.banco.id_for_label }}">
+            <option value="" {% if not form.instance.banco %}selected{% endif %}>Selecione o banco</option>
+            <option value="001" {% if form.instance.banco == '001' %}selected{% endif %}>001 - Banco do Brasil</option>
+            <option value="033" {% if form.instance.banco == '033' %}selected{% endif %}>033 - Santander</option>
+            <option value="104" {% if form.instance.banco == '104' %}selected{% endif %}>104 - Caixa Econômica Federal</option>
+            <option value="237" {% if form.instance.banco == '237' %}selected{% endif %}>237 - Bradesco</option>
+            <option value="341" {% if form.instance.banco == '341' %}selected{% endif %}>341 - Itaú</option>
+            <option value="260" {% if form.instance.banco == '260' %}selected{% endif %}>260 - Nu Pagamentos</option>
+            <option value="077" {% if form.instance.banco == '077' %}selected{% endif %}>077 - Banco Inter</option>
+            <option value="212" {% if form.instance.banco == '212' %}selected{% endif %}>212 - Banco Original</option>
+            <option value="290" {% if form.instance.banco == '290' %}selected{% endif %}>290 - PagSeguro</option>
+          </select>
         </div>
+        
+        <!-- Agência -->
         <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Agência</label>
-          <input name="agencia" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="0001-9" value="{{ form.instance.agencia|default_if_none:'' }}">
+          <label for="agencia" class="block text-sm font-medium text-gray-700 mb-2">Agência</label>
+          <input 
+            name="agencia" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="agencia" 
+            placeholder="0001-9" 
+            maxlength="6" 
+            value="{{ form.instance.agencia|default_if_none:'' }}">
         </div>
+        
+        <!-- Conta -->
         <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Conta</label>
-          <input name="conta" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="123456-7" value="{{ form.instance.conta|default_if_none:'' }}">
+          <label for="conta" class="block text-sm font-medium text-gray-700 mb-2">Conta</label>
+          <input 
+            name="conta" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="conta" 
+            placeholder="123456-7" 
+            maxlength="12" 
+            value="{{ form.instance.conta|default_if_none:'' }}">
         </div>
+        
+        <!-- Tipo de Conta -->
         <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Tipo de Conta</label>
-          {{ form.tipo_conta|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.tipo_conta.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Conta</label>
+          <select 
+            name="tipo_conta" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 bg-white" 
+            id="{{ form.tipo_conta.id_for_label }}">
+            <option value="" {% if not form.instance.tipo_conta %}selected{% endif %}>Selecione o tipo</option>
+            <option value="CC" {% if form.instance.tipo_conta == 'CC' %}selected{% endif %}>Conta Corrente</option>
+            <option value="PP" {% if form.instance.tipo_conta == 'PP' %}selected{% endif %}>Conta Poupança</option>
+          </select>
         </div>
 
+        <!-- Chave Pix -->
         <div class="col-span-12">
-          <label class="block text-sm font-medium text-gray-700">Chave Pix</label>
-          {{ form.chave_pix|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
-          <p class="text-xs text-muted-foreground mt-1">Use a chave PIX principal do associado para futuros pagamentos.</p>
+          <label for="{{ form.chave_pix.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Chave Pix</label>
+          <input 
+            name="chave_pix" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.chave_pix.id_for_label }}" 
+            value="{{ form.instance.chave_pix|default_if_none:'' }}" 
+            placeholder="Digite a chave PIX (CPF, e-mail, telefone ou chave aleatória)">
+          <p class="text-xs text-gray-500 mt-2">Use a chave PIX principal do associado para futuros pagamentos.</p>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ========== CONTATO E VÍNCULO PÚBLICO ========== -->
-  <div class="bg-white shadow rounded-lg">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-medium text-gray-900">Contato e Vínculo Público</h2>
+  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+    <div class="px-8 py-6 border-b border-gray-100">
+      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Contato e Vínculo Público</h2>
     </div>
-    <div class="p-6">
-      <div class="grid grid-cols-12 gap-4">
+    <div class="p-8">
+      <div class="grid grid-cols-12 gap-6">
+        <!-- Celular -->
         <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Celular</label>
-          {{ form.celular|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Celular</label>
+          <input 
+            name="celular" 
+            class="w-full px-4 py-3 text-sm border {% if form.celular.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.celular.id_for_label }}" 
+            value="{{ form.instance.celular|default_if_none:'' }}" 
+            placeholder="(11) 99999-9999" 
+            maxlength="15" 
+            inputmode="tel">
+          {% if form.celular.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.celular.errors.0 }}</p>
+          {% endif %}
         </div>
+        
+        <!-- E-mail -->
         <div class="col-span-5">
-          <label class="block text-sm font-medium text-gray-700">E-mail</label>
-          {{ form.email|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">E-mail</label>
+          <input 
+            name="email" 
+            type="email" 
+            class="w-full px-4 py-3 text-sm border {% if form.email.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.email.id_for_label }}" 
+            value="{{ form.instance.email|default_if_none:'' }}" 
+            placeholder="Digite o e-mail">
+          {% if form.email.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+          {% endif %}
         </div>
+        
+        <!-- Órgão Público -->
         <div class="col-span-4">
-          <label class="block text-sm font-medium text-gray-700">Órgão Público</label>
-          {{ form.orgao_publico|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.orgao_publico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Órgão Público</label>
+          <input 
+            name="orgao_publico" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.orgao_publico.id_for_label }}" 
+            value="{{ form.instance.orgao_publico|default_if_none:'' }}" 
+            placeholder="Digite o órgão público">
         </div>
 
-        <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Situação do Servidor</label>
-          {{ form.situacao_servidor|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
-        </div>
+        <!-- Situação do Servidor -->
         <div class="col-span-4">
-          <label class="block text-sm font-medium text-gray-700">Matrícula do Servidor Público</label>
-          {{ form.matricula_servidor|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.situacao_servidor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Situação do Servidor</label>
+          <select 
+            name="situacao_servidor" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 bg-white" 
+            id="{{ form.situacao_servidor.id_for_label }}">
+            <option value="" {% if not form.instance.situacao_servidor %}selected{% endif %}>Selecione a situação</option>
+            <option value="EFETIVO" {% if form.instance.situacao_servidor == 'EFETIVO' %}selected{% endif %}>Efetivo</option>
+            <option value="COMISSIONADO" {% if form.instance.situacao_servidor == 'COMISSIONADO' %}selected{% endif %}>Comissionado</option>
+            <option value="APOSENTADO" {% if form.instance.situacao_servidor == 'APOSENTADO' %}selected{% endif %}>Aposentado</option>
+            <option value="OUTRO" {% if form.instance.situacao_servidor == 'OUTRO' %}selected{% endif %}>Outro</option>
+          </select>
+        </div>
+        
+        <!-- Matrícula do Servidor Público -->
+        <div class="col-span-4">
+          <label for="{{ form.matricula_servidor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Matrícula do Servidor Público</label>
+          <input 
+            name="matricula_servidor" 
+            class="w-full px-4 py-3 text-sm border {% if form.matricula_servidor.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.matricula_servidor.id_for_label }}" 
+            value="{{ form.instance.matricula_servidor|default_if_none:'' }}" 
+            placeholder="Digite a matrícula">
+          {% if form.matricula_servidor.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.matricula_servidor.errors.0 }}</p>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
 
   <!-- ========== MARGEM (cálculos automáticos) ========== -->
-  <div class="bg-white shadow rounded-lg">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-medium text-gray-900">Dados para cálculo de margem (pré-validação)</h2>
+  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+    <div class="px-8 py-6 border-b border-gray-100">
+      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Dados para cálculo de margem (pré-validação)</h2>
     </div>
-    <div class="p-6">
-      <div class="grid grid-cols-12 gap-4">
+    <div class="p-8">
+      <div class="grid grid-cols-12 gap-6">
+        <!-- Valor Bruto Total -->
         <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Valor Bruto Total</label>
-          {{ form.valor_bruto_total|add_class:"input w-full money" }}
+          <label for="{{ form.valor_bruto_total.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Valor Bruto Total</label>
+          <input 
+            name="valor_bruto_total" 
+            class="w-full px-4 py-3 text-sm border {% if form.valor_bruto_total.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 money" 
+            id="{{ form.valor_bruto_total.id_for_label }}" 
+            value="{{ form.instance.valor_bruto_total|default_if_none:'' }}" 
+            placeholder="R$ 0,00" 
+            inputmode="decimal">
+          {% if form.valor_bruto_total.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.valor_bruto_total.errors.0 }}</p>
+          {% endif %}
         </div>
+        
+        <!-- Valor Líquido -->
         <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Valor Líquido (contra-cheque)</label>
-          {{ form.valor_liquido|add_class:"input w-full money" }}
+          <label for="{{ form.valor_liquido.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Valor Líquido (contra-cheque)</label>
+          <input 
+            name="valor_liquido" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 money" 
+            id="{{ form.valor_liquido.id_for_label }}" 
+            value="{{ form.instance.valor_liquido|default_if_none:'' }}" 
+            placeholder="R$ 0,00" 
+            inputmode="decimal">
         </div>
+        
+        <!-- Prazo de Antecipação -->
         <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Prazo de Antecipação (meses)</label>
-          {{ form.prazo_antecipacao_meses|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.prazo_antecipacao_meses.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Prazo de Antecipação (meses)</label>
+          <input 
+            name="prazo_antecipacao_meses" 
+            type="number" 
+            min="1" 
+            max="120" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.prazo_antecipacao_meses.id_for_label }}" 
+            value="{{ form.instance.prazo_antecipacao_meses|default_if_none:'' }}" 
+            placeholder="12">
         </div>
+        
+        <!-- 30% do Bruto (calculado) -->
         <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700">30% do Bruto</label>
-          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="trinta_bruto" readonly>
+          <label for="trinta_bruto" class="block text-sm font-medium text-gray-700 mb-2">30% do Bruto</label>
+          <input 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
+            id="trinta_bruto" 
+            placeholder="R$ 0,00" 
+            readonly>
         </div>
+        
+        <!-- Margem (calculada) -->
         <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Margem (Liq − 30%)</label>
-          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="margem_calc" readonly>
+          <label for="margem_calc" class="block text-sm font-medium text-gray-700 mb-2">Margem (Liq − 30%)</label>
+          <input 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
+            id="margem_calc" 
+            placeholder="R$ 0,00" 
+            readonly>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ========== DETALHES DO CONTRATO (cálculos automáticos) ========== -->
-  <div class="bg-white shadow rounded-lg">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-medium text-gray-900">Detalhes do Contrato</h2>
+  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+    <div class="px-8 py-6 border-b border-gray-100">
+      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Detalhes do Contrato</h2>
     </div>
-    <div class="p-6">
-      <div class="grid grid-cols-12 gap-4">
+    <div class="p-8">
+      <div class="grid grid-cols-12 gap-6">
+        <!-- Contribuição Associativa -->
         <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Contribuição Associativa (R$)</label>
-          {{ form.mensalidade_associativa|add_class:"input w-full money" }}
+          <label for="{{ form.mensalidade_associativa.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Contribuição Associativa (R$)</label>
+          <input 
+            name="mensalidade_associativa" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 money" 
+            id="{{ form.mensalidade_associativa.id_for_label }}" 
+            value="{{ form.instance.mensalidade_associativa|default_if_none:'' }}" 
+            placeholder="R$ 0,00" 
+            inputmode="decimal">
         </div>
+        
+        <!-- Taxa de Antecipação -->
         <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Taxa de Antecipação (%)</label>
-          <input name="taxa_antecipacao_percent" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" value="30,00" readonly>
+          <label for="taxa_antecipacao_percent" class="block text-sm font-medium text-gray-700 mb-2">Taxa de Antecipação (%)</label>
+          <input 
+            name="taxa_antecipacao_percent" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
+            id="taxa_antecipacao_percent" 
+            value="30,00" 
+            readonly>
         </div>
+        
+        <!-- Repasse ao Associado -->
         <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Repasse ao Associado (R$)</label>
-          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="disponivel" readonly>
+          <label for="disponivel" class="block text-sm font-medium text-gray-700 mb-2">Repasse ao Associado (R$)</label>
+          <input 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
+            id="disponivel" 
+            placeholder="R$ 0,00" 
+            readonly>
         </div>
+        
+        <!-- Total das 3 Cotas -->
         <div class="col-span-4">
-          <label class="block text-sm font-medium text-gray-700">Total das 3 Cotas (R$)</label>
-          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="valor_total_ant" readonly>
+          <label for="valor_total_ant" class="block text-sm font-medium text-gray-700 mb-2">Total das 3 Cotas (R$)</label>
+          <input 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
+            id="valor_total_ant" 
+            placeholder="R$ 0,00" 
+            readonly>
         </div>
 
+        <!-- Data da Aprovação -->
         <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Data da Aprovação</label>
-          {{ form.data_aprovacao|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.data_aprovacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Data da Aprovação</label>
+          <input 
+            name="data_aprovacao" 
+            type="date" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.data_aprovacao.id_for_label }}" 
+            value="{{ form.instance.data_aprovacao|date:'Y-m-d'|default_if_none:'' }}">
         </div>
+        
+        <!-- Data da primeira contribuição -->
         <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Data da primeira contribuição</label>
-          {{ form.data_primeira_mensalidade|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.data_primeira_mensalidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Data da primeira contribuição</label>
+          <input 
+            name="data_primeira_mensalidade" 
+            type="date" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.data_primeira_mensalidade.id_for_label }}" 
+            value="{{ form.instance.data_primeira_mensalidade|date:'Y-m-d'|default_if_none:'' }}">
         </div>
+        
+        <!-- Mês de Averbação -->
         <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Mês de Averbação (AAAA-MM)</label>
-          {{ form.mes_averbacao|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+          <label for="{{ form.mes_averbacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Mês de Averbação (AAAA-MM)</label>
+          <input 
+            name="mes_averbacao" 
+            type="month" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            id="{{ form.mes_averbacao.id_for_label }}" 
+            value="{{ form.instance.mes_averbacao|default_if_none:'' }}">
         </div>
+        
+        <!-- Doação do Associado -->
         <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Doação do Associado (R$)</label>
-          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="doacao" readonly>
+          <label for="doacao" class="block text-sm font-medium text-gray-700 mb-2">Doação do Associado (R$)</label>
+          <input 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
+            id="doacao" 
+            placeholder="R$ 0,00" 
+            readonly>
+        </div>
+        
+        <!-- Auxílio do Agente -->
+        <div class="col-span-3">
+          <label for="auxilio_agente" class="block text-sm font-medium text-gray-700 mb-2">Auxílio do Agente (10%)</label>
+          <input 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
+            id="auxilio_agente" 
+            placeholder="R$ 0,00" 
+            readonly>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ========== AGENTE / FILIAL ========== -->
-  <div class="bg-white shadow rounded-lg">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-medium text-gray-900">Agente / Filial</h2>
+
+  <!-- ========== DOCUMENTOS ========== -->
+  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+    <div class="px-8 py-6 border-b border-gray-100">
+      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Documentos</h2>
+      <p class="text-sm text-gray-600 mt-1">Suporte a imagens e PDF até 10MB</p>
     </div>
-    <div class="p-6">
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">Data do Envio</label>
-          {{ form.data_envio|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+    <div class="p-8">
+      <div class="grid grid-cols-12 gap-6">
+        <!-- Tipo de Documento -->
+        <div class="col-span-4">
+          <label for="tipo_doc" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Documento</label>
+          <select 
+            id="tipo_doc" 
+            name="tipo"
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300">
+            <option value="DOC_FRENTE">Documento (frente)</option>
+            <option value="DOC_VERSO">Documento (verso)</option>
+            <option value="COMP_ENDERECO">Comprovante de endereço</option>
+            <option value="COMP_RENDA">Comprovante de renda</option>
+            <option value="CONTRACHEQUE_ATUAL">Contracheque atual</option>
+            <option value="TERMO_ADESAO">Termo de Adesão</option>
+            <option value="TERMO_ANTECIPACAO">Termo de Antecipação</option>
+          </select>
+        </div>
+        
+        <!-- Upload de Arquivo -->
+        <div class="col-span-6">
+          <label for="arquivo_doc" class="block text-sm font-medium text-gray-700 mb-2">Arquivo</label>
+          <div class="relative">
+            <input 
+              id="arquivo_doc" 
+              name="arquivo_doc"
+              type="file" 
+              accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp" 
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" 
+              onchange="validateFileSize(this)">
+            <div class="text-xs text-gray-500 mt-1">
+              Formatos aceitos: PDF, JPG, PNG, GIF, BMP, WebP (máx. 10MB)
+            </div>
+          </div>
+        </div>
+        
+        <!-- Botão Adicionar -->
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">&nbsp;</label>
+          <button 
+            type="button" 
+            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl font-medium shadow-sm hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200" 
+            hx-post="{% url 'documentos:draft-upload' %}"
+            hx-encoding="multipart/form-data"
+            hx-include="#tipo_doc,#arquivo_doc"
+            hx-target="#draft-list">
+            <i class="fas fa-plus mr-2"></i>Adicionar
+          </button>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- ========== DOCUMENTOS (rascunho) ========== -->
-  <div class="bg-white shadow rounded-lg">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-medium text-gray-900">Documentos (imagem/PDF até 10MB)</h2>
-    </div>
-    <div class="p-6">
-      <div class="flex flex-wrap gap-2 mb-3">
-        <select id="tipo_doc" class="mt-1 block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-          <option value="DOC_FRENTE">Documento (frente)</option>
-          <option value="DOC_VERSO">Documento (verso)</option>
-          <option value="COMP_ENDERECO">Comprovante de endereço</option>
-          <option value="COMP_RENDA">Comprovante de renda</option>
-          <option value="CONTRACHEQUE_ATUAL">Contracheque atual</option>
-          <option value="TERMO_ADESAO">Termo de Adesão</option>
-          <option value="TERMO_ANTECIPACAO">Termo de Antecipação</option>
-        </select>
-        <input id="arquivo_doc" type="file" class="mt-1 block w-[380px] text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-        <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                hx-post="{% url 'documentos:draft-upload' %}"
-                hx-encoding="multipart/form-data"
-                hx-vals='js:{"tipo": document.getElementById("tipo_doc").value}'
-                hx-include="#arquivo_doc"
-                hx-target="#draft-list">
-          Adicionar
-        </button>
+      
+      <!-- Documentos Existentes (apenas na edição) -->
+      {% if is_edit and existing_docs %}
+      <div class="mt-6">
+        <h4 class="text-md font-medium text-gray-800 mb-3">Documentos Já Enviados</h4>
+        <div class="space-y-2">
+          {% for doc in existing_docs %}
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <div>
+                <p class="text-sm font-medium text-gray-900">{{ doc.tipo|default:"Documento" }}</p>
+                <p class="text-xs text-gray-500">Enviado em {{ doc.created_at|date:"d/m/Y H:i" }}</p>
+              </div>
+            </div>
+            <a href="{% url 'serve_private' doc.id %}" target="_blank" class="text-blue-600 hover:text-blue-500 text-sm">
+              Ver
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+        <hr class="my-6">
       </div>
-      <div id="draft-list">
+      {% endif %}
+      
+      <!-- Lista de Documentos (Rascunhos) -->
+      <div id="draft-list" class="mt-8">
         {% include "documentos/_draft_list.html" with docs=docs %}
       </div>
     </div>
   </div>
+  
+  <!-- Script para validação de tamanho de arquivo -->
+  <script>
+    function validateFileSize(input) {
+      const maxSize = 10 * 1024 * 1024; // 10MB em bytes
+      const file = input.files[0];
+      
+      if (file && file.size > maxSize) {
+        alert('O arquivo selecionado é muito grande. O tamanho máximo permitido é 10MB.');
+        input.value = '';
+        return false;
+      }
+      
+      return true;
+    }
+  </script>
 
   <div class="flex justify-end space-x-3">
     <a href="{% url 'cadastros:agente-list' %}" 
@@ -307,6 +767,77 @@
   </div>
 </div>
 </form>
+
+<!-- ======= Form submission handler ======= -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = document.querySelector('button[type="submit"]');
+    
+    if (form && submitBtn) {
+        console.log('Form handler initialized');
+        
+        // Interceptar submit para garantir normalização
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevenir envio inicial
+            console.log('Form submitting - normalizing all fields');
+            
+            // Log dos valores antes da normalização
+            const cpfBefore = form.querySelector('[name="cpf"]')?.value || 'empty';
+            const cepBefore = form.querySelector('[name="cep"]')?.value || 'empty';
+            console.log('CPF before:', cpfBefore);
+            console.log('CEP before:', cepBefore);
+            
+            // Função para normalizar campos monetários
+            function normalizeMoneyField(element) {
+                if (element && element.value) {
+                    let value = element.value.toString();
+                    // Remove R$, espaços, pontos e converte vírgula para ponto
+                    value = value.replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.');
+                    element.value = value;
+                    console.log(`Normalized ${element.name}: ${element.value}`);
+                }
+            }
+            
+            // Normalizar apenas os campos monetários
+            normalizeMoneyField(form.querySelector('[name="valor_bruto_total"]'));
+            normalizeMoneyField(form.querySelector('[name="valor_liquido"]'));
+            normalizeMoneyField(form.querySelector('[name="mensalidade_associativa"]'));
+            
+            // Normalizar CPF e CEP
+            const cpfField = form.querySelector('[name="cpf"]');
+            if(cpfField && cpfField.value) {
+                cpfField.value = cpfField.value.replace(/\D/g, '');
+                console.log(`Normalized CPF: ${cpfField.value}`);
+            }
+            
+            const cepField = form.querySelector('[name="cep"]');
+            if(cepField && cepField.value) {
+                cepField.value = cepField.value.replace(/\D/g, '');
+                console.log(`Normalized CEP: ${cepField.value}`);
+            }
+            
+            // Log dos valores após a normalização
+            const cpfAfter = form.querySelector('[name="cpf"]')?.value || 'empty';
+            const cepAfter = form.querySelector('[name="cep"]')?.value || 'empty';
+            console.log('CPF after:', cpfAfter);
+            console.log('CEP after:', cepAfter);
+            
+            // Mostrar estado de loading no botão
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
+            
+            console.log('Form normalized, submitting to server...');
+            
+            // Reenviar o formulário após normalização
+            setTimeout(() => {
+                form.removeEventListener('submit', arguments.callee);
+                form.submit();
+            }, 100);
+        });
+    }
+});
+</script>
 
 <!-- ======= Scripts de máscara, CEP e cálculos ======= -->
 <script>
@@ -327,13 +858,13 @@ function toMoneyInput(el){
     let v = onlyDigits(el.value);
     if(!v) { el.value=""; recalc(); return; }
     v = (parseInt(v,10)/100).toFixed(2);    // sempre 2 casas
-    el.value = v.replace(".", ",");         // formato BR
+    el.value = "R$ " + v.replace(".", ","); // formato BR com símbolo
     recalc();
   });
 }
 function parseMoney(s){
   if(!s) return 0;
-  s = (s+"").replace(/\./g,"").replace(",",".");
+  s = (s+"").replace(/R\$\s?/g,"").replace(/\./g,"").replace(",",".");
   let n = parseFloat(s); return isNaN(n)?0:n;
 }
 
@@ -347,13 +878,15 @@ function recalc(){
   const total = +(mensal * 3).toFixed(2);
   const doacao = +(total * 0.30).toFixed(2);
   const disp = +(total * 0.70).toFixed(2);
+  const auxilioAgente = +(disp * 0.10).toFixed(2);
 
-  const f = n => n.toLocaleString('pt-BR', {minimumFractionDigits:2});
+  const f = n => "R$ " + n.toLocaleString('pt-BR', {minimumFractionDigits:2});
   document.getElementById('trinta_bruto').value = f(trinta);
   document.getElementById('margem_calc').value = f(margem);
   document.getElementById('valor_total_ant').value = f(total);
   document.getElementById('doacao').value = f(doacao);
   document.getElementById('disponivel').value = f(disp);
+  document.getElementById('auxilio_agente').value = f(auxilioAgente);
 }
 
 const cpf = document.getElementById('cpf');
@@ -364,24 +897,11 @@ if(cnpj){ cnpj.addEventListener('input',()=>cnpj.value=maskCNPJ(cnpj.value)); }
 const cep = document.getElementById('cep');
 if(cep){
   cep.addEventListener('input', ()=> cep.value = maskCEP(cep.value));
-  cep.addEventListener('blur', async ()=>{
-    const v = cep.value.replace(/\D/g,"");
-    if(v.length===8){
-      try {
-        const r = await fetch(`https://viacep.com.br/ws/${v}/json/`);
-        const j = await r.json();
-        if(!j.erro){
-          document.querySelector('[name="endereco"]').value = j.logradouro || "";
-          document.querySelector('[name="bairro"]').value = j.bairro || "";
-          document.querySelector('[name="cidade"]').value = j.localidade || "";
-          document.querySelector('[name="uf"]').value = j.uf || "";
-        }
-      } catch(e){}
-    }
-  });
 }
 
 document.querySelectorAll('.money').forEach(toMoneyInput);
 document.addEventListener('DOMContentLoaded', recalc);
+
+
 </script>
 {% endblock %}

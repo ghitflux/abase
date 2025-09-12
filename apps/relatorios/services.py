@@ -43,7 +43,7 @@ def build_xlsx_resumo_associados(qs):
     for c in qs:
         doc = c.cpf or c.cnpj or "—"
         ws.append([
-            c.id, c.nome_razao_social, doc, c.matricula_servidor, c.orgao_publico,
+            c.id, c.nome_completo, doc, c.matricula_servidor, c.orgao_publico,
             c.get_status_display(), float(c.valor_total_antecipacao or 0),
             float(c.doacao_associado or 0), float(c.disponivel or 0),
             c.created_at and c.created_at.strftime("%d/%m/%Y %H:%M"),
@@ -120,7 +120,7 @@ def generate_pdf_associados(qs, title="Relatório de Associados"):
         doc_num = c.cpf or c.cnpj or "—"
         data.append([
             str(c.id),
-            c.nome_razao_social,
+            c.nome_completo,
             doc_num,
             c.get_status_display(),
             f"R$ {float(c.valor_total_antecipacao or 0):,.2f}"

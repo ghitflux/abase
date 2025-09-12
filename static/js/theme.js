@@ -1,137 +1,58 @@
 /**
- * Theme Management System
- * Handles theme switching, persistence, and UI updates
+ * Theme Management System - Light Mode Only
+ * Handles light theme application and UI updates
  */
 
 class ThemeManager {
   constructor() {
-    this.theme = this.getStoredTheme() || this.getSystemTheme();
+    this.theme = 'light';
     this.callbacks = [];
     this.init();
   }
 
   init() {
-    // Apply theme on load
-    this.applyTheme(this.theme);
+    // Apply light theme on load
+    this.applyTheme('light');
+  }
+
+
+
+  applyTheme() {
+    const root = document.documentElement;
     
-    // Listen for system theme changes
-    if (window.matchMedia) {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        if (!this.getStoredTheme()) {
-          this.setTheme(e.matches ? 'dark' : 'light');
-        }
-      });
-    }
-
-    // Initialize theme toggle buttons
-    this.initializeToggles();
-  }
-
-  getSystemTheme() {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    return 'light';
-  }
-
-  getStoredTheme() {
-    try {
-      return localStorage.getItem('theme');
-    } catch (e) {
-      return null;
-    }
-  }
-
-  setStoredTheme(theme) {
-    try {
-      localStorage.setItem('theme', theme);
-    } catch (e) {
-      console.warn('Could not save theme to localStorage');
-    }
-  }
-
-  applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
+    // Remove any existing theme classes
+    root.classList.remove('light', 'dark');
+    
+    // Add light theme class
+    root.classList.add('light');
+    
+    // Set data attribute for CSS selectors
+    root.setAttribute('data-theme', 'light');
     
     // Update meta theme-color for mobile browsers
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', theme === 'dark' ? '#0f172a' : '#ffffff');
+      metaThemeColor.setAttribute('content', '#ffffff');
     }
-
+    
     // Trigger callbacks
-    this.callbacks.forEach(callback => callback(theme));
-  }
-
-  setTheme(theme) {
-    this.theme = theme;
-    this.setStoredTheme(theme);
-    this.applyTheme(theme);
-    this.updateToggles();
-  }
-
-  toggleTheme() {
-    const newTheme = this.theme === 'light' ? 'dark' : 'light';
-    this.setTheme(newTheme);
+    this.callbacks.forEach(callback => callback('light'));
   }
 
   getTheme() {
-    return this.theme;
-  }
-
-  isDark() {
-    return this.theme === 'dark';
+    return 'light';
   }
 
   isLight() {
-    return this.theme === 'light';
+    return true;
+  }
+
+  isDark() {
+    return false;
   }
 
   onThemeChange(callback) {
     this.callbacks.push(callback);
-  }
-
-  initializeToggles() {
-    const toggles = document.querySelectorAll('[data-theme-toggle]');
-    toggles.forEach(toggle => {
-      toggle.addEventListener('click', () => this.toggleTheme());
-    });
-
-    const switches = document.querySelectorAll('[data-theme-switch]');
-    switches.forEach(switchEl => {
-      switchEl.addEventListener('change', (e) => {
-        this.setTheme(e.target.checked ? 'dark' : 'light');
-      });
-    });
-
-    this.updateToggles();
-  }
-
-  updateToggles() {
-    const switches = document.querySelectorAll('[data-theme-switch]');
-    switches.forEach(switchEl => {
-      switchEl.checked = this.isDark();
-    });
-
-    const toggles = document.querySelectorAll('[data-theme-toggle]');
-    toggles.forEach(toggle => {
-      toggle.setAttribute('aria-pressed', this.isDark());
-      toggle.setAttribute('data-theme', this.theme);
-    });
-
-    // Update theme icons
-    const sunIcons = document.querySelectorAll('[data-theme-icon="sun"]');
-    const moonIcons = document.querySelectorAll('[data-theme-icon="moon"]');
-    
-    sunIcons.forEach(icon => {
-      icon.style.opacity = this.isLight() ? '1' : '0.5';
-      icon.style.transform = this.isLight() ? 'scale(1) rotate(0deg)' : 'scale(0.75) rotate(12deg)';
-    });
-
-    moonIcons.forEach(icon => {
-      icon.style.opacity = this.isDark() ? '1' : '0.5';
-      icon.style.transform = this.isDark() ? 'scale(1) rotate(0deg)' : 'scale(0.75) rotate(12deg)';
-    });
   }
 }
 
@@ -151,7 +72,14 @@ class SidebarManager {
     this.sidebar = document.querySelector('[data-sidebar]');
     this.toggleButton = document.querySelector('[data-sidebar-toggle]');
     
-    if (!this.sidebar) return;
+    if (!this.sidebar) {
+      console.warn('Sidebar element not found - sidebar functionality disabled');
+      return;
+    }
+    
+    if (!this.toggleButton) {
+      console.warn('Sidebar toggle button not found');
+    }
 
     // Apply initial state
     this.applySidebarState();
@@ -167,6 +95,8 @@ class SidebarManager {
 
     // Initialize menu items with hover effects
     this.initializeMenuItems();
+    
+    console.log('Sidebar initialized successfully');
   }
 
   getStoredState() {
@@ -337,12 +267,24 @@ class SidebarManager {
 let themeManager, sidebarManager;
 
 function initializeThemeSystem() {
-  themeManager = new ThemeManager();
-  sidebarManager = new SidebarManager();
+  // Prevent double initialization
+  if (window.themeManager || window.sidebarManager) {
+    console.log('Theme system already initialized');
+    return;
+  }
   
-  // Make managers globally available
-  window.themeManager = themeManager;
-  window.sidebarManager = sidebarManager;
+  try {
+    themeManager = new ThemeManager();
+    sidebarManager = new SidebarManager();
+    
+    // Make managers globally available
+    window.themeManager = themeManager;
+    window.sidebarManager = sidebarManager;
+    
+    console.log('Theme system initialized successfully');
+  } catch (error) {
+    console.error('Error initializing theme system:', error);
+  }
 }
 
 // Initialize on DOM ready

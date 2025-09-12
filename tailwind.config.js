@@ -1,6 +1,5 @@
 module.exports = {
   content: ["./templates/**/*.html", "./apps/**/*.html", "./apps/**/*.py"],
-  darkMode: ["class"], // força .dark
   theme: {
     container: { center: true, padding: "1rem" },
     extend: {

@@ -35,7 +35,7 @@
             {% for associado in associados %}
             <tr>
                 <td>{{ associado.id }}</td>
-                <td>{{ associado.nome_razao_social }}</td>
+                <td>{{ associado.nome_completo }}</td>
                 <td>{{ associado.cpf|default:associado.cnpj|default:"—" }}</td>
                 <td>{{ associado.matricula_servidor|default:"—" }}</td>
                 <td>{{ associado.orgao_publico|default:"—" }}</td>

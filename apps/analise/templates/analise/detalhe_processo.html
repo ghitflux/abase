@@ -1,0 +1,534 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Processo #{{ processo.id }} - Análise{% endblock %}
+{% block page_title %}Detalhes do Processo #{{ processo.id }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Ações do Analista -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Ações do Analista</h3>
+        <div class="space-y-4">
+            {% if processo.status == 'pendente' %}
+                {% if processo.cadastro.status == 'RESUBMITTED' or processo.feedback_agente %}
+                    <!-- Processo corrigido pelo agente ou devolvido - mostrar ações diretas -->
+                    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        {% if processo.cadastro.status == 'RESUBMITTED' %}
+                            <p class="text-sm text-blue-800"><strong>Corrigido pelo Agente:</strong> O cadastro foi reenviado após correções.</p>
+                        {% elif processo.feedback_agente %}
+                            <p class="text-sm text-blue-800"><strong>Feedback Anterior:</strong> {{ processo.feedback_agente }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <!-- Botão Assumir e Aprovar -->
+                        <button type="button" onclick="assumirEAprovar()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Aprovar
+                        </button>
+                        
+                        <!-- Botão Assumir e Pendenciar -->
+                        <button type="button" onclick="assumirEPendenciar()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Pendenciar
+                        </button>
+                        
+                        <!-- Botão Assumir e Cancelar -->
+                        <button type="button" onclick="assumirECancelar()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Cancelar
+                        </button>
+
+                        <!-- Botão Apenas Assumir -->
+                        <form method="post" action="{% url 'analise:assumir_processo' processo.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center justify-center w-full">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                Só Assumir
+                            </button>
+                        </form>
+                    </div>
+                {% else %}
+                    <!-- Processo pendente normal - mostrar botão assumir -->
+                    <form method="post" action="{% url 'analise:assumir_processo' processo.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            Assumir Processo
+                        </button>
+                    </form>
+                {% endif %}
+            {% elif processo.status == 'em_analise' and processo.analista_responsavel == request.user %}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <!-- Botão Aprovar -->
+                    <button type="button" onclick="openApprovalModal()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Aprovar
+                    </button>
+                    
+                    <!-- Botão Pendenciar -->
+                    <button type="button" onclick="openPendencyModal()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Pendenciar
+                    </button>
+                    
+                    <!-- Botão Cancelar -->
+                    <button type="button" onclick="openCancelModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Cancelar
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Informações do Processo -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900">{{ processo.cadastro.nome_completo }}</h2>
+                <p class="text-sm text-gray-600">CPF/CNPJ: {{ processo.cadastro.cpf_cnpj }}</p>
+                <p class="text-sm text-gray-600">Matrícula: {{ processo.cadastro.matricula_servidor }}</p>
+            </div>
+            <div class="text-right">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                    {% if processo.status == 'PENDENTE' %}bg-yellow-100 text-yellow-800
+                    {% elif processo.status == 'EM_ANALISE' %}bg-blue-100 text-blue-800
+                    {% elif processo.status == 'APROVADO' %}bg-green-100 text-green-800
+                    {% elif processo.status == 'REJEITADO' %}bg-red-100 text-red-800
+                    {% elif processo.status == 'SUSPENSO' %}bg-gray-100 text-gray-800
+                    {% endif %}">
+                    {{ processo.get_status_display }}
+                </span>
+                <p class="text-sm text-gray-600 mt-1">Entrada: {{ processo.data_entrada|date:"d/m/Y H:i" }}</p>
+            </div>
+        </div>
+
+        <!-- Cadastro Completo -->
+        <div class="mb-8">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Dados Completos do Cadastro</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dados Pessoais -->
+                <div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Dados Pessoais</h4>
+                    <dl class="space-y-2">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Nome/Razão Social:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.nome_completo|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">CPF/CNPJ:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.cpf_cnpj|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">RG:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.rg|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Data de Nascimento:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.data_nascimento|date:"d/m/Y"|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Estado Civil:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.estado_civil|default:"Não informado" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+                
+                <!-- Contato -->
+                <div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Contato</h4>
+                    <dl class="space-y-2">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Email:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.email|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Celular:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.celular|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">PIX:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.chave_pix|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Endereço:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.endereco|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">CEP:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.cep|default:"Não informado" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+                
+                <!-- Dados Profissionais -->
+                <div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Dados Profissionais</h4>
+                    <dl class="space-y-2">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Matrícula:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.matricula_servidor|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Órgão Público:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.orgao_publico|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Cargo:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.cargo|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Salário Bruto:</dt>
+                            <dd class="text-sm text-gray-900">R$ {{ processo.cadastro.salario_bruto|floatformat:2|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Salário Líquido:</dt>
+                            <dd class="text-sm text-gray-900">R$ {{ processo.cadastro.salario_liquido|floatformat:2|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Mensalidade:</dt>
+                            <dd class="text-sm text-gray-900">R$ {{ processo.cadastro.mensalidade|floatformat:2|default:"Não informado" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Agente Responsável:</dt>
+                            <dd class="text-sm text-gray-900">{{ processo.cadastro.agente_responsavel.get_full_name|default:processo.cadastro.agente_responsavel.username|default:"Não informado" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Informações da Análise -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-3">Informações da Análise</h3>
+                <dl class="space-y-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Analista Responsável:</dt>
+                        <dd class="text-sm text-gray-900">
+                            {% if processo.analista_responsavel %}
+                                {{ processo.analista_responsavel.get_full_name|default:processo.analista_responsavel.username }}
+                            {% else %}
+                                Não atribuído
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Tipo de Análise:</dt>
+                        <dd class="text-sm text-gray-900">{{ processo.get_tipo_analise_display|default:"Normal" }}</dd>
+                    </div>
+                    {% if processo.data_inicio_analise %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Início da Análise:</dt>
+                        <dd class="text-sm text-gray-900">{{ processo.data_inicio_analise|date:"d/m/Y H:i" }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+            
+            <!-- Documentos Anexados -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-3">Documentos Anexados</h3>
+                {% if processo.cadastro.documentos.all %}
+                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                        {% for documento in processo.cadastro.documentos.all %}
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ documento.nome|default:documento.tipo_documento }}</p>
+                                    <p class="text-xs text-gray-500">Enviado em {{ documento.data_upload|date:"d/m/Y H:i" }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <a href="{% url 'serve_private' documento.id %}" target="_blank" class="text-blue-600 hover:text-blue-500 text-sm font-medium">
+                                    Visualizar
+                                </a>
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-6">
+                        <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p class="text-sm text-gray-500">Nenhum documento anexado ao cadastro.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Checklist -->
+    {% if checklist_itens %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Checklist de Análise</h3>
+        <div class="space-y-3">
+            {% for item in checklist_itens %}
+            <div class="flex items-center">
+                <input type="checkbox" 
+                       id="checklist_{{ item.id }}" 
+                       {% if item.concluido %}checked{% endif %}
+                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <label for="checklist_{{ item.id }}" class="ml-3 text-sm text-gray-900">
+                    {{ item.item }}
+                    {% if item.obrigatorio %}
+                        <span class="text-red-500">*</span>
+                    {% endif %}
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Histórico -->
+    {% if historico %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Histórico do Processo</h3>
+        <div class="flow-root">
+            <ul class="-mb-8">
+                {% for evento in historico %}
+                <li>
+                    <div class="relative pb-8">
+                        {% if not forloop.last %}
+                        <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                        {% endif %}
+                        <div class="relative flex space-x-3">
+                            <div>
+                                <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
+                                    <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                <div>
+                                    <p class="text-sm text-gray-500">{{ evento.acao }}</p>
+                                    <p class="text-xs text-gray-400">por {{ evento.usuario.get_full_name|default:evento.usuario.username }}</p>
+                                </div>
+                                <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                    {{ evento.data_acao|date:"d/m/Y H:i" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Botões de Navegação -->
+    <div class="flex justify-between">
+        <a href="{% url 'analise:esteira_analise' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+            ← Voltar para Esteira
+        </a>
+        <a href="{% url 'analise:dashboard' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+            Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Modal de Aprovação -->
+<div id="approvalModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mt-4">Aprovar Cadastro</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500">O cadastro será aprovado e encaminhado para a tesouraria. Esta ação não pode ser desfeita.</p>
+            </div>
+            <form method="post" action="{% url 'analise:aprovar_processo' processo.id %}">
+                {% csrf_token %}
+                <div class="mt-4">
+                    <textarea name="observacoes" placeholder="Observações da análise (opcional)" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" rows="3"></textarea>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-700">
+                        Confirmar Aprovação
+                    </button>
+                    <button type="button" onclick="closeApprovalModal()" class="mt-3 px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-400">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Pendenciar -->
+<div id="pendencyModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mt-4">Pendenciar Cadastro</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500">O cadastro será devolvido ao agente para correções. Informe quais ajustes são necessários.</p>
+            </div>
+            <form method="post" action="{% url 'analise:rejeitar_processo' processo.id %}">
+                {% csrf_token %}
+                <div class="mt-4">
+                    <textarea name="feedback_agente" placeholder="Informe o que precisa ser corrigido (obrigatório)" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" rows="4"></textarea>
+                </div>
+                <div class="mt-4">
+                    <textarea name="observacoes" placeholder="Observações internas (opcional)" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" rows="2"></textarea>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button type="submit" class="px-4 py-2 bg-yellow-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-yellow-700">
+                        Enviar para Revisão
+                    </button>
+                    <button type="button" onclick="closePendencyModal()" class="mt-3 px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-400">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Cancelar -->
+<div id="cancelModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mt-4">Cancelar Cadastro</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500">O cadastro será cancelado definitivamente. Esta ação não pode ser desfeita.</p>
+            </div>
+            <form method="post" action="{% url 'analise:cancelar_processo' processo.id %}">
+                {% csrf_token %}
+                <div class="mt-4">
+                    <textarea name="motivo_cancelamento" placeholder="Motivo do cancelamento (obrigatório)" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" rows="4"></textarea>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-700">
+                        Confirmar Cancelamento
+                    </button>
+                    <button type="button" onclick="closeCancelModal()" class="mt-3 px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-400">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openApprovalModal() {
+    document.getElementById('approvalModal').classList.remove('hidden');
+}
+
+function closeApprovalModal() {
+    document.getElementById('approvalModal').classList.add('hidden');
+}
+
+function openPendencyModal() {
+    document.getElementById('pendencyModal').classList.remove('hidden');
+}
+
+function closePendencyModal() {
+    document.getElementById('pendencyModal').classList.add('hidden');
+}
+
+function openCancelModal() {
+    document.getElementById('cancelModal').classList.remove('hidden');
+}
+
+function closeCancelModal() {
+    document.getElementById('cancelModal').classList.add('hidden');
+}
+
+// Fechar modal ao clicar fora dele
+document.addEventListener('click', function(event) {
+    const modals = ['approvalModal', 'pendencyModal', 'cancelModal'];
+    modals.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (event.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+});
+
+// Funções para assumir processo e executar ação diretamente
+async function assumirProcesso() {
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    try {
+        const response = await fetch(`{% url 'analise:assumir_processo' processo.id %}`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            return true;
+        } else {
+            throw new Error('Erro ao assumir processo');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao assumir processo. Tente novamente.');
+        return false;
+    }
+}
+
+async function assumirEAprovar() {
+    if (await assumirProcesso()) {
+        openApprovalModal();
+    }
+}
+
+async function assumirEPendenciar() {
+    if (await assumirProcesso()) {
+        openPendencyModal();
+    }
+}
+
+async function assumirECancelar() {
+    if (await assumirProcesso()) {
+        openCancelModal();
+    }
+}
+</script>
+{% endblock %}

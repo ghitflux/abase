@@ -12,11 +12,13 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.utils import timezone
+from django.db import transaction
 from datetime import datetime, timedelta
 
-from .models import MovimentacaoTesouraria, Mensalidade, ReconciliacaoLog, StatusMensalidade
+from .models import MovimentacaoTesouraria, Mensalidade, ReconciliacaoLog, StatusMensalidade, ProcessoTesouraria, StatusProcessoTesouraria
 from .services import ReconciliacaoService
-from apps.accounts.decorators import admin_required
+from apps.accounts.decorators import admin_required, tesouraria_required
+from apps.documentos.models import Documento
 
 
 @login_required
@@ -328,3 +330,211 @@ def reconciliacao_logs(request):
     page_obj = paginator.get_page(page_number)
     
     return render(request, 'tesouraria/reconciliacao_logs.html', {'page_obj': page_obj})
+
+
+# ========== VIEWS DE PROCESSOS DA TESOURARIA ==========
+
+@login_required
+@tesouraria_required
+def processos_tesouraria(request):
+    """
+    Lista todos os processos aprovados que chegaram da análise
+    """
+    # Filtros
+    status_filter = request.GET.get('status', '')
+    agente_filter = request.GET.get('agente', '')
+    search = request.GET.get('search', '')
+    
+    # QuerySet base
+    processos = ProcessoTesouraria.objects.select_related(
+        'cadastro', 'origem_analise', 'agente_responsavel', 'processado_por'
+    ).prefetch_related('cadastro__documentos')
+    
+    # Aplicar filtros
+    if status_filter:
+        processos = processos.filter(status=status_filter)
+    
+    if agente_filter:
+        processos = processos.filter(agente_responsavel_id=agente_filter)
+    
+    if search:
+        processos = processos.filter(
+            Q(cadastro__nome_completo__icontains=search) |
+            Q(cadastro__cpf__icontains=search) |
+            Q(cadastro__cnpj__icontains=search) |
+            Q(cadastro__matricula_servidor__icontains=search)
+        )
+    
+    # Ordenação por data de entrada
+    processos = processos.order_by('-data_entrada')
+    
+    # Paginação
+    paginator = Paginator(processos, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Agentes disponíveis para filtro
+    from django.contrib.auth.models import User
+    agentes = User.objects.filter(groups__name='AGENTE').order_by('username')
+    
+    context = {
+        'page_obj': page_obj,
+        'status_choices': StatusProcessoTesouraria.choices,
+        'agentes': agentes,
+        'current_filters': {
+            'status': status_filter,
+            'agente': agente_filter, 
+            'search': search,
+        }
+    }
+    
+    return render(request, 'tesouraria/processos_lista.html', context)
+
+
+@login_required
+@tesouraria_required
+def detalhe_processo_tesouraria(request, processo_id):
+    """
+    Exibe detalhes de um processo da tesouraria com modal de ações
+    """
+    processo = get_object_or_404(
+        ProcessoTesouraria.objects.select_related(
+            'cadastro', 'origem_analise', 'agente_responsavel', 'processado_por'
+        ).prefetch_related('cadastro__documentos'),
+        id=processo_id
+    )
+    
+    context = {
+        'processo': processo,
+        'status_choices': StatusProcessoTesouraria.choices,
+    }
+    
+    return render(request, 'tesouraria/detalhe_processo.html', context)
+
+
+@login_required 
+@tesouraria_required
+def efetivar_contrato(request, processo_id):
+    """
+    Efetiva um contrato na tesouraria
+    """
+    if request.method != 'POST':
+        return redirect('tesouraria:detalhe_processo', processo_id=processo_id)
+        
+    processo = get_object_or_404(ProcessoTesouraria, id=processo_id)
+    
+    observacoes = request.POST.get('observacoes_efetivacao', '')
+    comprovante = request.FILES.get('comprovante')
+    
+    try:
+        with transaction.atomic():
+            # Atualizar processo
+            processo.status = StatusProcessoTesouraria.PROCESSADO
+            processo.data_processamento = timezone.now()
+            processo.processado_por = request.user
+            processo.observacoes_tesouraria = observacoes
+            processo.save()
+            
+            # Atualizar cadastro para efetivado
+            from apps.cadastros.choices import StatusCadastro
+            processo.cadastro.status = StatusCadastro.EFFECTIVATED
+            processo.cadastro.save()
+            
+            # Anexar comprovante se fornecido
+            if comprovante:
+                Documento.objects.create(
+                    cadastro=processo.cadastro,
+                    tipo='COMPROVANTE_EFETIVACAO',
+                    arquivo=comprovante
+                )
+            
+            # Registrar movimentação na tesouraria
+            MovimentacaoTesouraria.objects.create(
+                descricao=f'Contrato efetivado - {processo.cadastro.nome_completo}',
+                valor=processo.cadastro.disponivel or 0,
+                tipo='saida',
+                data=timezone.now().date(),
+                usuario=request.user,
+                observacoes=f'Processo #{processo.id} - Agente: {processo.agente_responsavel}. {observacoes}'
+            )
+            
+        messages.success(request, f'Contrato #{processo_id} efetivado com sucesso!')
+        
+    except Exception as e:
+        messages.error(request, f'Erro ao efetivar contrato: {str(e)}')
+    
+    return redirect('tesouraria:processos')
+
+
+@login_required
+@tesouraria_required  
+def cancelar_contrato(request, processo_id):
+    """
+    Cancela um contrato na tesouraria
+    """
+    if request.method != 'POST':
+        return redirect('tesouraria:detalhe_processo', processo_id=processo_id)
+        
+    processo = get_object_or_404(ProcessoTesouraria, id=processo_id)
+    
+    observacoes = request.POST.get('observacoes_cancelamento', '')
+    
+    try:
+        with transaction.atomic():
+            # Atualizar processo
+            processo.status = StatusProcessoTesouraria.REJEITADO
+            processo.data_processamento = timezone.now()
+            processo.processado_por = request.user
+            processo.observacoes_tesouraria = observacoes
+            processo.save()
+            
+            # Atualizar cadastro para cancelado
+            from apps.cadastros.choices import StatusCadastro
+            processo.cadastro.status = StatusCadastro.CANCELLED
+            processo.cadastro.save()
+            
+        messages.success(request, f'Contrato #{processo_id} cancelado com sucesso!')
+        
+    except Exception as e:
+        messages.error(request, f'Erro ao cancelar contrato: {str(e)}')
+    
+    return redirect('tesouraria:processos')
+
+
+@login_required
+@tesouraria_required
+def devolver_analise(request, processo_id):
+    """
+    Devolve um processo para a análise
+    """
+    if request.method != 'POST':
+        return redirect('tesouraria:detalhe_processo', processo_id=processo_id)
+        
+    processo = get_object_or_404(ProcessoTesouraria, id=processo_id)
+    
+    observacoes = request.POST.get('observacoes_devolucao', '')
+    
+    try:
+        with transaction.atomic():
+            # Atualizar processo de análise original
+            if processo.origem_analise:
+                from apps.analise.models import StatusAnalise
+                processo.origem_analise.status = StatusAnalise.PENDENTE
+                processo.origem_analise.analista_responsavel = None
+                processo.origem_analise.feedback_agente = f'Devolvido pela tesouraria: {observacoes}'
+                processo.origem_analise.save()
+            
+            # Atualizar cadastro
+            from apps.cadastros.choices import StatusCadastro  
+            processo.cadastro.status = StatusCadastro.PENDING_AGENT
+            processo.cadastro.save()
+            
+            # Remover processo da tesouraria
+            processo.delete()
+            
+        messages.success(request, f'Processo #{processo_id} devolvido para análise com sucesso!')
+        
+    except Exception as e:
+        messages.error(request, f'Erro ao devolver processo: {str(e)}')
+    
+    return redirect('tesouraria:processos')

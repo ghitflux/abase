@@ -1,5 +1,10 @@
 /* Custom styles for ABASE with Theme Support */
 
+/* Alpine.js x-cloak directive - hide elements until Alpine is loaded */
+[x-cloak] {
+  display: none !important;
+}
+
 /* Base styles */
 * {
   box-sizing: border-box;

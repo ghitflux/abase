@@ -26,4 +26,11 @@ urlpatterns = [
     path('mensalidades/', views.mensalidades_list, name='mensalidades_list'),
     path('reconciliacao/executar/', views.executar_reconciliacao, name='executar_reconciliacao'),
     path('reconciliacao/logs/', views.reconciliacao_logs, name='reconciliacao_logs'),
+    
+    # Processos da Tesouraria
+    path('processos/', views.processos_tesouraria, name='processos'),
+    path('processos/<int:processo_id>/', views.detalhe_processo_tesouraria, name='detalhe_processo'),
+    path('processos/<int:processo_id>/efetivar/', views.efetivar_contrato, name='efetivar_contrato'),
+    path('processos/<int:processo_id>/cancelar/', views.cancelar_contrato, name='cancelar_contrato'),
+    path('processos/<int:processo_id>/devolver/', views.devolver_analise, name='devolver_analise'),
 ]

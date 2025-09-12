@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ cadastro.nome_completo }} - Detalhes{% endblock %}
+{% block page_title %}Detalhes do Cadastro{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Cabeçalho do Cadastro -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900">{{ cadastro.nome_completo }}</h2>
+                <p class="text-sm text-gray-600">CPF/CNPJ: {{ cadastro.cpf_cnpj }}</p>
+                <p class="text-sm text-gray-600">Matrícula: {{ cadastro.matricula_servidor|default:"Não informado" }}</p>
+            </div>
+            <div class="text-right">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                    {% if cadastro.status == 'DRAFT' %}bg-gray-100 text-gray-800
+                    {% elif cadastro.status == 'SENT_REVIEW' %}bg-blue-100 text-blue-800
+                    {% elif cadastro.status == 'PENDING_AGENT' %}bg-yellow-100 text-yellow-800
+                    {% elif cadastro.status == 'APPROVED_REVIEW' %}bg-green-100 text-green-800
+                    {% elif cadastro.status == 'CANCELLED' %}bg-red-100 text-red-800
+                    {% endif %}">
+                    {{ cadastro.get_status_display }}
+                </span>
+                <p class="text-sm text-gray-600 mt-1">Criado: {{ cadastro.created_at|date:"d/m/Y H:i" }}</p>
+            </div>
+        </div>
+
+        <!-- Comentários do Analista -->
+        {% if processo_analise.feedback_agente %}
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">
+                        Comentário do Analista
+                    </h3>
+                    <div class="mt-2 text-sm text-yellow-700">
+                        <p>{{ processo_analise.feedback_agente }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Dados Completos do Cadastro -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Dados Pessoais -->
+            <div>
+                <h4 class="text-md font-medium text-gray-800 mb-3">Dados Pessoais</h4>
+                <dl class="space-y-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Nome/Razão Social:</dt>
+                        <dd class="text-sm text-gray-900">{{ cadastro.nome_completo|default:"Não informado" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">CPF/CNPJ:</dt>
+                        <dd class="text-sm text-gray-900">{{ cadastro.cpf_cnpj|default:"Não informado" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">RG:</dt>
+                        <dd class="text-sm text-gray-900">{{ cadastro.rg|default:"Não informado" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Estado Civil:</dt>
+                        <dd class="text-sm text-gray-900">{{ cadastro.get_estado_civil_display|default:"Não informado" }}</dd>
+                    </div>
+                </dl>
+            </div>
+            
+            <!-- Contato -->
+            <div>
+                <h4 class="text-md font-medium text-gray-800 mb-3">Contato</h4>
+                <dl class="space-y-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Email:</dt>
+                        <dd class="text-sm text-gray-900">{{ cadastro.email|default:"Não informado" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Celular:</dt>
+                        <dd class="text-sm text-gray-900">{{ cadastro.celular|default:"Não informado" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Endereço:</dt>
+                        <dd class="text-sm text-gray-900">{{ cadastro.endereco|default:"Não informado" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">CEP:</dt>
+                        <dd class="text-sm text-gray-900">{{ cadastro.cep|default:"Não informado" }}</dd>
+                    </div>
+                </dl>
+            </div>
+            
+            <!-- Dados Financeiros -->
+            <div>
+                <h4 class="text-md font-medium text-gray-800 mb-3">Dados Financeiros</h4>
+                <dl class="space-y-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Salário Bruto:</dt>
+                        <dd class="text-sm text-gray-900">R$ {{ cadastro.valor_bruto_total|floatformat:2|default:"0,00" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Salário Líquido:</dt>
+                        <dd class="text-sm text-gray-900">R$ {{ cadastro.valor_liquido|floatformat:2|default:"0,00" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Mensalidade:</dt>
+                        <dd class="text-sm text-gray-900">R$ {{ cadastro.mensalidade_associativa|floatformat:2|default:"0,00" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">PIX:</dt>
+                        <dd class="text-sm text-gray-900">{{ cadastro.chave_pix|default:"Não informado" }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parcelas -->
+    {% if parcelas %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Parcelas de Antecipação</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {% for parcela in parcelas %}
+            <div class="border rounded-lg p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-900">{{ parcela.numero }}ª Parcela</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if parcela.status == 'PENDENTE' %}bg-yellow-100 text-yellow-800
+                        {% elif parcela.status == 'LIQUIDADA' %}bg-green-100 text-green-800
+                        {% endif %}">
+                        {{ parcela.get_status_display }}
+                    </span>
+                </div>
+                <p class="text-lg font-bold text-gray-900">R$ {{ parcela.valor|floatformat:2 }}</p>
+                {% if parcela.vencimento %}
+                <p class="text-sm text-gray-500">Vencimento: {{ parcela.vencimento|date:"d/m/Y" }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Documentos -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Documentos Anexados</h3>
+        {% if documentos %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for documento in documentos %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">{{ documento.tipo|default:"Documento" }}</p>
+                            <p class="text-xs text-gray-500">{{ documento.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'serve_private' documento.id %}" target="_blank" class="text-blue-600 hover:text-blue-500 text-sm">
+                        Ver
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-6">
+                <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="text-sm text-gray-500">Nenhum documento anexado.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Botões de Ação -->
+    <div class="flex justify-between">
+        <a href="{% url 'cadastros:agente-list' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+            ← Voltar para Lista
+        </a>
+        {% if cadastro.status == 'PENDING_AGENT' %}
+        <a href="{% url 'cadastros:agente-create' %}?edit={{ cadastro.id }}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+            Corrigir Cadastro
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

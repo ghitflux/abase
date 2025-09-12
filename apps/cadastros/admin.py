@@ -24,7 +24,7 @@ def export_csv(modeladmin, request, queryset):
     resp["Content-Disposition"] = 'attachment; filename="cadastros.csv"'
     writer = csv.writer(resp)
     cols = [
-        "id","status","tipo_pessoa","cpf","cnpj","nome_razao_social","nome_completo",
+        "id","status","tipo_pessoa","cpf","cnpj","nome_completo",
         "orgao_publico","situacao_servidor","matricula_servidor",
         "mensalidade_associativa","valor_total_antecipacao","doacao_associado","disponivel",
         "created_at","approved_at","paid_at"
@@ -39,11 +39,11 @@ def export_csv(modeladmin, request, queryset):
 @admin.register(Cadastro)
 class CadastroAdmin(admin.ModelAdmin):
     list_display = (
-        "id","nome_razao_social","doc","matricula_servidor",
+        "id","nome_completo","doc","matricula_servidor",
         "orgao_publico","status","valor_total_antecipacao","created_at"
     )
     list_filter = ("status","tipo_pessoa","situacao_servidor","orgao_publico","created_at")
-    search_fields = ("nome_razao_social","nome_completo","cpf","cnpj","matricula_servidor","orgao_publico")
+    search_fields = ("nome_completo","cpf","cnpj","matricula_servidor","orgao_publico")
     date_hierarchy = "created_at"
     inlines = [ParcelaInline, DocumentoInline]
     actions = [export_csv]

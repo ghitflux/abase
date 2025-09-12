@@ -29,7 +29,7 @@ def upload_draft(request):
     """
     draft_token = ensure_draft_token(request)
     tipo = request.POST.get("tipo")
-    arquivo = request.FILES.get("arquivo")
+    arquivo = request.FILES.get("arquivo") or request.FILES.get("arquivo_doc")
 
     if not tipo or not arquivo:
         return HttpResponseBadRequest("Tipo e arquivo são obrigatórios.")

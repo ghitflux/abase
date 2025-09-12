@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Relatórios - Análise{% endblock %}
+{% block page_title %}Relatórios de Análise{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Estatísticas de Período -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Processos Hoje -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Processos Hoje</dt>
+                        <dd class="text-lg font-medium text-gray-900">{{ processos_hoje }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processos Semana -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Processos Semana</dt>
+                        <dd class="text-lg font-medium text-gray-900">{{ processos_semana }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processos Mês -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Processos Mês</dt>
+                        <dd class="text-lg font-medium text-gray-900">{{ processos_mes }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tempo Médio -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Tempo Médio</dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {% if tempo_medio_horas %}
+                                {{ tempo_medio_horas|floatformat:1 }}h
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Performance do Mês</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="text-center">
+                <div class="text-3xl font-bold text-green-600">{{ processos_concluidos }}</div>
+                <p class="text-sm text-gray-500 mt-1">Processos Concluídos</p>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl font-bold text-blue-600">
+                    {% if tempo_medio_horas %}
+                        {{ tempo_medio_horas|floatformat:1 }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <p class="text-sm text-gray-500 mt-1">Horas Médias por Processo</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Ações Rápidas</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="{% url 'analise:esteira_analise' %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div class="flex-shrink-0">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">Ver Esteira</p>
+                    <p class="text-sm text-gray-500">Todos os processos</p>
+                </div>
+            </a>
+            
+            <a href="{% url 'analise:dashboard' %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div class="flex-shrink-0">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">Dashboard</p>
+                    <p class="text-sm text-gray-500">Visão geral</p>
+                </div>
+            </a>
+            
+            <a href="{% url 'analise:esteira_analise' %}?status=pendente" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div class="flex-shrink-0">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">Pendentes</p>
+                    <p class="text-sm text-gray-500">Aguardando análise</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

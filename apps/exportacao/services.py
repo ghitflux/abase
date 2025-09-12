@@ -30,7 +30,7 @@ def build_xlsx_resumo_associados(qs):
     for c in qs:
         doc = c.cpf or c.cnpj or "—"
         ws.append([
-            c.id, c.nome_razao_social, doc, c.matricula_servidor, c.orgao_publico,
+            c.id, c.nome_completo, doc, c.matricula_servidor, c.orgao_publico,
             c.get_status_display(), float(c.valor_total_antecipacao or 0),
             float(c.doacao_associado or 0), float(c.disponivel or 0),
             c.created_at and c.created_at.strftime("%d/%m/%Y %H:%M"),
