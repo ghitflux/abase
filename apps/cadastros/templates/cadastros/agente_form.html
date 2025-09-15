@@ -803,20 +803,7 @@ window.addEventListener('load', function() {
                 console.log('CEP normalizado:', cepLimpo);
             }
             
-            // Normalizar valores monetários
-            const camposMonetarios = ['valor_bruto_total', 'valor_liquido', 'mensalidade_associativa'];
-            camposMonetarios.forEach(campo => {
-                const field = document.querySelector(`[name="${campo}"]`);
-                if (field && field.value) {
-                    // Remove R$, espaços, pontos de milhares e troca vírgula por ponto
-                    let valorLimpo = field.value
-                        .replace(/R\$\s*/g, '')     // Remove R$
-                        .replace(/\./g, '')         // Remove pontos (milhares)
-                        .replace(/,/g, '.');        // Troca vírgula por ponto
-                    field.value = valorLimpo;
-                    console.log(`${campo} normalizado:`, valorLimpo);
-                }
-            });
+            // Normalização de valores monetários removida - agora é feita pelo módulo brl-money.ts
             
             // Visual de loading
             btn.disabled = true;
@@ -854,8 +841,12 @@ function maskMatricula(v){
 // Função removida - agora usando brl-money.ts
 function parseMoney(s){
   if(!s) return 0;
-  // Remove R$ e espaços, depois remove pontos de milhares e troca vírgula por ponto decimal
-  s = (s+"").replace(/R\$\s?/g,"").replace(/\./g,"").replace(",",".");
+  // Remove R$ e espaços
+  s = (s+"").replace(/R\$\s?/g,"").trim();
+  // Remove pontos de milhares (somente aqueles seguidos por exatamente 3 dígitos)
+  s = s.replace(/\.(?=\d{3}(?:\D|$))/g, "");
+  // Troca vírgula decimal por ponto
+  s = s.replace(",", ".");
   let n = parseFloat(s);
   return isNaN(n) ? 0 : n;
 }
