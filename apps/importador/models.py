@@ -1,30 +1,42 @@
 from django.db import models
-from django.contrib.auth.models import User
-import uuid
+from django.conf import settings
 
-class StatusImportacao(models.TextChoices):
-    PENDENTE = 'PENDENTE', 'Pendente'
-    PROCESSANDO = 'PROCESSANDO', 'Processando'
-    CONCLUIDO = 'CONCLUIDO', 'Concluído'
-    ERRO = 'ERRO', 'Erro'
+class ImportacaoContribuicao(models.Model):
+    referencia = models.DateField(help_text="Primeiro dia do mês de referência (ex.: 2025-05-01)")
+    data_geracao = models.DateField(null=True, blank=True)
+    arquivo_nome = models.CharField(max_length=255)
+    arquivo_sha256 = models.CharField(max_length=64, unique=True)
+    criado_por = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+    criado_em = models.DateTimeField(auto_now_add=True)
 
-class ArquivoImportacao(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    nome_arquivo = models.CharField(max_length=255)
-    arquivo = models.FileField(upload_to='importacoes/')
-    tipo_arquivo = models.CharField(max_length=10, choices=[('CSV', 'CSV'), ('TXT', 'TXT')])
-    competencia = models.CharField(max_length=7, help_text="Formato YYYY-MM")
-    status = models.CharField(max_length=12, choices=StatusImportacao.choices, default=StatusImportacao.PENDENTE)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    data_upload = models.DateTimeField(auto_now_add=True)
-    data_processamento = models.DateTimeField(null=True, blank=True)
-    total_linhas = models.IntegerField(default=0)
-    linhas_processadas = models.IntegerField(default=0)
-    linhas_com_erro = models.IntegerField(default=0)
-    log_erros = models.TextField(blank=True)
-    
-    class Meta:
-        ordering = ['-data_upload']
-    
+    total_linhas = models.PositiveIntegerField(default=0)
+    total_processados = models.PositiveIntegerField(default=0)
+    total_atualizados = models.PositiveIntegerField(default=0)
+    total_ignorados = models.PositiveIntegerField(default=0)
+    total_nao_encontrados = models.PositiveIntegerField(default=0)
+
     def __str__(self):
-        return f"{self.nome_arquivo} - {self.competencia} ({self.status})"
+        return f"Importação {self.referencia:%Y-%m} • {self.arquivo_nome}"
+
+class ImportacaoOcorrencia(models.Model):
+    ACOES = [
+        ("MARCADA_LIQUIDADA","Parcela marcada como liquidada"),
+        ("IGNORADA_STATUS","Linha ignorada pelo status externo"),
+        ("CADASTRO_NAO_EFETIVADO","Cadastro não está efetivado"),
+        ("CPF_MATRICULA_NAO_ENCONTRADO","Cadastro não encontrado por CPF+Matrícula"),
+        ("PARCELA_DO_MES_NAO_ENCONTRADA","Não há parcela do mês de referência"),
+    ]
+    importacao = models.ForeignKey(ImportacaoContribuicao, related_name="ocorrencias", on_delete=models.CASCADE)
+    cpf = models.CharField(max_length=14)
+    matricula = models.CharField(max_length=32)
+    nome = models.CharField(max_length=200, blank=True)
+    orgao_pagto = models.CharField(max_length=32, blank=True)
+    valor = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    status_externo = models.CharField(max_length=2)
+    status_legenda = models.CharField(max_length=200)
+    acao = models.CharField(max_length=64, choices=ACOES)
+    mensagem = models.TextField(blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    cadastro_id = models.IntegerField(null=True, blank=True)
+    parcela_id = models.IntegerField(null=True, blank=True)

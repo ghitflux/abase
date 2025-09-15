@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Importar contribuições{% endblock %}
+{% block content %}
+<h1 class="text-xl font-semibold mb-4">Importar contribuições</h1>
+
+<form method="post" enctype="multipart/form-data" class="space-y-3">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <div class="flex gap-2">
+    <button name="modo" value="preview" class="btn-outline">Pré-visualizar</button>
+    <button name="modo" value="confirm" class="btn-primary">Importar</button>
+  </div>
+</form>
+
+{% if referencia %}
+  <div class="mt-6 p-3 rounded border">
+    <div><b>Competência:</b> {{ referencia|date:"m/Y" }} • <b>Gerado em:</b> {{ data_geracao|date:"d/m/Y" }}</div>
+  </div>
+{% endif %}
+
+{% if preview %}
+  <h2 class="mt-4 font-medium">Amostra ({{ preview|length }} linhas)</h2>
+  <div class="text-sm overflow-auto max-h-96 mt-2 border rounded">
+    <table class="min-w-full">
+      <thead><tr><th>Status</th><th>Matrícula</th><th>Nome</th><th>Órgão</th><th>Valor</th><th>CPF</th></tr></thead>
+      <tbody>
+        {% for r in preview %}
+          <tr><td>{{ r.status }} — {{ r.legenda }}</td><td>{{ r.matricula }}</td><td>{{ r.nome }}</td><td>{{ r.orgao_pagto }}</td><td>{{ r.valor }}</td><td>{{ r.cpf }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}

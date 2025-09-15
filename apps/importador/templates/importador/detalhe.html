@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Importação {{ imp.id }}{% endblock %}
+{% block content %}
+<h1 class="text-xl font-semibold mb-4">Importação #{{ imp.id }} — {{ imp.referencia|date:"m/Y" }}</h1>
+<p class="text-sm mb-2">
+  Arquivo: {{ imp.arquivo_nome }} — Hash: {{ imp.arquivo_sha256|slice:":12" }}… — Criado por: {{ imp.criado_por }} — {{ imp.criado_em }}
+</p>
+
+<ul class="mb-4">
+  <li>Total lidas: <b>{{ imp.total_linhas }}</b></li>
+  <li>Processadas: <b>{{ imp.total_processados }}</b></li>
+  <li>Atualizadas: <b class="text-green-700">{{ imp.total_atualizados }}</b></li>
+  <li>Ignoradas: <b class="text-yellow-700">{{ imp.total_ignorados }}</b></li>
+  <li>Não encontradas: <b class="text-red-700">{{ imp.total_nao_encontrados }}</b></li>
+</ul>
+
+<div class="text-sm overflow-auto max-h-[32rem] border rounded">
+  <table class="min-w-full">
+    <thead><tr><th>Ação</th><th>Status</th><th>Matrícula</th><th>CPF</th><th>Nome</th><th>Órgão</th><th>Valor</th><th>Mensagem</th></tr></thead>
+    <tbody>
+      {% for o in imp.ocorrencias.all %}
+        <tr>
+          <td>{{ o.acao }}</td>
+          <td>{{ o.status_externo }} — {{ o.status_legenda }}</td>
+          <td>{{ o.matricula }}</td>
+          <td>{{ o.cpf }}</td>
+          <td>{{ o.nome }}</td>
+          <td>{{ o.orgao_pagto }}</td>
+          <td>{{ o.valor }}</td>
+          <td>{{ o.mensagem }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

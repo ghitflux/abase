@@ -105,6 +105,30 @@ body {
   justify-content: center;
 }
 
+/* Hide chevron icons in collapsed sidebar */
+.sidebar.collapsed .sidebar-item svg:last-child,
+[data-sidebar].collapsed .sidebar-item svg:last-child,
+[data-sidebar][data-expanded="false"] .sidebar-item svg:last-child {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Hide submenu when sidebar is collapsed */
+.sidebar.collapsed [x-show],
+[data-sidebar].collapsed [x-show],
+[data-sidebar][data-expanded="false"] [x-show] {
+  display: none !important;
+}
+
+/* Ensure icons remain visible and centered when collapsed */
+.sidebar.collapsed .sidebar-item .relative.z-10:first-of-type,
+[data-sidebar].collapsed .sidebar-item .relative.z-10:first-of-type,
+[data-sidebar][data-expanded="false"] .sidebar-item .relative.z-10:first-of-type {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Form styles with theme support */
 .form-group {
   margin-bottom: 1rem;

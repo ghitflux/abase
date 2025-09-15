@@ -162,35 +162,7 @@
         </a>
       </li>
       {% endif %}
-      <li>
-        <a 
-          href="/tesouraria/" 
-          class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-xl theme-transition relative overflow-hidden group focus-ring"
-          data-menu-item
-        >
-          <!-- Glow Effect -->
-          <div 
-            class="absolute inset-0 opacity-0 transition-all duration-500 ease-out pointer-events-none rounded-xl"
-            data-menu-glow
-            style="background: radial-gradient(circle, rgba(34,197,94,0.15) 0%, rgba(22,163,74,0.06) 50%, rgba(21,128,61,0) 100%);"
-          ></div>
-          
-          <!-- Icon -->
-          <div class="relative z-10 text-green-500">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-            </svg>
-          </div>
-          
-          <!-- Label -->
-          <span 
-            class="relative z-10 font-medium theme-transition"
-            data-menu-label
-          >
-            Secretaria
-          </span>
-        </a>
-      </li>
+
       {% if request.user.is_superuser or request.user|has_group:"TESOURARIA" or request.user|has_group:"ADMIN" %}
       <li>
         <a 
@@ -223,35 +195,7 @@
       </li>
       {% endif %}
       {% if request.user.is_superuser or request.user|has_group:"ADMIN" %}
-      <li>
-        <a 
-          href="/tesouraria/mensalidades/" 
-          class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-xl theme-transition relative overflow-hidden group focus-ring"
-          data-menu-item
-        >
-          <!-- Glow Effect -->
-          <div 
-            class="absolute inset-0 opacity-0 transition-all duration-500 ease-out pointer-events-none rounded-xl"
-            data-menu-glow
-            style="background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(37,99,235,0.06) 50%, rgba(29,78,216,0) 100%);"
-          ></div>
-          
-          <!-- Icon -->
-          <div class="relative z-10 text-blue-500">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
-          </div>
-          
-          <!-- Label -->
-          <span 
-            class="relative z-10 font-medium theme-transition"
-            data-menu-label
-          >
-            Contribuições
-          </span>
-        </a>
-      </li>
+
       <li>
         <a 
           href="/importador/" 
@@ -467,154 +411,7 @@
           </span>
         </a>
       </li>
-      <!-- Exportações XLSX -->
-      <li>
-        <a 
-          href="{% url 'relatorios:export-associados-xlsx' %}" 
-          class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-xl theme-transition relative overflow-hidden group focus-ring"
-          data-menu-item
-        >
-          <!-- Glow Effect -->
-          <div 
-            class="absolute inset-0 opacity-0 transition-all duration-500 ease-out pointer-events-none rounded-xl"
-            data-menu-glow
-            style="background: radial-gradient(circle, rgba(34,197,94,0.15) 0%, rgba(22,163,74,0.06) 50%, rgba(21,128,61,0) 100%);"
-          ></div>
-          
-          <!-- Icon -->
-          <div class="relative z-10 text-green-600">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          
-          <!-- Label -->
-          <span 
-            class="relative z-10 font-medium theme-transition"
-            data-menu-label
-          >
-            Exportar Associados (XLSX)
-          </span>
-        </a>
-      </li>
-      <li>
-        <a 
-          href="{% url 'relatorios:export-orgaos-xlsx' %}" 
-          class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-xl theme-transition relative overflow-hidden group focus-ring"
-          data-menu-item
-        >
-          <!-- Glow Effect -->
-          <div 
-            class="absolute inset-0 opacity-0 transition-all duration-500 ease-out pointer-events-none rounded-xl"
-            data-menu-glow
-            style="background: radial-gradient(circle, rgba(34,197,94,0.15) 0%, rgba(22,163,74,0.06) 50%, rgba(21,128,61,0) 100%);"
-          ></div>
-          
-          <!-- Icon -->
-          <div class="relative z-10 text-green-600">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          
-          <!-- Label -->
-          <span 
-            class="relative z-10 font-medium theme-transition"
-            data-menu-label
-          >
-            Exportar Órgãos (XLSX)
-          </span>
-        </a>
-      </li>
-      
-      <!-- Exportações PDF -->
-      <li>
-        <a 
-          href="{% url 'relatorios:export-associados-pdf' %}" 
-          class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-xl theme-transition relative overflow-hidden group focus-ring"
-          data-menu-item
-        >
-          <!-- Glow Effect -->
-          <div 
-            class="absolute inset-0 opacity-0 transition-all duration-500 ease-out pointer-events-none rounded-xl"
-            data-menu-glow
-            style="background: radial-gradient(circle, rgba(239,68,68,0.15) 0%, rgba(220,38,38,0.06) 50%, rgba(185,28,28,0) 100%);"
-          ></div>
-          
-          <!-- Icon -->
-          <div class="relative z-10 text-red-600">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          
-          <!-- Label -->
-          <span 
-            class="relative z-10 font-medium theme-transition"
-            data-menu-label
-          >
-            Relatório Associados (PDF)
-          </span>
-        </a>
-      </li>
-      <li>
-        <a 
-          href="{% url 'relatorios:export-orgaos-pdf' %}" 
-          class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-xl theme-transition relative overflow-hidden group focus-ring"
-          data-menu-item
-        >
-          <!-- Glow Effect -->
-          <div 
-            class="absolute inset-0 opacity-0 transition-all duration-500 ease-out pointer-events-none rounded-xl"
-            data-menu-glow
-            style="background: radial-gradient(circle, rgba(239,68,68,0.15) 0%, rgba(220,38,38,0.06) 50%, rgba(185,28,28,0) 100%);"
-          ></div>
-          
-          <!-- Icon -->
-          <div class="relative z-10 text-red-600">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          
-          <!-- Label -->
-          <span 
-            class="relative z-10 font-medium theme-transition"
-            data-menu-label
-          >
-            Relatório Órgãos (PDF)
-          </span>
-        </a>
-      </li>
-      <li>
-        <a 
-          href="{% url 'relatorios:export-dashboard-pdf' %}" 
-          class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-xl theme-transition relative overflow-hidden group focus-ring"
-          data-menu-item
-        >
-          <!-- Glow Effect -->
-          <div 
-            class="absolute inset-0 opacity-0 transition-all duration-500 ease-out pointer-events-none rounded-xl"
-            data-menu-glow
-            style="background: radial-gradient(circle, rgba(239,68,68,0.15) 0%, rgba(220,38,38,0.06) 50%, rgba(185,28,28,0) 100%);"
-          ></div>
-          
-          <!-- Icon -->
-          <div class="relative z-10 text-red-600">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          
-          <!-- Label -->
-          <span 
-            class="relative z-10 font-medium theme-transition"
-            data-menu-label
-          >
-            Relatório Dashboard (PDF)
-          </span>
-        </a>
-      </li>
+
       {% endif %}
     </ul>
   </div>

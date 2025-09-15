@@ -1,80 +1,58 @@
-from django.shortcuts import render, redirect, get_object_or_404
+import logging
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.core.paginator import Paginator
-from django.http import JsonResponse
-from apps.accounts.decorators import admin_required
-from .models import ArquivoImportacao, StatusImportacao
-from .forms import ArquivoImportacaoForm
-from .services import ImportadorService
+from django.views.decorators.http import require_http_methods
+
+from .forms import ImportarTXTForm
+from .parser import parse_header_ref, find_columns_index, iter_registros, sha256_bytes
+from .service import importar_contribuicoes
+
+log = logging.getLogger("apps")
 
 @login_required
-@admin_required
-def upload_arquivo(request):
-    if request.method == 'POST':
-        form = ArquivoImportacaoForm(request.POST, request.FILES)
-        if form.is_valid():
-            arquivo = form.save(commit=False)
-            arquivo.usuario = request.user
-            arquivo.nome_arquivo = request.FILES['arquivo'].name
-            arquivo.save()
-            
-            # Processar arquivo em background (simplificado aqui)
+@require_http_methods(["GET","POST"])
+def importar(request):
+    if request.method == "POST":
+        form = ImportarTXTForm(request.POST, request.FILES)
+        if not form.is_valid():
+            return render(request, "importador/importar.html", {"form": form}, status=400)
+
+        f = form.cleaned_data["arquivo"]
+        modo = form.cleaned_data["modo"]
+        content = f.read()
+
+        if modo == "preview":
             try:
-                ImportadorService.processar_arquivo(arquivo)
-                messages.success(request, 'Arquivo processado com sucesso!')
-            except Exception as e:
-                messages.error(request, f'Erro ao processar arquivo: {str(e)}')
-            
-            return redirect('importador:listar_importacoes')
-    else:
-        form = ArquivoImportacaoForm()
-    
-    return render(request, 'importador/upload_arquivo.html', {'form': form})
+                lines = content.decode("latin1", errors="ignore").splitlines()
+                ref, data_gen = parse_header_ref(lines)
+                colspec = find_columns_index(lines)
+                # pega só as 30 primeiras para prévia
+                regs = list(r for i,r in zip(range(30), iter_registros(lines, colspec)))
+                sha = sha256_bytes(content)
+                ctx = {"form": form, "preview": regs, "referencia": ref, "data_geracao": data_gen, "sha256": sha}
+                messages.info(request, f"Pré-visualização: {len(regs)} linhas exibidas (arquivo hash {sha[:12]}…).")
+                return render(request, "importador/importar.html", ctx)
+            except Exception as ex:
+                messages.error(request, f"Erro na leitura: {ex}")
+                log.exception("Prévia do importador falhou")
+                return render(request, "importador/importar.html", {"form": form}, status=400)
 
-@login_required
-@admin_required
-def listar_importacoes(request):
-    importacoes = ArquivoImportacao.objects.all()
-    
-    status_filter = request.GET.get('status')
-    if status_filter:
-        importacoes = importacoes.filter(status=status_filter)
-    
-    competencia_filter = request.GET.get('competencia')
-    if competencia_filter:
-        importacoes = importacoes.filter(competencia=competencia_filter)
-    
-    paginator = Paginator(importacoes, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'page_obj': page_obj,
-        'status_choices': StatusImportacao.choices,
-        'current_status': status_filter,
-        'current_competencia': competencia_filter,
-    }
-    return render(request, 'importador/listar_importacoes.html', context)
-
-@login_required
-@admin_required
-def detalhe_importacao(request, importacao_id):
-    importacao = get_object_or_404(ArquivoImportacao, id=importacao_id)
-    return render(request, 'importador/detalhe_importacao.html', {'importacao': importacao})
-
-@login_required
-@admin_required
-def reprocessar_arquivo(request, importacao_id):
-    if request.method == 'POST':
-        importacao = get_object_or_404(ArquivoImportacao, id=importacao_id)
-        
+        # confirm
         try:
-            ImportadorService.processar_arquivo(importacao)
-            messages.success(request, 'Arquivo reprocessado com sucesso!')
-        except Exception as e:
-            messages.error(request, f'Erro ao reprocessar arquivo: {str(e)}')
-        
-        return redirect('importador:detalhe_importacao', importacao_id=importacao_id)
-    
-    return redirect('importador:listar_importacoes')
+            imp = importar_contribuicoes(content, f.name, request.user)
+            messages.success(request, f"Importado com sucesso. Atualizados: {imp.total_atualizados}, ignorados: {imp.total_ignorados}, não encontrados: {imp.total_nao_encontrados}.")
+            return redirect("importador:detalhe", pk=imp.id)
+        except Exception as ex:
+            messages.error(request, f"Falha ao importar: {ex}")
+            log.exception("Falha na importação")
+            return render(request, "importador/importar.html", {"form": form}, status=400)
+    else:
+        form = ImportarTXTForm()
+    return render(request, "importador/importar.html", {"form": form})
+
+@login_required
+def detalhe(request, pk):
+    from .models import ImportacaoContribuicao
+    imp = ImportacaoContribuicao.objects.select_related("criado_por").prefetch_related("ocorrencias").get(pk=pk)
+    return render(request, "importador/detalhe.html", {"imp": imp})

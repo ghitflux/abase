@@ -164,6 +164,9 @@ class ParcelaAntecipacao(models.Model):
     valor      = models.DecimalField("Valor (R$)", max_digits=12, decimal_places=2, default=Decimal("0.00"))
     vencimento = models.DateField("Vencimento", null=True, blank=True)
     status     = models.CharField("Status", max_length=12, choices=StatusParcela.choices, default=StatusParcela.PENDENTE)
+    status_origem_txt = models.CharField(max_length=200, blank=True, default="")
+    atualizado_em = models.DateTimeField(null=True, blank=True)
+
 
     class Meta:
         unique_together = ("cadastro","numero")

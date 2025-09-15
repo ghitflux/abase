@@ -26,7 +26,7 @@ urlpatterns = [
     path('analise/', include(('apps.analise.urls', 'analise'), namespace='analise')),
     path('tesouraria/', include('apps.tesouraria.urls')),
     path('relatorios/', include(('apps.relatorios.urls', 'relatorios'), namespace='relatorios')),
-    path('importador/', include(('apps.importador.urls', 'importador'), namespace='importador')),
+    path("importador/", include(("apps.importador.urls","importador"), namespace="importador")),
     path('auditoria/', include(('apps.auditoria.urls', 'auditoria'), namespace='auditoria')),
     path('notificacoes/', include(('apps.notificacoes.urls', 'notificacoes'), namespace='notificacoes')),
     path('p/', include(('apps.documentos.urls', 'documentos'), namespace='documentos')),
