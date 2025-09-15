@@ -1,112 +1,104 @@
 /**
- * Máscara BRL robusta em TypeScript (sem libs).
- * - Input: digitação livre → exibe "R$ 5.000,00"
- * - Submit: converte para "1234.56" (string) para o backend
- * - Exibição: elementos com [data-brl-text] são formatados em "R$ X.XXX,YY"
+ * Máscara BRL "blur-only":
+ * - Enquanto digita: NÃO reformatamos (não mexe no cursor, nem "anda casas").
+ * - Ao focar: tira símbolo e separadores para edição fácil.
+ * - Ao sair do campo (blur): formata "R$ X.XXX,YY".
+ * - No submit: envia "1234.56" para o backend (string).
  */
-
 type MoneyInput = HTMLInputElement & { dataset: DOMStringMap };
 
-const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 2 });
+const BRL = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+  maximumFractionDigits: 2,
+});
 
-/** Mantém apenas dígitos (para trabalhar em centavos) */
-function onlyDigits(s: string): string {
-  return s.replace(/\D+/g, "");
+/** Converte string livre ("2.345,6" | "2345.6" | "R$ 2.345,60") => número JS */
+function parseLoose(s: string): number {
+  if (!s) return 0;
+  let t = s.replace(/\s|R\$/g, "");
+  // remove separador de milhar (.)
+  t = t.replace(/\.(?=\d{3}(?:\D|$))/g, "");
+  // vírgula decimal -> ponto
+  t = t.replace(/,/, ".");
+  const n = Number(t);
+  return Number.isFinite(n) ? n : 0;
 }
 
-/** Converte centavos (string de dígitos) em string número com ponto decimal e 2 casas (ex.: "1234.56") */
-function centsToNumberString(cents: string): string {
-  const n = cents.length ? Number.parseInt(cents, 10) : 0;
-  return (n / 100).toFixed(2);
-}
-
-/** Formata "1234.56" como "R$ 1.234,56" */
-function formatBRL(numberString: string): string {
-  const n = Number(numberString || "0");
+/** Formata número JS => "R$ X.XXX,YY" */
+function toBRL(n: number): string {
   return BRL.format(Number.isFinite(n) ? n : 0);
 }
 
-/** Aplica a máscara em um input */
-function maskInput(el: MoneyInput): void {
-  const cents = onlyDigits(el.value);
-  const numStr = centsToNumberString(cents);
-  el.value = formatBRL(numStr);
-  // guarda o valor "desmascarado" como referência (opcional)
-  el.dataset.brlRaw = numStr; // "1234.56"
+/** Pega "raw" do dataset ou converte o que está no input */
+function getRaw(el: MoneyInput): number {
+  if (el.dataset.raw) {
+    const n = Number(el.dataset.raw);
+    if (Number.isFinite(n)) return n;
+  }
+  return parseLoose(el.value);
 }
 
-/** Ao digitar ou sair do campo */
-function onInput(e: Event): void {
-  const el = e.target as MoneyInput;
-  maskInput(el);
+/** Exibe para edição (sem R$ e sem separadores de milhar, com vírgula se houver decimais) */
+function showEditable(el: MoneyInput): void {
+  const n = getRaw(el);
+  // Mostra com ponto como decimal (mais estável para edição) ou inteiro puro
+  el.value = Number.isInteger(n) ? String(n) : String(n).replace(".", ",");
 }
 
-/** Converte o valor do input para "1234.56" antes do submit */
-function unmaskInput(el: MoneyInput): void {
-  const cents = onlyDigits(el.value);
-  el.value = centsToNumberString(cents);
+/** Exibe formatado BRL e armazena raw no dataset */
+function showFormatted(el: MoneyInput): void {
+  const n = parseLoose(el.value);
+  el.dataset.raw = String(n.toFixed(2));   // usado no submit
+  el.value = toBRL(n);
 }
 
-/** Seletores dos campos de dinheiro */
-const SELECTOR = [
-  'input[data-brl="money"]',   // recomendação: use este atributo
-  // fallback por nome (opcional; deixe se não puder marcar todos os inputs):
-  'input[name*="valor"]',
-  'input[name*="mensal"]',
-  'input[name*="salario"]',
-  'input[name*="parcela"]',
-  'input[name*="desconto"]',
-  'input[name*="doacao"]',
-].join(",");
+/** No submit: substitui pelo raw "1234.56" para o backend */
+function unmaskForSubmit(el: MoneyInput): void {
+  const n = getRaw(el);
+  el.value = n.toFixed(2);
+}
 
-/** Atacha listeners aos inputs */
-function attachToInputs(): void {
-  document.querySelectorAll<HTMLInputElement>(SELECTOR).forEach((el) => {
+/** Inicializa campos marcados com data-money="brl" */
+function bindMoneyInputs(): void {
+  const sel = 'input[data-money="brl"]';
+  document.querySelectorAll<HTMLInputElement>(sel).forEach((el) => {
     const node = el as MoneyInput;
     if (node.dataset.brlBound === "1") return;
     node.dataset.brlBound = "1";
     node.setAttribute("inputmode", "decimal");
-    node.addEventListener("input", onInput);
-    node.addEventListener("blur", onInput);
 
-    // Se já vier valor do servidor (ex.: edição), aplique a máscara:
-    if (node.value && /\d/.test(node.value)) maskInput(node);
+    // Estado inicial: se vier preenchido do server, formata bonito
+    if (node.value && /\d/.test(node.value)) showFormatted(node);
+
+    node.addEventListener("focus", () => showEditable(node));
+    node.addEventListener("blur", () => showFormatted(node));
   });
-}
 
-/** No submit, desmascarar todos os inputs alvo */
-function hookForms(): void {
-  document.querySelectorAll<HTMLFormElement>("form").forEach((form) => {
+  // Unmask de todos os formularios antes de enviar
+  document.querySelectorAll("form").forEach((form) => {
     if ((form as any)._brlHooked) return;
     (form as any)._brlHooked = true;
 
-    form.addEventListener("submit", () => {
-      form.querySelectorAll<HTMLInputElement>(SELECTOR).forEach((el) => unmaskInput(el as MoneyInput));
-    }, { capture: true });
+    form.addEventListener(
+      "submit",
+      () => {
+        form
+          .querySelectorAll<HTMLInputElement>('input[data-money="brl"]')
+          .forEach((el) => unmaskForSubmit(el as MoneyInput));
+      },
+      { capture: true }
+    );
   });
-}
 
-/** Formatar spans/tds estáticos: <span data-brl-text>5000.00</span> → "R$ 5.000,00" */
-function formatStaticTexts(): void {
+  // Formatar textos estáticos: <span data-brl-text>5000.00</span>
   document.querySelectorAll<HTMLElement>("[data-brl-text]").forEach((node) => {
-    const raw = (node.textContent || "")
-      .replace(/[^\d.,-]/g, "")
-      .replace(/\./g, "")
-      .replace(",", ".");
-    const n = Number(raw);
-    if (!Number.isNaN(n)) node.textContent = BRL.format(n);
+    const n = parseLoose(node.textContent || "");
+    node.textContent = toBRL(n);
   });
 }
 
-/** Inicialização */
-function init(): void {
-  attachToInputs();
-  hookForms();
-  formatStaticTexts();
-}
-
-document.addEventListener("DOMContentLoaded", init);
-
-// Exponha para re-inicialização em páginas com troca dinâmica:
-window.ABASE = window.ABASE ?? {};
-window.ABASE.moneyMaskInit = init;
+document.addEventListener("DOMContentLoaded", bindMoneyInputs);
+// Re-inicializador para páginas dinâmicas (HTMX/Turbo)
+(window as any).ABASE = (window as any).ABASE || {};
+(window as any).ABASE.moneyMaskInit = bindMoneyInputs;

@@ -1,0 +1,98 @@
+<!-- Exemplo de uso da máscara BRL blur-only -->
+<!-- Para usar em seus formulários, adicione data-money="brl" aos inputs de dinheiro -->
+
+<div class="space-y-4">
+  <h3 class="text-lg font-semibold">Exemplos de Campos com Máscara BRL (Blur-Only)</h3>
+  
+  <!-- Exemplo 1: Campo vazio -->
+  <div>
+    <label for="valor1" class="block text-sm font-medium mb-1">Valor (campo vazio)</label>
+    <input 
+      type="text" 
+      id="valor1" 
+      name="valor1" 
+      data-money="brl"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      placeholder="Digite um valor"
+    >
+    <p class="text-xs text-gray-500 mt-1">Digite livremente. Ao sair do campo, será formatado como R$ X.XXX,YY</p>
+  </div>
+  
+  <!-- Exemplo 2: Campo pré-preenchido -->
+  <div>
+    <label for="valor2" class="block text-sm font-medium mb-1">Valor pré-preenchido</label>
+    <input 
+      type="text" 
+      id="valor2" 
+      name="valor2" 
+      data-money="brl"
+      value="1234.56"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+    <p class="text-xs text-gray-500 mt-1">Valor inicial será formatado automaticamente</p>
+  </div>
+  
+  <!-- Exemplo 3: Formulário completo -->
+  <form class="border p-4 rounded-lg bg-gray-50">
+    <h4 class="font-medium mb-3">Formulário de Teste</h4>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="salario" class="block text-sm font-medium mb-1">Salário</label>
+        <input 
+          type="text" 
+          id="salario" 
+          name="salario" 
+          data-money="brl"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+      </div>
+      
+      <div>
+        <label for="desconto" class="block text-sm font-medium mb-1">Desconto</label>
+        <input 
+          type="text" 
+          id="desconto" 
+          name="desconto" 
+          data-money="brl"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+      </div>
+    </div>
+    
+    <button 
+      type="submit" 
+      class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      Enviar (valores serão convertidos para formato numérico)
+    </button>
+    
+    <p class="text-xs text-gray-500 mt-2">
+      No submit, os valores serão automaticamente convertidos para formato "1234.56" antes de enviar ao backend.
+    </p>
+  </form>
+  
+  <!-- Exemplo 4: Exibição de valores estáticos -->
+  <div class="border p-4 rounded-lg bg-blue-50">
+    <h4 class="font-medium mb-3">Valores Estáticos Formatados</h4>
+    <p>Valor 1: <span data-brl-text>5000.00</span></p>
+    <p>Valor 2: <span data-brl-text>1234.56</span></p>
+    <p>Valor 3: <span data-brl-text>999.99</span></p>
+    <p class="text-xs text-gray-500 mt-2">
+      Elementos com data-brl-text são automaticamente formatados como moeda brasileira.
+    </p>
+  </div>
+</div>
+
+<!-- Instruções de uso -->
+<div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+  <h4 class="font-medium text-yellow-800 mb-2">Como usar:</h4>
+  <ul class="text-sm text-yellow-700 space-y-1">
+    <li>• Adicione <code class="bg-yellow-100 px-1 rounded">data-money="brl"</code> aos inputs de dinheiro</li>
+    <li>• Durante a digitação: o valor não é reformatado (não interfere no cursor)</li>
+    <li>• Ao focar: remove formatação para edição fácil</li>
+    <li>• Ao sair do campo (blur): formata como "R$ X.XXX,YY"</li>
+    <li>• No submit: converte automaticamente para "1234.56" (formato backend)</li>
+    <li>• Para textos estáticos: use <code class="bg-yellow-100 px-1 rounded">data-brl-text</code></li>
+  </ul>
+</div>
