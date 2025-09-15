@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Exemplo de Exibição Monetária • ABASE{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Exemplo de Exibição de Valores Monetários</h1>
+        
+        <!-- Exemplo de valores formatados automaticamente -->
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Valores Formatados Automaticamente</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-gray-50 rounded">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Salário Bruto:</label>
+                    <span class="text-lg font-semibold text-green-600" data-brl-text>5000.00</span>
+                </div>
+                <div class="p-4 bg-gray-50 rounded">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Valor Líquido:</label>
+                    <span class="text-lg font-semibold text-blue-600" data-brl-text>4250.75</span>
+                </div>
+                <div class="p-4 bg-gray-50 rounded">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Mensalidade Associativa:</label>
+                    <span class="text-lg font-semibold text-purple-600" data-brl-text>150.00</span>
+                </div>
+                <div class="p-4 bg-gray-50 rounded">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Contribuição:</label>
+                    <span class="text-lg font-semibold text-orange-600" data-brl-text>300.50</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Exemplo de formulário com campos monetários -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Formulário com Campos Monetários</h2>
+            <form class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Valor Bruto Total:</label>
+                        <input 
+                            name="valor_bruto_total" 
+                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+                            placeholder="R$ 0,00" 
+                            inputmode="decimal"
+                            data-money="brl">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Valor Líquido:</label>
+                        <input 
+                            name="valor_liquido" 
+                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+                            placeholder="R$ 0,00" 
+                            inputmode="decimal"
+                            data-money="brl">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Repasse ao Associado:</label>
+                        <input 
+                            name="repasse_associado" 
+                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+                            placeholder="R$ 0,00" 
+                            inputmode="decimal"
+                            data-money="brl">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contribuição:</label>
+                        <input 
+                            name="contribuicao" 
+                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+                            placeholder="R$ 0,00" 
+                            inputmode="decimal"
+                            data-money="brl">
+                    </div>
+                </div>
+                
+                <div class="pt-4">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Testar Envio
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Instruções de uso -->
+        <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mt-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">Como Testar</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>Campos de entrada:</strong> Digite valores numéricos (ex: 2000). Ao sair do campo, será formatado para R$ 2.000,00</li>
+                            <li><strong>Exibição estática:</strong> Os valores acima são formatados automaticamente com data-brl-text</li>
+                            <li><strong>Envio de formulário:</strong> Os valores são convertidos para formato numérico (ex: 2000.00) antes do envio</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

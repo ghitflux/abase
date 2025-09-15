@@ -9,4 +9,10 @@ def add_class(field, css):
     """
     attrs = field.field.widget.attrs.copy()
     attrs["class"] = (attrs.get("class","") + " " + css).strip()
+    
+    # Adicionar data-money="brl" automaticamente para campos monetários
+    money_fields = ['valor_bruto_total', 'valor_liquido', 'mensalidade_associativa', 'salario_bruto', 'repasse_associado', 'contribuicao', 'doacao_associado']
+    if field.name in money_fields:
+        attrs["data-money"] = "brl"
+    
     return field.as_widget(attrs=attrs)
