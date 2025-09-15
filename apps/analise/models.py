@@ -11,6 +11,8 @@ class StatusAnalise(models.TextChoices):
     APROVADO = 'aprovado', 'Aprovado - Encaminhado para Tesouraria'
     REJEITADO = 'rejeitado', 'Rejeitado - Devolvido ao Agente'
     SUSPENSO = 'suspenso', 'Suspenso - Aguardando Documentos'
+    CORRECAO_FEITA = 'correcao_feita', 'Correção Feita - Aguardando Nova Análise'
+    CANCELADO = 'cancelado', 'Cancelado Definitivamente'
 
 
 class TipoAnalise(models.TextChoices):

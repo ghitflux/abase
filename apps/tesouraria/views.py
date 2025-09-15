@@ -424,7 +424,8 @@ def efetivar_contrato(request, processo_id):
     processo = get_object_or_404(ProcessoTesouraria, id=processo_id)
     
     observacoes = request.POST.get('observacoes_efetivacao', '')
-    comprovante = request.FILES.get('comprovante')
+    comprovante_associado = request.FILES.get('comprovante_associado')
+    comprovante_agente = request.FILES.get('comprovante_agente')
     
     try:
         with transaction.atomic():
@@ -440,13 +441,14 @@ def efetivar_contrato(request, processo_id):
             processo.cadastro.status = StatusCadastro.EFFECTIVATED
             processo.cadastro.save()
             
-            # Anexar comprovante se fornecido
-            if comprovante:
-                Documento.objects.create(
-                    cadastro=processo.cadastro,
-                    tipo='COMPROVANTE_EFETIVACAO',
-                    arquivo=comprovante
-                )
+            # Salvar comprovantes se fornecidos
+            if comprovante_associado:
+                processo.comprovante_associado = comprovante_associado
+            
+            if comprovante_agente:
+                processo.comprovante_agente = comprovante_agente
+            
+            processo.save()
             
             # Registrar movimentação na tesouraria
             MovimentacaoTesouraria.objects.create(
@@ -518,9 +520,21 @@ def devolver_analise(request, processo_id):
         with transaction.atomic():
             # Atualizar processo de análise original
             if processo.origem_analise:
-                from apps.analise.models import StatusAnalise
+                from apps.analise.models import StatusAnalise, HistoricoAnalise
+                
+                # Buscar o último analista que trabalhou no processo
+                ultimo_analista = None
+                historico_analistas = HistoricoAnalise.objects.filter(
+                    processo=processo.origem_analise,
+                    usuario__isnull=False,
+                    acao__in=['assumiu_processo', 'aprovou_processo', 'rejeitou_processo', 'pendenciou_processo']
+                ).order_by('-data_acao')
+                
+                if historico_analistas.exists():
+                    ultimo_analista = historico_analistas.first().usuario
+                
                 processo.origem_analise.status = StatusAnalise.PENDENTE
-                processo.origem_analise.analista_responsavel = None
+                processo.origem_analise.analista_responsavel = ultimo_analista
                 processo.origem_analise.feedback_agente = f'Devolvido pela tesouraria: {observacoes}'
                 processo.origem_analise.save()
             

@@ -74,7 +74,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- HTMX já carregado no base.html -->
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 {% endblock %}
@@ -768,58 +768,91 @@
 </div>
 </form>
 
-<!-- ======= NORMALIZAÇÃO NA SUBMISSÃO ======= -->
+<!-- ======= Form submission handler ======= -->
 <script>
-window.addEventListener('load', function() {
-    console.log('FORM: Script de normalização carregado');
-    
+document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
-    const btn = document.querySelector('button[type="submit"]');
+    const submitBtn = document.querySelector('button[type="submit"]');
     
-    if (form && btn) {
-        form.addEventListener('submit', function(e) {
-            console.log('FORM: Normalizando dados antes da submissão...');
-            
-            // Normalizar CPF: remover pontos e hífens
-            const cpfField = document.getElementById('cpf');
-            if (cpfField && cpfField.value) {
-                const cpfLimpo = cpfField.value.replace(/\D+/g, '');
-                cpfField.value = cpfLimpo;
-                console.log('CPF normalizado:', cpfLimpo);
-            }
-            
-            // Normalizar CEP: remover hífen
-            const cepField = document.getElementById('cep');
-            if (cepField && cepField.value) {
-                const cepLimpo = cepField.value.replace(/\D+/g, '');
-                cepField.value = cepLimpo;
-                console.log('CEP normalizado:', cepLimpo);
-            }
-            
-            // Normalizar valores monetários
-            const camposMonetarios = ['valor_bruto_total', 'valor_liquido', 'mensalidade_associativa'];
-            camposMonetarios.forEach(campo => {
-                const field = document.querySelector(`[name="${campo}"]`);
-                if (field && field.value) {
-                    // Remove R$, espaços, pontos de milhares e troca vírgula por ponto
-                    let valorLimpo = field.value
-                        .replace(/R\$\s*/g, '')     // Remove R$
-                        .replace(/\./g, '')         // Remove pontos (milhares)
-                        .replace(/,/g, '.');        // Troca vírgula por ponto
-                    field.value = valorLimpo;
-                    console.log(`${campo} normalizado:`, valorLimpo);
-                }
-            });
-            
-            // Visual de loading
-            btn.disabled = true;
-            btn.innerHTML = 'Enviando...';
-            
-            console.log('FORM: Dados normalizados, submetendo...');
-            // Não faz preventDefault(), deixa submissão continuar
-        });
+    if (form && submitBtn) {
+        console.log('Form handler initialized');
         
-        console.log('FORM: Normalização configurada');
+        // Interceptar submit para garantir normalização
+        let isSubmitting = false;
+        
+        const submitHandler = function(e) {
+            if (isSubmitting) return; // Previne múltiplas submissões
+            
+            e.preventDefault(); // Prevenir envio inicial
+            isSubmitting = true;
+            console.log('Form submitting - normalizing all fields');
+            
+            // Função para normalizar campos monetários
+            function normalizeMoneyField(element) {
+                if (element && element.value) {
+                    let value = element.value.toString();
+                    // Remove R$, espaços, pontos e converte vírgula para ponto
+                    value = value.replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.');
+                    element.value = value;
+                    console.log(`Normalized ${element.name}: ${element.value}`);
+                }
+            }
+            
+            // Normalizar apenas os campos monetários
+            normalizeMoneyField(form.querySelector('[name="valor_bruto_total"]'));
+            normalizeMoneyField(form.querySelector('[name="valor_liquido"]'));
+            normalizeMoneyField(form.querySelector('[name="mensalidade_associativa"]'));
+            
+            // Normalizar CPF e CEP
+            const cpfField = form.querySelector('[name="cpf"]');
+            if(cpfField && cpfField.value) {
+                cpfField.value = cpfField.value.replace(/\D/g, '');
+                console.log(`Normalized CPF: ${cpfField.value}`);
+            }
+            
+            const cepField = form.querySelector('[name="cep"]');
+            if(cepField && cepField.value) {
+                cepField.value = cepField.value.replace(/\D/g, '');
+                console.log(`Normalized CEP: ${cepField.value}`);
+            }
+            
+            // Mostrar estado de loading no botão
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
+            
+            console.log('Form normalized, submitting to server...');
+            
+            // Remover listener e submeter
+            form.removeEventListener('submit', submitHandler);
+            
+            // Criar um novo FormData com os dados normalizados e submeter
+            const formData = new FormData(form);
+            
+            // Submeter usando fetch para controle total
+            fetch(form.action || window.location.pathname, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.text().then(html => {
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    });
+                }
+            }).catch(error => {
+                console.error('Submit error:', error);
+                // Fallback: submissão nativa
+                form.submit();
+            });
+        };
+        
+        form.addEventListener('submit', submitHandler);
     }
 });
 </script>
@@ -842,25 +875,15 @@ function toMoneyInput(el){
   el.addEventListener('input', e=>{
     let v = onlyDigits(el.value);
     if(!v) { el.value=""; recalc(); return; }
-
-    // Converte centavos para reais: divide por 100
-    // Exemplo: usuário digita "5000" (centavos) = R$ 50,00
-    let valor = (parseInt(v,10) / 100).toFixed(2);
-
-    // Formata com separador de milhares
-    let [reais, centavos] = valor.split('.');
-    reais = reais.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-
-    el.value = "R$ " + reais + "," + centavos;
+    v = (parseInt(v,10)/100).toFixed(2);    // sempre 2 casas
+    el.value = "R$ " + v.replace(".", ","); // formato BR com símbolo
     recalc();
   });
 }
 function parseMoney(s){
   if(!s) return 0;
-  // Remove R$ e espaços, depois remove pontos de milhares e troca vírgula por ponto decimal
   s = (s+"").replace(/R\$\s?/g,"").replace(/\./g,"").replace(",",".");
-  let n = parseFloat(s);
-  return isNaN(n) ? 0 : n;
+  let n = parseFloat(s); return isNaN(n)?0:n;
 }
 
 function recalc(){

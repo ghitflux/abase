@@ -1,5 +1,5 @@
 from functools import wraps
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 
@@ -41,9 +41,16 @@ def analista_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         if not request.user.is_authenticated:
+            # Verifica se é requisição AJAX
+            if request.headers.get('Content-Type') == 'application/json':
+                return JsonResponse({'success': False, 'message': 'Login necessário'})
             return redirect('login')
         if not (request.user.is_superuser or request.user.groups.filter(name__in=['ANALISTA', 'Analistas']).exists()):
-            return HttpResponseForbidden("Acesso negado. Você precisa ser um analista.")
+            error_message = "Acesso negado. Você precisa ser um analista."
+            # Verifica se é requisição AJAX
+            if request.headers.get('Content-Type') == 'application/json':
+                return JsonResponse({'success': False, 'message': error_message})
+            return HttpResponseForbidden(error_message)
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 

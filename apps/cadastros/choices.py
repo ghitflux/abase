@@ -26,9 +26,12 @@ class TipoConta(models.TextChoices):
     PP = "PP", "Poupança"
 
 class SituacaoServidor(models.TextChoices):
+    ATIVO = "ATIVO", "Ativo"
     EFETIVO = "EFETIVO", "Efetivo"
     COMISSIONADO = "COMISSIONADO", "Comissionado"
     APOSENTADO = "APOSENTADO", "Aposentado"
+    PENSIONISTA = "PENSIONISTA", "Pensionista"
+    LICENCIADO = "LICENCIADO", "Licenciado"
     OUTRO = "OUTRO", "Outro"
 
 class StatusParcela(models.TextChoices):

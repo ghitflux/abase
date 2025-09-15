@@ -23,6 +23,9 @@ urlpatterns = [
     # AJAX
     path('processo/<int:processo_id>/checklist/', views.atualizar_checklist, name='atualizar_checklist'),
     
+    # Ações em lote
+    path('processos/assumir-multiplos/', views.assumir_processos_multiplos, name='assumir_processos_multiplos'),
+    
     # Relatórios
     path('relatorio/', views.relatorio_analise, name='relatorio_analise'),
 ]

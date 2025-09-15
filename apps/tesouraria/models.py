@@ -224,6 +224,23 @@ class ProcessoTesouraria(models.Model):
         help_text='Observações internas da tesouraria'
     )
     
+    # Comprovantes de pagamento
+    comprovante_associado = models.FileField(
+        upload_to='tesouraria/comprovantes/associados/',
+        blank=True,
+        null=True,
+        verbose_name='Comprovante de Pagamento do Associado',
+        help_text='Comprovante do pagamento liberado para o associado'
+    )
+    
+    comprovante_agente = models.FileField(
+        upload_to='tesouraria/comprovantes/agentes/',
+        blank=True,
+        null=True,
+        verbose_name='Comprovante de Pagamento do Agente',
+        help_text='Comprovante do auxílio pago ao agente'
+    )
+    
     class Meta:
         verbose_name = 'Processo da Tesouraria'
         verbose_name_plural = 'Processos da Tesouraria'

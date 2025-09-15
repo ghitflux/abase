@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load currency_filters %}
 
 {% block title %}{{ cadastro.nome_completo }} - Detalhes{% endblock %}
 {% block page_title %}Detalhes do Cadastro{% endblock %}
@@ -103,15 +104,15 @@
                 <dl class="space-y-2">
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Salário Bruto:</dt>
-                        <dd class="text-sm text-gray-900">R$ {{ cadastro.valor_bruto_total|floatformat:2|default:"0,00" }}</dd>
+                        <dd class="text-sm text-gray-900">R$ {{ cadastro.valor_bruto_total|currency_brl }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Salário Líquido:</dt>
-                        <dd class="text-sm text-gray-900">R$ {{ cadastro.valor_liquido|floatformat:2|default:"0,00" }}</dd>
+                        <dd class="text-sm text-gray-900">R$ {{ cadastro.valor_liquido|currency_brl }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Mensalidade:</dt>
-                        <dd class="text-sm text-gray-900">R$ {{ cadastro.mensalidade_associativa|floatformat:2|default:"0,00" }}</dd>
+                        <dd class="text-sm text-gray-900">R$ {{ cadastro.mensalidade_associativa|currency_brl }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">PIX:</dt>
@@ -122,15 +123,15 @@
         </div>
     </div>
 
-    <!-- Parcelas -->
+    <!-- Mensalidades -->
     {% if parcelas %}
     <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Parcelas de Antecipação</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Mensalidades</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             {% for parcela in parcelas %}
             <div class="border rounded-lg p-4">
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium text-gray-900">{{ parcela.numero }}ª Parcela</span>
+                    <span class="text-sm font-medium text-gray-900">{{ parcela.numero }}ª Mensalidade</span>
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                         {% if parcela.status == 'PENDENTE' %}bg-yellow-100 text-yellow-800
                         {% elif parcela.status == 'LIQUIDADA' %}bg-green-100 text-green-800
@@ -138,9 +139,10 @@
                         {{ parcela.get_status_display }}
                     </span>
                 </div>
-                <p class="text-lg font-bold text-gray-900">R$ {{ parcela.valor|floatformat:2 }}</p>
+                <p class="text-lg font-bold text-gray-900">R$ {{ parcela.valor|currency_brl }}</p>
                 {% if parcela.vencimento %}
-                <p class="text-sm text-gray-500">Vencimento: {{ parcela.vencimento|date:"d/m/Y" }}</p>
+                <p class="text-sm text-gray-500">Vencimento: {{ parcela.vencimento|date:"d/m/Y" }} (5º dia útil)</p>
+                <p class="text-xs text-blue-600 font-medium">{{ parcela.vencimento|days_until }}</p>
                 {% endif %}
             </div>
             {% endfor %}
@@ -164,7 +166,7 @@
                             <p class="text-xs text-gray-500">{{ documento.created_at|date:"d/m/Y H:i" }}</p>
                         </div>
                     </div>
-                    <a href="{% url 'serve_private' documento.id %}" target="_blank" class="text-blue-600 hover:text-blue-500 text-sm">
+                    <a href="{% url 'documentos:serve' %}?path={{ documento.arquivo.name }}" target="_blank" class="text-blue-600 hover:text-blue-500 text-sm">
                         Ver
                     </a>
                 </div>

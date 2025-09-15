@@ -7,12 +7,12 @@
 {% block content %}
 <div class="space-y-6">
     <!-- Estatísticas Principais -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Total de Processos -->
+    <div class="grid grid-cols-4 gap-6">
+        <!-- Total de Cadastros -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                    <div class="w-8 h-8 bg-gray-500 rounded-md flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
@@ -20,14 +20,14 @@
                 </div>
                 <div class="ml-5 w-0 flex-1">
                     <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Total de Processos</dt>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Total de Cadastros</dt>
                         <dd class="text-lg font-medium text-gray-900">{{ total_processos }}</dd>
                     </dl>
                 </div>
             </div>
         </div>
 
-        <!-- Processos Pendentes -->
+        <!-- Pendente de Revisão -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -39,20 +39,20 @@
                 </div>
                 <div class="ml-5 w-0 flex-1">
                     <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Pendentes</dt>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Pendente de Revisão</dt>
                         <dd class="text-lg font-medium text-gray-900">{{ processos_pendentes }}</dd>
                     </dl>
                 </div>
             </div>
         </div>
 
-        <!-- Processos em Análise -->
+        <!-- Em Análise -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                     </div>
                 </div>
@@ -65,20 +65,20 @@
             </div>
         </div>
 
-        <!-- Processos em Atraso -->
+        <!-- Aprovados -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
+                    <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
                     </div>
                 </div>
                 <div class="ml-5 w-0 flex-1">
                     <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Em Atraso</dt>
-                        <dd class="text-lg font-medium text-gray-900">{{ processos_em_atraso }}</dd>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Aprovados</dt>
+                        <dd class="text-lg font-medium text-gray-900">{{ processos_aprovados }}</dd>
                     </dl>
                 </div>
             </div>
@@ -86,18 +86,6 @@
     </div>
 
 
-
-    <!-- Meus Processos -->
-    <div class="bg-white rounded-lg shadow p-6 max-w-md mx-auto">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Meus Processos</h3>
-        <div class="text-center">
-            <div class="text-3xl font-bold text-blue-600">{{ meus_processos }}</div>
-            <p class="text-sm text-gray-500 mt-1">Processos sob minha responsabilidade</p>
-            <a href="{% url 'analise:esteira_analise' %}?analista={{ request.user.id }}" class="mt-3 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Ver Meus Processos
-            </a>
-        </div>
-    </div>
 
     <!-- Últimos Processos -->
     <div class="bg-white rounded-lg shadow">

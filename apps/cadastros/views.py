@@ -111,29 +111,29 @@ def agente_create(request):
         })
 
     # POST
-    print(f"📧 POST REQUEST RECEIVED for user: {request.user}")
-    print(f"📋 POST DATA: {dict(request.POST)}")
+    print(f"POST REQUEST RECEIVED for user: {request.user}")
+    print(f"POST DATA: {dict(request.POST)}")
     
     if cadastro:
         # Editando cadastro existente
-        print(f"✏️ EDITING existing cadastro ID: {cadastro.id}")
+        print(f"EDITING existing cadastro ID: {cadastro.id}")
         form = CadastroForm(request.POST, instance=cadastro)
         existing_docs = cadastro.documentos.all()
     else:
         # Criando novo cadastro
-        print("🆕 CREATING new cadastro")
+        print("CREATING new cadastro")
         form = CadastroForm(request.POST)
         existing_docs = []
         
     docs = DocumentoRascunho.objects.filter(user=request.user, draft_token=draft_token)
-    print(f"📄 Draft documents found: {docs.count()}")
+    print(f"Draft documents found: {docs.count()}")
 
-    print(f"🔍 FORM VALIDATION: {form.is_valid()}")
+    print(f"FORM VALIDATION: {form.is_valid()}")
     
     if not form.is_valid():
-        print("❌ FORM VALIDATION FAILED!")
-        print(f"🐛 FORM ERRORS: {form.errors}")
-        print(f"🐛 NON-FIELD ERRORS: {form.non_field_errors()}")
+        print("FORM VALIDATION FAILED!")
+        print(f"FORM ERRORS: {form.errors}")
+        print(f"NON-FIELD ERRORS: {form.non_field_errors()}")
         
         # Adicionar mensagem de erro para o usuário
         messages.error(request, 'Erro na validação do formulário. Verifique os campos destacados.')
@@ -147,26 +147,31 @@ def agente_create(request):
             "is_edit": bool(cadastro)
         }, status=400)
 
-    print("✅ FORM VALIDATION PASSED! Saving cadastro...")
+    print("FORM VALIDATION PASSED! Saving cadastro...")
     
     try:
         cad: Cadastro = form.save(commit=False)
-        print(f"📝 Form saved to object: {cad}")
+        print(f"Form saved to object: {cad}")
         
         if not cadastro:  # Só para novos cadastros
             cad.agente_responsavel = request.user
             cad.status = StatusCadastro.SENT_REVIEW  # Enviar automaticamente para análise
-            print(f"🆕 New cadastro - Agent: {request.user}, Status: {cad.status}")
+            print(f"New cadastro - Agent: {request.user}, Status: {cad.status}")
         else:  # Para edições, manter status atual ou reenviar para análise se necessário
             if cadastro.status == StatusCadastro.PENDING_AGENT:
                 cad.status = StatusCadastro.SENT_REVIEW  # Reenviar para análise após correção
-                print(f"🔄 Resubmitted - Status changed to: {cad.status}")
+                print(f"Resubmitted - Status changed to: {cad.status}")
                 
         cad.save()  # dispara recalc() no model
-        print(f"💾 Cadastro saved successfully with ID: {cad.id}")
+        print(f"Cadastro saved successfully with ID: {cad.id}")
+
+        # Se é edição e tem data_primeira_mensalidade, atualizar vencimentos das parcelas
+        if cadastro and cad.data_primeira_mensalidade:
+            print("Updating parcela vencimentos for edited cadastro...")
+            cad.atualizar_vencimento_parcelas()
         
     except Exception as e:
-        print(f"💥 ERROR saving cadastro: {e}")
+        print(f"ERROR saving cadastro: {e}")
         import traceback
         traceback.print_exc()
         messages.error(request, f'Erro ao salvar cadastro: {e}')
@@ -206,13 +211,13 @@ def agente_create(request):
 
     # Mensagem de sucesso
     if cadastro:
-        print("✅ UPDATE SUCCESS - Redirecting...")
+        print("UPDATE SUCCESS - Redirecting...")
         messages.success(request, 'Cadastro atualizado com sucesso e enviado para análise!')
     else:
-        print("✅ CREATE SUCCESS - Redirecting...")
+        print("CREATE SUCCESS - Redirecting...")
         messages.success(request, 'Cadastro criado com sucesso e enviado para análise!')
 
-    print("🔄 Redirecting to cadastros:agente-list")
+    print("Redirecting to cadastros:agente-list")
     # redireciona para lista do agente (ou detalhe, conforme seu menu)
     return redirect("cadastros:agente-list")
 

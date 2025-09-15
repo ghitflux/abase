@@ -2,10 +2,30 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
+from datetime import date, timedelta
 from .choices import (
     StatusCadastro, TipoPessoa, EstadoCivil, TipoConta,
     SituacaoServidor, StatusParcela
 )
+
+def calcular_quinto_dia_util(ano, mes):
+    """
+    Calcula o 5º dia útil de um mês específico.
+    Considera segunda a sexta como dias úteis.
+    """
+    primeiro_dia = date(ano, mes, 1)
+    dias_uteis_encontrados = 0
+    data_atual = primeiro_dia
+    
+    while dias_uteis_encontrados < 5:
+        # Segunda = 0, Domingo = 6
+        if data_atual.weekday() < 5:  # Segunda a sexta
+            dias_uteis_encontrados += 1
+            if dias_uteis_encontrados == 5:
+                return data_atual
+        data_atual += timedelta(days=1)
+    
+    return data_atual
 
 User = get_user_model()
 
@@ -115,6 +135,20 @@ class Cadastro(models.Model):
         self.recalc()
         super().save(*args, **kwargs)
 
+    def atualizar_vencimento_parcelas(self):
+        """
+        Atualiza as datas de vencimento das parcelas existentes.
+        Usado quando o cadastro é editado e a data_primeira_mensalidade é preenchida.
+        """
+        if not self.data_primeira_mensalidade:
+            return
+
+        parcelas = self.parcelas.all()
+        for parcela in parcelas:
+            # Força recálculo do vencimento zerando o campo atual
+            parcela.vencimento = None
+            parcela.save()  # Dispara o cálculo automático no save() da parcela
+
     @property
     def cpf_cnpj(self):
         """Retorna CPF ou CNPJ, o que estiver preenchido"""
@@ -134,3 +168,55 @@ class ParcelaAntecipacao(models.Model):
     class Meta:
         unique_together = ("cadastro","numero")
         ordering = ["numero"]
+        verbose_name = "Mensalidade"
+        verbose_name_plural = "Mensalidades"
+    
+    def save(self, *args, **kwargs):
+        # Calcula automaticamente o vencimento se não foi definido
+        if not self.vencimento and self.cadastro.data_primeira_mensalidade:
+            data_base = self.cadastro.data_primeira_mensalidade
+
+            if self.numero == 1:
+                # A primeira parcela vence na data escolhida pelo usuário
+                self.vencimento = data_base
+            else:
+                # Para 2ª e 3ª parcelas, calcula o 5º dia útil dos meses seguintes
+                mes_vencimento = data_base.month + (self.numero - 1)
+                ano_vencimento = data_base.year
+
+                # Ajusta ano se o mês passou de 12
+                while mes_vencimento > 12:
+                    mes_vencimento -= 12
+                    ano_vencimento += 1
+
+                self.vencimento = calcular_quinto_dia_util(ano_vencimento, mes_vencimento)
+
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.numero}ª Mensalidade - {self.cadastro.nome_completo} - R$ {self.valor}"
+    
+    @classmethod
+    def criar_parcelas_automaticas(cls, cadastro):
+        """
+        Cria automaticamente as 3 mensalidades para um cadastro.
+        """
+        if not cadastro.data_primeira_mensalidade:
+            return []
+        
+        parcelas_criadas = []
+        valor_parcela = cadastro.valor_total_antecipacao / 3 if cadastro.valor_total_antecipacao else Decimal('0.00')
+        
+        for numero in range(1, 4):  # 1, 2, 3
+            parcela, created = cls.objects.get_or_create(
+                cadastro=cadastro,
+                numero=numero,
+                defaults={
+                    'valor': valor_parcela,
+                    'status': StatusParcela.PENDENTE
+                }
+            )
+            if created:
+                parcelas_criadas.append(parcela)
+        
+        return parcelas_criadas

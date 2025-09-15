@@ -5,6 +5,8 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-6">
+  <!-- CSRF Token para JavaScript -->
+  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" id="csrf_token">
   <!-- Header -->
   <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-900 dark:text-primary-foreground mb-2">Esteira de Análise</h1>
@@ -16,16 +18,15 @@
     <!-- Barra de Filtros Básicos -->
     <div class="p-4 border-b border-gray-100 dark:border-gray-700">
       <form method="get" class="flex flex-wrap items-end gap-3">
-        <!-- Status -->
+        <!-- Prioridade -->
         <div class="min-w-0 flex-shrink-0">
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Status</label>
-          <select name="status" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
-            <option value="">Todos</option>
-            <option value="pendente" {% if current_filters.status == 'pendente' %}selected{% endif %}>Pendente</option>
-            <option value="em_analise" {% if current_filters.status == 'em_analise' %}selected{% endif %}>Em Análise</option>
-            <option value="aprovado" {% if current_filters.status == 'aprovado' %}selected{% endif %}>Aprovado</option>
-            <option value="rejeitado" {% if current_filters.status == 'rejeitado' %}selected{% endif %}>Rejeitado</option>
-            <option value="suspenso" {% if current_filters.status == 'suspenso' %}selected{% endif %}>Suspenso</option>
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Prioridade</label>
+          <select name="prioridade" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+            <option value="">Todas</option>
+            <option value="1" {% if current_filters.prioridade == '1' %}selected{% endif %}>Baixa</option>
+            <option value="2" {% if current_filters.prioridade == '2' %}selected{% endif %}>Normal</option>
+            <option value="3" {% if current_filters.prioridade == '3' %}selected{% endif %}>Alta</option>
+            <option value="4" {% if current_filters.prioridade == '4' %}selected{% endif %}>Urgente</option>
           </select>
         </div>
 
@@ -137,12 +138,48 @@
     </div>
   </div>
 
-  <!-- Lista de Processos -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+  <!-- Barra de Ações Múltiplas -->
+  <div id="bulkActions" class="hidden bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <span class="text-sm font-medium text-blue-900 dark:text-blue-100">
+          <span id="selectedCount">0</span> processo(s) selecionado(s)
+        </span>
+        <button onclick="clearSelection()" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100">
+          Limpar seleção
+        </button>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button onclick="assumirProcessosSelecionados()" 
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+          </svg>
+          Assumir Selecionados
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO PROCESSOS ATIVOS -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-primary-foreground">
+        Processos Ativos 
+        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+          {{ total_ativos }}
+        </span>
+      </h3>
+      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Processos pendentes, em análise e em correção</p>
+    </div>
     <div class="overflow-x-auto">
       <table class="w-full">
         <thead class="bg-gray-50 dark:bg-gray-700">
           <tr>
+            <th class="px-3 py-3 text-left">
+              <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-primary focus:ring-primary" 
+                     onchange="toggleAllProcessos(this)">
+            </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Processo</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tipo</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
@@ -152,8 +189,12 @@
           </tr>
         </thead>
         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          {% for processo in page_obj %}
+          {% for processo in page_obj_ativos %}
           <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+            <td class="px-3 py-4 whitespace-nowrap">
+              <input type="checkbox" class="processo-checkbox rounded border-gray-300 text-primary focus:ring-primary" 
+                     value="{{ processo.id }}" onchange="updateSelectedCount()">
+            </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="text-sm font-medium text-gray-900 dark:text-primary-foreground">
                 #{{ processo.id }}
@@ -184,6 +225,8 @@
                   bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
                 {% elif processo.status == 'rejeitado' %}
                   bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                {% elif processo.status == 'correcao_feita' %}
+                  bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
                 {% else %}
                   bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
                 {% endif %}">
@@ -201,15 +244,33 @@
               {{ processo.data_entrada|date:"d/m/Y H:i" }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <div class="flex space-x-2">
+              <div class="flex items-center space-x-3">
+                <!-- Botão Ver Detalhes -->
                 <a href="{% url 'analise:detalhe_processo' processo.id %}" 
-                   class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                  Ver
+                   class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                   title="Ver detalhes do processo">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
                 </a>
+
+                <!-- Botão Assumir -->
                 {% if processo.status == 'pendente' and not processo.analista_responsavel %}
                 <button onclick="assumirProcesso({{ processo.id }})" 
-                        class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
-                  Assumir
+                        class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 transition-colors"
+                        title="Assumir processo">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                  </svg>
+                </button>
+                {% elif processo.status == 'correcao_feita' and not processo.analista_responsavel %}
+                <button onclick="assumirProcesso({{ processo.id }})" 
+                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                        title="Assumir processo corrigido">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
                 </button>
                 {% endif %}
               </div>
@@ -217,7 +278,7 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+            <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
               Nenhum processo encontrado.
             </td>
           </tr>
@@ -225,53 +286,302 @@
         </tbody>
       </table>
     </div>
+    
+    <!-- Paginação Processos Ativos -->
+    {% if page_obj_ativos.has_other_pages %}
+    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+      <nav class="flex justify-center items-center space-x-2">
+        {% if page_obj_ativos.has_previous %}
+          <a href="?page_ativos={{ page_obj_ativos.previous_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            Anterior
+          </a>
+        {% endif %}
+        
+        <span class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
+          Página {{ page_obj_ativos.number }} de {{ page_obj_ativos.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj_ativos.has_next %}
+          <a href="?page_ativos={{ page_obj_ativos.next_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            Próxima
+          </a>
+        {% endif %}
+      </nav>
+    </div>
+    {% endif %}
   </div>
 
-  <!-- Paginação -->
-  {% if page_obj.has_other_pages %}
-  <div class="mt-6 flex justify-center">
-    <nav class="flex items-center space-x-2">
-      {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-          Anterior
-        </a>
-      {% endif %}
-      
-      <span class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
-        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-      </span>
-      
-      {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-          Próxima
-        </a>
-      {% endif %}
-    </nav>
+  <!-- SEÇÃO PROCESSOS FINALIZADOS -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-primary-foreground">
+        Processos Finalizados 
+        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+          {{ total_finalizados }}
+        </span>
+      </h3>
+      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Processos aprovados, rejeitados e cancelados</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Processo</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tipo</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Analista</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Finalizado em</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          {% for processo in page_obj_finalizados %}
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900 dark:text-primary-foreground">
+                #{{ processo.id }}
+              </div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                {{ processo.cadastro.nome_completo|truncatechars:30 }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                {% if processo.tipo_analise == 'completa' %}
+                  bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                {% elif processo.tipo_analise == 'documental' %}
+                  bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                {% else %}
+                  bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                {% endif %}">
+                {{ processo.get_tipo_analise_display }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                {% if processo.status == 'aprovado' %}
+                  bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                {% elif processo.status == 'rejeitado' %}
+                  bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                {% elif processo.status == 'cancelado' %}
+                  bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
+                {% endif %}">
+                {{ processo.get_status_display }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900 dark:text-primary-foreground">
+                {{ processo.analista_responsavel.get_full_name|default:processo.analista_responsavel.username|default:"Não atribuído" }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900 dark:text-primary-foreground">
+                {{ processo.data_conclusao|date:"d/m/Y H:i"|default:"N/A" }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <div class="flex items-center space-x-2">
+                <a href="{% url 'analise:detalhe_processo' processo.id %}" 
+                   class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                   title="Ver detalhes">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+              Nenhum processo finalizado encontrado.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Paginação Processos Finalizados -->
+    {% if page_obj_finalizados.has_other_pages %}
+    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+      <nav class="flex justify-center items-center space-x-2">
+        {% if page_obj_finalizados.has_previous %}
+          <a href="?page_finalizados={{ page_obj_finalizados.previous_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            Anterior
+          </a>
+        {% endif %}
+        
+        <span class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
+          Página {{ page_obj_finalizados.number }} de {{ page_obj_finalizados.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj_finalizados.has_next %}
+          <a href="?page_finalizados={{ page_obj_finalizados.next_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            Próxima
+          </a>
+        {% endif %}
+      </nav>
+    </div>
+    {% endif %}
   </div>
-  {% endif %}
+
 </div>
 
 <script>
+// Verificação inicial quando a página carrega
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Esteira de análise carregada');
+  console.log('CSRF Token disponível:', document.getElementById('csrf_token') ? 'SIM' : 'NÃO');
+  console.log('Total de processos na página:', document.querySelectorAll('.processo-checkbox').length);
+});
+
 function assumirProcesso(processoId) {
+  console.log('Tentando assumir processo:', processoId);
   if (confirm('Deseja assumir este processo?')) {
+    const csrfToken = document.getElementById('csrf_token').value;
+    console.log('CSRF Token obtido:', csrfToken ? 'OK' : 'ERRO');
     fetch(`/analise/processo/${processoId}/assumir/`, {
       method: 'POST',
       headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'X-CSRFToken': csrfToken,
         'Content-Type': 'application/json',
       },
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log('Response data:', data);
       if (data.success) {
+        alert('Processo assumido com sucesso!');
         location.reload();
       } else {
         alert('Erro ao assumir processo: ' + data.message);
       }
     })
     .catch(error => {
-      console.error('Erro:', error);
-      alert('Erro ao assumir processo.');
+      console.error('Erro completo:', error);
+      alert('Erro ao assumir processo: ' + error.message);
+    });
+  }
+}
+
+// Funções para seleção múltipla
+function toggleAllProcessos(selectAllCheckbox) {
+  const checkboxes = document.querySelectorAll('.processo-checkbox');
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = selectAllCheckbox.checked;
+  });
+  updateSelectedCount();
+}
+
+function updateSelectedCount() {
+  const checkboxes = document.querySelectorAll('.processo-checkbox:checked');
+  const count = checkboxes.length;
+  const selectedCountSpan = document.getElementById('selectedCount');
+  const bulkActions = document.getElementById('bulkActions');
+  const selectAllCheckbox = document.getElementById('selectAll');
+  
+  selectedCountSpan.textContent = count;
+  
+  if (count > 0) {
+    bulkActions.classList.remove('hidden');
+  } else {
+    bulkActions.classList.add('hidden');
+  }
+  
+  // Atualizar o estado do checkbox "Selecionar todos"
+  const allCheckboxes = document.querySelectorAll('.processo-checkbox');
+  if (count === 0) {
+    selectAllCheckbox.indeterminate = false;
+    selectAllCheckbox.checked = false;
+  } else if (count === allCheckboxes.length) {
+    selectAllCheckbox.indeterminate = false;
+    selectAllCheckbox.checked = true;
+  } else {
+    selectAllCheckbox.indeterminate = true;
+    selectAllCheckbox.checked = false;
+  }
+}
+
+function clearSelection() {
+  const checkboxes = document.querySelectorAll('.processo-checkbox');
+  const selectAllCheckbox = document.getElementById('selectAll');
+  
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = false;
+  });
+  selectAllCheckbox.checked = false;
+  selectAllCheckbox.indeterminate = false;
+  
+  updateSelectedCount();
+}
+
+function assumirProcessosSelecionados() {
+  console.log('Tentando assumir processos selecionados');
+  const checkboxes = document.querySelectorAll('.processo-checkbox:checked');
+  const processoIds = Array.from(checkboxes).map(checkbox => checkbox.value);
+  console.log('Processos selecionados:', processoIds);
+  
+  if (processoIds.length === 0) {
+    alert('Selecione ao menos um processo.');
+    return;
+  }
+  
+  const count = processoIds.length;
+  const confirmMessage = count === 1 
+    ? 'Deseja assumir este processo?' 
+    : `Deseja assumir ${count} processos?`;
+  
+  if (confirm(confirmMessage)) {
+    // Mostrar indicador de carregamento
+    const button = document.querySelector('button[onclick="assumirProcessosSelecionados()"]');
+    if (!button) {
+      console.error('Botão não encontrado');
+      return;
+    }
+    const originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Assumindo...';
+    
+    const csrfToken = document.getElementById('csrf_token').value;
+    fetch('/analise/processos/assumir-multiplos/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ processo_ids: processoIds })
+    })
+    .then(response => {
+      console.log('Bulk response status:', response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Bulk response data:', data);
+      if (data.success) {
+        alert(`${data.count} processo(s) assumido(s) com sucesso!`);
+        location.reload();
+      } else {
+        alert('Erro ao assumir processos: ' + data.message);
+        button.disabled = false;
+        button.innerHTML = originalText;
+      }
+    })
+    .catch(error => {
+      console.error('Erro bulk:', error);
+      alert('Erro ao assumir processos: ' + error.message);
+      button.disabled = false;
+      button.innerHTML = originalText;
     });
   }
 }
