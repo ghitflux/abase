@@ -843,15 +843,13 @@ function toMoneyInput(el){
     let v = onlyDigits(el.value);
     if(!v) { el.value=""; recalc(); return; }
 
-    // Converte centavos para reais: divide por 100
-    // Exemplo: usuário digita "5000" (centavos) = R$ 50,00
-    let valor = (parseInt(v,10) / 100).toFixed(2);
+    // ✅ CORREÇÃO: NÃO dividir por 100 - manter valor como digitado
+    let valor = parseInt(v, 10).toString();
 
-    // Formata com separador de milhares
-    let [reais, centavos] = valor.split('.');
-    reais = reais.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    // Adicionar separadores de milhares
+    valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-    el.value = "R$ " + reais + "," + centavos;
+    el.value = "R$ " + valor + ",00";
     recalc();
   });
 }

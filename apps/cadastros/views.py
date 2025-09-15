@@ -187,10 +187,11 @@ def agente_create(request):
     # cria 3 parcelas padrão com o valor da mensalidade (só para novos)
     try:
         if not cadastro:
+            valor_parcela = cad.valor_total_antecipacao / 3 if cad.valor_total_antecipacao else Decimal('0.00')
             for n in (1,2,3):
                 ParcelaAntecipacao.objects.get_or_create(
                     cadastro=cad, numero=n,
-                    defaults={"valor": cad.mensalidade_associativa, "status": StatusParcela.PENDENTE}
+                    defaults={"valor": valor_parcela, "status": StatusParcela.PENDENTE}
                 )
     except Exception as e:
         messages.warning(request, f'Cadastro salvo mas erro ao criar parcelas: {e}')

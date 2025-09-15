@@ -1,0 +1,227 @@
+from django.db import models
+from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator, MaxValueValidator
+from decimal import Decimal
+from datetime import date, timedelta
+from .choices import (
+    StatusCadastro, TipoPessoa, EstadoCivil, TipoConta,
+    SituacaoServidor, StatusParcela
+)
+
+def calcular_quinto_dia_util(ano, mes):
+    """
+    Calcula o 5º dia útil de um mês específico.
+    Considera segunda a sexta como dias úteis.
+    """
+    primeiro_dia = date(ano, mes, 1)
+    dias_uteis_encontrados = 0
+    data_atual = primeiro_dia
+    
+    while dias_uteis_encontrados < 5:
+        # Segunda = 0, Domingo = 6
+        if data_atual.weekday() < 5:  # Segunda a sexta
+            dias_uteis_encontrados += 1
+            if dias_uteis_encontrados == 5:
+                return data_atual
+        data_atual += timedelta(days=1)
+    
+    return data_atual
+
+User = get_user_model()
+
+class Cadastro(models.Model):
+    """
+    Cadastro do associado (sem campos de observação).
+    Cálculos automáticos são atualizados ao salvar.
+    """
+
+    # ---- Dados cadastrais ----
+    tipo_pessoa          = models.CharField(max_length=2, choices=TipoPessoa.choices, default=TipoPessoa.PF)
+    cpf                  = models.CharField("CPF", max_length=11, blank=True, db_index=True)   # PF
+    cnpj                 = models.CharField("CNPJ", max_length=14, blank=True, db_index=True)  # PJ
+    rg                   = models.CharField("RG", max_length=20, blank=True)
+    orgao_expedidor      = models.CharField("Órgão Expedidor", max_length=20, blank=True)
+
+    nome_completo        = models.CharField("Nome Completo", max_length=180)
+    data_nascimento      = models.DateField("Data de nascimento", null=True, blank=True)
+    profissao            = models.CharField("Profissão", max_length=120, blank=True)
+    estado_civil         = models.CharField("Estado civil", max_length=20, choices=EstadoCivil.choices, blank=True)
+
+    # ---- Endereço ----
+    cep                  = models.CharField("CEP", max_length=8, blank=True)
+    endereco             = models.CharField("Endereço", max_length=180, blank=True)
+    numero               = models.CharField("Nº", max_length=10, blank=True)
+    complemento          = models.CharField("Complemento", max_length=60, blank=True)
+    bairro               = models.CharField("Bairro", max_length=80, blank=True)
+    cidade               = models.CharField("Cidade", max_length=80, blank=True)
+    uf                   = models.CharField("UF", max_length=2, blank=True)
+
+    # ---- Dados bancários ----
+    banco                = models.CharField("Banco", max_length=120, blank=True)
+    agencia              = models.CharField("Agência", max_length=15, blank=True)
+    conta                = models.CharField("Conta", max_length=20, blank=True)
+    tipo_conta           = models.CharField("Tipo de Conta", max_length=2, choices=TipoConta.choices, blank=True)
+    chave_pix            = models.CharField("Chave Pix", max_length=120, blank=True)
+
+    # ---- Contato e vínculo público ----
+    celular              = models.CharField("Celular", max_length=20, blank=True)
+    email                = models.EmailField("E-mail", blank=True)
+    orgao_publico        = models.CharField("Órgão Público", max_length=120, blank=True)
+    situacao_servidor    = models.CharField("Situação do Servidor", max_length=20, choices=SituacaoServidor.choices, blank=True)
+    matricula_servidor   = models.CharField("Matrícula do Servidor Público", max_length=30, blank=True, db_index=True)
+
+    # ---- Dados para cálculo de margem (pré-validação) ----
+    valor_bruto_total    = models.DecimalField("Valor Bruto Total", max_digits=12, decimal_places=2, null=True, blank=True)
+    valor_liquido        = models.DecimalField("Valor Líquido (contra-cheque)", max_digits=12, decimal_places=2, null=True, blank=True)
+    prazo_antecipacao_meses = models.PositiveSmallIntegerField("Prazo de Antecipação (meses)", default=3, validators=[MinValueValidator(1), MaxValueValidator(12)])
+
+    # calculados
+    trinta_porcento_bruto       = models.DecimalField("30% do Bruto", max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    margem_liquido_menos_30_bruto = models.DecimalField("Margem (Líquido - 30% do Bruto)", max_digits=12, decimal_places=2, default=Decimal("0.00"))
+
+    # ---- Detalhes do contrato ----
+    mensalidade_associativa = models.DecimalField("Contribuição Associativa (R$)", max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    taxa_antecipacao_percent = models.DecimalField("Taxa de Antecipação (%)", max_digits=5, decimal_places=2, default=Decimal("30.00"))  # sempre 30%
+    disponivel              = models.DecimalField("Repasse ao Associado (R$)", max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    valor_total_antecipacao = models.DecimalField("Total das 3 Cotas (R$)", max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    data_aprovacao          = models.DateField("Data da Aprovação", null=True, blank=True)
+    data_primeira_mensalidade = models.DateField("Data da primeira contribuição", null=True, blank=True)
+    mes_averbacao           = models.CharField("Mês de Averbação (AAAA-MM)", max_length=7, blank=True)
+    doacao_associado        = models.DecimalField("Doação do Associado (R$)", max_digits=12, decimal_places=2, default=Decimal("0.00"))
+
+    # ---- Agente ----
+    agente_responsavel      = models.ForeignKey(User, on_delete=models.PROTECT, related_name="cadastros", verbose_name="Agente Responsável")
+    agente_padrao           = models.BooleanField("Agente Padrão", default=False)
+    auxilio_agente_taxa_percent = models.DecimalField("Auxílio do Agente (%)", max_digits=5, decimal_places=2, default=Decimal("10.00"))  # sempre 10%
+    auxilio_agente_valor    = models.DecimalField("Auxílio do Agente (R$)", max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    data_envio              = models.DateField("Data do Envio", null=True, blank=True)
+
+    # ---- Fluxo ----
+    status                 = models.CharField(max_length=32, choices=StatusCadastro.choices, db_index=True, default=StatusCadastro.DRAFT)
+    cadastro_anterior      = models.ForeignKey("self", null=True, blank=True, on_delete=models.SET_NULL, related_name="renovacoes")
+
+    # ---- Timestamps ----
+    created_at             = models.DateTimeField(auto_now_add=True)
+    updated_at             = models.DateTimeField(auto_now=True)
+    approved_at            = models.DateTimeField(null=True, blank=True)
+    paid_at                = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["cpf"]),
+            models.Index(fields=["cnpj"]),
+            models.Index(fields=["matricula_servidor"]),
+            models.Index(fields=["status"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    # ---- Cálculos automáticos ----
+    def recalc(self):
+        bruto   = self.valor_bruto_total or Decimal("0")
+        liquido = self.valor_liquido or Decimal("0")
+        mensal  = self.mensalidade_associativa or Decimal("0")
+        self.taxa_antecipacao_percent = Decimal("30.00")  # fixo
+        self.trinta_porcento_bruto = (bruto * Decimal("0.30")).quantize(Decimal("0.01"))
+        self.margem_liquido_menos_30_bruto = (liquido - self.trinta_porcento_bruto).quantize(Decimal("0.01"))
+        self.valor_total_antecipacao = (mensal * Decimal("3")).quantize(Decimal("0.01"))
+        self.doacao_associado = (self.valor_total_antecipacao * Decimal("0.30")).quantize(Decimal("0.01"))
+        self.disponivel = (self.valor_total_antecipacao * Decimal("0.70")).quantize(Decimal("0.01"))
+        # Cálculo do auxílio do agente: 10% do valor liberado para o associado
+        self.auxilio_agente_taxa_percent = Decimal("10.00")  # sempre 10%
+        self.auxilio_agente_valor = (self.disponivel * Decimal("0.10")).quantize(Decimal("0.01"))
+
+    def save(self, *args, **kwargs):
+        self.recalc()
+        super().save(*args, **kwargs)
+
+    def atualizar_vencimento_parcelas(self):
+        """
+        Atualiza as datas de vencimento e valores das parcelas existentes.
+        Usado quando o cadastro é editado e a data_primeira_mensalidade é preenchida.
+        """
+        if not self.data_primeira_mensalidade:
+            return
+
+        # Calcular valor correto por parcela
+        valor_correto_parcela = self.valor_total_antecipacao / 3 if self.valor_total_antecipacao else Decimal('0.00')
+
+        parcelas = self.parcelas.all()
+        for parcela in parcelas:
+            # Atualizar valor da parcela
+            parcela.valor = valor_correto_parcela
+            # Força recálculo do vencimento zerando o campo atual
+            parcela.vencimento = None
+            parcela.save()  # Dispara o cálculo automático no save() da parcela
+
+    @property
+    def cpf_cnpj(self):
+        """Retorna CPF ou CNPJ, o que estiver preenchido"""
+        return self.cpf or self.cnpj or "—"
+    
+    def __str__(self):
+        doc = self.cpf or self.cnpj or "—"
+        return f"{self.nome_completo} • {doc} • {self.get_status_display()}"
+
+class ParcelaAntecipacao(models.Model):
+    cadastro   = models.ForeignKey(Cadastro, on_delete=models.CASCADE, related_name="parcelas")
+    numero     = models.PositiveSmallIntegerField("Nº Mensalidade", validators=[MinValueValidator(1), MaxValueValidator(3)])
+    valor      = models.DecimalField("Valor (R$)", max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    vencimento = models.DateField("Vencimento", null=True, blank=True)
+    status     = models.CharField("Status", max_length=12, choices=StatusParcela.choices, default=StatusParcela.PENDENTE)
+
+    class Meta:
+        unique_together = ("cadastro","numero")
+        ordering = ["numero"]
+        verbose_name = "Mensalidade"
+        verbose_name_plural = "Mensalidades"
+    
+    def save(self, *args, **kwargs):
+        # Calcula automaticamente o vencimento se não foi definido
+        if not self.vencimento and self.cadastro.data_primeira_mensalidade:
+            data_base = self.cadastro.data_primeira_mensalidade
+
+            if self.numero == 1:
+                # A primeira parcela vence na data escolhida pelo usuário
+                self.vencimento = data_base
+            else:
+                # Para 2ª e 3ª parcelas, calcula o 5º dia útil dos meses seguintes
+                mes_vencimento = data_base.month + (self.numero - 1)
+                ano_vencimento = data_base.year
+
+                # Ajusta ano se o mês passou de 12
+                while mes_vencimento > 12:
+                    mes_vencimento -= 12
+                    ano_vencimento += 1
+
+                self.vencimento = calcular_quinto_dia_util(ano_vencimento, mes_vencimento)
+
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.numero}ª Mensalidade - {self.cadastro.nome_completo} - R$ {self.valor}"
+    
+    @classmethod
+    def criar_parcelas_automaticas(cls, cadastro):
+        """
+        Cria automaticamente as 3 mensalidades para um cadastro.
+        """
+        if not cadastro.data_primeira_mensalidade:
+            return []
+        
+        parcelas_criadas = []
+        valor_parcela = cadastro.valor_total_antecipacao / 3 if cadastro.valor_total_antecipacao else Decimal('0.00')
+        
+        for numero in range(1, 4):  # 1, 2, 3
+            parcela, created = cls.objects.get_or_create(
+                cadastro=cadastro,
+                numero=numero,
+                defaults={
+                    'valor': valor_parcela,
+                    'status': StatusParcela.PENDENTE
+                }
+            )
+            if created:
+                parcelas_criadas.append(parcela)
+        
+        return parcelas_criadas
