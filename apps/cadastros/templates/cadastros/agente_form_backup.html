@@ -558,7 +558,8 @@
             id="{{ form.mensalidade_associativa.id_for_label }}" 
             value="{{ form.instance.mensalidade_associativa|default_if_none:'' }}" 
             placeholder="R$ 0,00" 
-            inputmode="decimal">
+            inputmode="decimal"
+            data-brl="money">
         </div>
         
         <!-- Taxa de Antecipação -->

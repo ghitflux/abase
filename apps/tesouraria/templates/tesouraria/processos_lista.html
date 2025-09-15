@@ -96,11 +96,11 @@
                     <label for="valor_min" class="block text-xs font-medium text-gray-600 mb-1">Valor Liberado</label>
                     <div class="flex gap-2">
                         <input type="number" name="valor_min" id="valor_min" step="0.01" 
-                               value="{{ current_filters.valor_min }}" placeholder="Mín"
+                               value="{{ current_filters.valor_min }}" placeholder="Mín" data-brl="money"
                                class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
                         <span class="text-xs text-gray-500 self-center">até</span>
                         <input type="number" name="valor_max" id="valor_max" step="0.01" 
-                               value="{{ current_filters.valor_max }}" placeholder="Máx"
+                               value="{{ current_filters.valor_max }}" placeholder="Máx" data-brl="money"
                                class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
                     </div>
                 </div>

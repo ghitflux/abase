@@ -104,15 +104,15 @@
                 <dl class="space-y-2">
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Salário Bruto:</dt>
-                        <dd class="text-sm text-gray-900">R$ {{ cadastro.valor_bruto_total|currency_brl }}</dd>
+                        <dd class="text-sm text-gray-900"><span data-brl-text>{{ cadastro.valor_bruto_total }}</span></dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Salário Líquido:</dt>
-                        <dd class="text-sm text-gray-900">R$ {{ cadastro.valor_liquido|currency_brl }}</dd>
+                        <dd class="text-sm text-gray-900"><span data-brl-text>{{ cadastro.valor_liquido }}</span></dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Mensalidade:</dt>
-                        <dd class="text-sm text-gray-900">R$ {{ cadastro.mensalidade_associativa|currency_brl }}</dd>
+                        <dd class="text-sm text-gray-900"><span data-brl-text>{{ cadastro.mensalidade_associativa }}</span></dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">PIX:</dt>
@@ -139,7 +139,7 @@
                         {{ parcela.get_status_display }}
                     </span>
                 </div>
-                <p class="text-lg font-bold text-gray-900">R$ {{ parcela.valor|currency_brl }}</p>
+                <p class="text-lg font-bold text-gray-900"><span data-brl-text>{{ parcela.valor }}</span></p>
                 {% if parcela.vencimento %}
                 <p class="text-sm text-gray-500">Vencimento: {{ parcela.vencimento|date:"d/m/Y" }} (5º dia útil)</p>
                 <p class="text-xs text-blue-600 font-medium">{{ parcela.vencimento|days_until }}</p>

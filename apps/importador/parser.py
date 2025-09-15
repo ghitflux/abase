@@ -50,24 +50,50 @@ def find_columns_index(lines):
     cols = {}
     for m in re.finditer(r"(STATUS|MATRICULA|NOME|CARGO|ORGAO PAGTO|CPF|VALOR|TOTAL PAGO)", header):
         cols[m.group(1)] = m.start()
-    # Garantidos:
-    start_status = cols.get("STATUS", 0)
-    start_matric = cols.get("MATRICULA", 7)
-    start_nome   = cols.get("NOME", 18)
-    start_valor  = cols.get("VALOR", header.find("VALOR"))
-    start_orgao  = cols.get("ORGAO PAGTO", header.find("ORGAO PAGTO"))
-    start_cpf    = cols.get("CPF", len(header)-11)
 
-    # end de cada campo = início do próximo
-    def seg(s, e): return slice(s, e if e>0 else None)
+    # Helpers para normalizar índices
+    def _safe_idx(v):
+        return v if isinstance(v, int) and v >= 0 else None
+
+    start_status = _safe_idx(cols.get("STATUS", 0)) or 0
+    start_matric = _safe_idx(cols.get("MATRICULA", 7)) or 7
+    start_nome   = _safe_idx(cols.get("NOME", 18)) or 18
+    start_valor  = _safe_idx(cols.get("VALOR", header.find("VALOR")))
+    start_orgao  = _safe_idx(cols.get("ORGAO PAGTO", header.find("ORGAO PAGTO")))
+    start_cpf    = _safe_idx(cols.get("CPF", header.find("CPF")))
+    if start_cpf is None:
+        start_cpf = len(header) - 11  # fallback seguro para CPF alinhado à direita
+
+    def seg(s, e):
+        # Se não houver 'fim' válido, deixe ir até o final da linha
+        if e is None or e <= s:
+            return slice(s, None)
+        return slice(s, e)
+
+    # Primeiro "fim" à direita do NOME entre VALOR/ÓRGÃO/CPF
+    end_nome_candidates = [
+        x for x in (start_valor, start_orgao, start_cpf)
+        if x is not None and x > start_nome
+    ]
+    end_nome = min(end_nome_candidates) if end_nome_candidates else None
+
+    # Fim do VALOR: antes de ORGAO, senão antes de CPF
+    if start_valor is not None:
+        if start_orgao is not None and start_orgao > start_valor:
+            end_valor = start_orgao
+        else:
+            end_valor = start_cpf
+    else:
+        # Se não achou VALOR, não fatie; deixe vazio/None na leitura
+        end_valor = None
+
     return {
-        "status": seg(start_status, start_matric),
-        "matricula": seg(start_matric, start_nome),
-        # nome vai até 'VALOR' ou 'ORGAO PAGTO'
-        "nome": seg(start_nome, min([x for x in [start_valor, start_orgao, start_cpf] if x>start_nome] or [None])),
-        "valor": seg(start_valor, start_orgao if start_orgao>start_valor else start_cpf),
-        "orgao_pagto": seg(start_orgao, start_cpf),
-        "cpf": seg(start_cpf, None),
+        "status":      seg(start_status, start_matric),
+        "matricula":   seg(start_matric, start_nome),
+        "nome":        seg(start_nome, end_nome),
+        "valor":       seg(start_valor or 0, end_valor),
+        "orgao_pagto": seg(start_orgao or (end_valor or 0), start_cpf),
+        "cpf":         seg(start_cpf, None),
         "header_index": idx,
     }
 
