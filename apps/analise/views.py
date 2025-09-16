@@ -817,6 +817,29 @@ def validar_correcao_e_aprovar(request, processo_id):
 
 
 @login_required
+def esteira_fragment(request):
+    """
+    Retorna apenas o fragmento HTML da lista de processos para atualização via HTMX.
+    Foca nos processos que devem aparecer na esteira do analista.
+    """
+    user = request.user
+    
+    # Query base com os mesmos filtros da esteira principal
+    processos = AnaliseProcesso.objects.select_related(
+        'cadastro', 'analista_responsavel'
+    ).filter(
+        # Incluir processos que devem aparecer para o analista
+        status__in=[
+            StatusAnalise.PENDENTE,
+            StatusAnalise.EM_ANALISE, 
+            StatusAnalise.CORRECAO_FEITA
+        ]
+    ).order_by('-prioridade', 'data_entrada')[:50]  # Limitar para performance
+    
+    return render(request, "analise/partials/_esteira_lista.html", {"itens": processos})
+
+
+@login_required
 @analista_required
 @require_http_methods(["POST"])
 def pendenciar_correcao_novamente(request, processo_id):

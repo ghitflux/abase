@@ -39,7 +39,7 @@ LOCAL_APPS = [
     'apps.accounts',
     'apps.auditoria',
     'apps.cadastros',
-    'apps.analise',  # App de análise de cadastros
+    'apps.analise.apps.AnaliseConfig',  # App de análise de cadastros
     'apps.documentos',
     'apps.tesouraria',  # Inclui funcionalidades de mensalidades e reconciliação
     'apps.importador',

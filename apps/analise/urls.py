@@ -9,6 +9,7 @@ urlpatterns = [
     
     # Esteira de análise
     path('esteira/', views.esteira_analise, name='esteira_analise'),
+    path('esteira/fragment/', views.esteira_fragment, name='esteira_fragment'),
     
     # Detalhes do processo
     path('processo/<int:processo_id>/', views.detalhe_processo, name='detalhe_processo'),
