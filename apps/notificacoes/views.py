@@ -1,9 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
 from django.db.models import Q
-from .models import NotificacaoLog
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from .models import NotificacaoLog, Notificacao
 
 @staff_member_required
 def logs_notificacoes(request):
@@ -46,3 +48,47 @@ def logs_notificacoes(request):
     }
     
     return render(request, 'notificacoes/logs_list.html', context)
+
+
+@login_required
+def listar_notificacoes(request):
+    """Lista as notificações do usuário logado."""
+    notificacoes = request.user.notificacoes.all()[:10]  # Últimas 10
+    nao_lidas = request.user.notificacoes.filter(lida=False).count()
+    
+    return JsonResponse({
+        'notificacoes': [{
+            'id': n.id,
+            'titulo': n.titulo,
+            'mensagem': n.mensagem,
+            'tipo': n.get_tipo_display(),
+            'lida': n.lida,
+            'data_criacao': n.data_criacao.strftime('%d/%m/%Y %H:%M'),
+            'url_acao': n.url_acao
+        } for n in notificacoes],
+        'nao_lidas': nao_lidas
+    })
+
+
+@login_required
+@require_POST
+def marcar_como_lida(request, notificacao_id):
+    """Marca uma notificação como lida."""
+    notificacao = get_object_or_404(
+        Notificacao, 
+        id=notificacao_id, 
+        usuario=request.user
+    )
+    
+    notificacao.marcar_como_lida()
+    
+    return JsonResponse({'success': True})
+
+
+@login_required
+@require_POST
+def marcar_todas_como_lidas(request):
+    """Marca todas as notificações do usuário como lidas."""
+    request.user.notificacoes.filter(lida=False).update(lida=True)
+    
+    return JsonResponse({'success': True})

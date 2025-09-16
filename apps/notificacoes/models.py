@@ -38,3 +38,41 @@ class NotificacaoLog(models.Model):
     
     def __str__(self):
         return f"{self.tipo} - {self.assunto} ({self.status})"
+
+
+class Notificacao(models.Model):
+    """Notificações do sistema para usuários."""
+    
+    TIPO_CHOICES = [
+        ('PROCESSO_ATRIBUIDO', 'Processo Atribuído'),
+        ('PROCESSO_CORRIGIDO', 'Processo Corrigido'),
+        ('PROCESSO_APROVADO', 'Processo Aprovado'),
+        ('PROCESSO_REJEITADO', 'Processo Rejeitado'),
+        ('CADASTRO_PENDENTE', 'Cadastro Pendente'),
+        ('PAGAMENTO_LIBERADO', 'Pagamento Liberado'),
+        ('SISTEMA', 'Sistema'),
+    ]
+    
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificacoes')
+    tipo = models.CharField(max_length=30, choices=TIPO_CHOICES)
+    titulo = models.CharField(max_length=255)
+    mensagem = models.TextField()
+    lida = models.BooleanField(default=False)
+    data_criacao = models.DateTimeField(default=timezone.now)
+    
+    # Campos opcionais para links
+    url_acao = models.URLField(blank=True, null=True, help_text="URL para ação relacionada")
+    objeto_id = models.PositiveIntegerField(blank=True, null=True, help_text="ID do objeto relacionado")
+    
+    class Meta:
+        ordering = ['-data_criacao']
+        verbose_name = 'Notificação'
+        verbose_name_plural = 'Notificações'
+    
+    def __str__(self):
+        return f"{self.titulo} - {self.usuario.username}"
+    
+    def marcar_como_lida(self):
+        """Marca a notificação como lida."""
+        self.lida = True
+        self.save(update_fields=['lida'])

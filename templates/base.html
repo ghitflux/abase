@@ -8,6 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/theme.css' %}">
   <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+  <link rel="stylesheet" href="{% static 'css/analise-improvements.css' %}">
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script defer src="https://unpkg.com/lucide@latest"></script>
@@ -42,7 +43,118 @@
           
           <!-- Header Actions -->
           <div class="flex items-center space-x-4">
-
+            <!-- Notificações -->
+            <div class="relative" x-data="{ open: false, notificacoes: [], naoLidas: 0 }" x-init="
+              // Carregar notificações ao inicializar
+              fetch('/notificacoes/api/listar/')
+                .then(response => response.json())
+                .then(data => {
+                  notificacoes = data.notificacoes;
+                  naoLidas = data.nao_lidas;
+                })
+                .catch(error => console.error('Erro ao carregar notificações:', error));
+            " x-cloak>
+              <button 
+                @click="open = !open"
+                class="relative p-2 rounded-lg hover:bg-accent theme-transition focus-ring"
+              >
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM11 19H6a2 2 0 01-2-2V7a2 2 0 012-2h5m5 0v6m0 0l3-3m-3 3l-3-3" />
+                 </svg>
+                <!-- Badge de notificações não lidas -->
+                <span 
+                  x-show="naoLidas > 0" 
+                  x-text="naoLidas > 99 ? '99+' : naoLidas"
+                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]"
+                ></span>
+              </button>
+              
+              <!-- Dropdown de Notificações -->
+              <div 
+                x-show="open" 
+                @click.away="open = false"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-75"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="absolute right-0 mt-2 w-80 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-hidden"
+              >
+                <div class="p-4 border-b border-border">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-medium text-popover-foreground">Notificações</h3>
+                    <button 
+                      @click="
+                        fetch('/notificacoes/api/marcar-todas-lidas/', {
+                          method: 'POST',
+                          headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                            'Content-Type': 'application/json'
+                          }
+                        })
+                        .then(() => {
+                          notificacoes.forEach(n => n.lida = true);
+                          naoLidas = 0;
+                        })
+                        .catch(error => console.error('Erro ao marcar como lidas:', error));
+                      "
+                      class="text-xs text-primary hover:text-primary/80 theme-transition"
+                    >
+                      Marcar todas como lidas
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="max-h-64 overflow-y-auto">
+                  <template x-if="notificacoes.length === 0">
+                    <div class="p-4 text-center text-sm text-muted-foreground">
+                      Nenhuma notificação
+                    </div>
+                  </template>
+                  
+                  <template x-for="notificacao in notificacoes" :key="notificacao.id">
+                    <div 
+                      class="p-3 border-b border-border last:border-b-0 hover:bg-accent theme-transition cursor-pointer"
+                      :class="{ 'bg-accent/50': !notificacao.lida }"
+                      @click="
+                        if (!notificacao.lida) {
+                          fetch(`/notificacoes/api/${notificacao.id}/marcar-lida/`, {
+                            method: 'POST',
+                            headers: {
+                              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                              'Content-Type': 'application/json'
+                            }
+                          })
+                          .then(() => {
+                            notificacao.lida = true;
+                            naoLidas = Math.max(0, naoLidas - 1);
+                          })
+                          .catch(error => console.error('Erro ao marcar como lida:', error));
+                        }
+                        if (notificacao.url_acao) {
+                          window.location.href = notificacao.url_acao;
+                        }
+                      "
+                    >
+                      <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                          <div 
+                            class="w-2 h-2 rounded-full mt-2"
+                            :class="notificacao.lida ? 'bg-gray-300' : 'bg-primary'"
+                          ></div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <p class="text-sm font-medium text-popover-foreground" x-text="notificacao.titulo"></p>
+                          <p class="text-xs text-muted-foreground mt-1" x-text="notificacao.mensagem"></p>
+                          <p class="text-xs text-muted-foreground mt-1" x-text="notificacao.data_criacao"></p>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
             
             <!-- User Menu -->
             <div class="relative" x-data="{ open: false }" x-cloak>
@@ -316,6 +428,7 @@
 
   <script src="{% static 'js/theme.js' %}"></script>
   <script src="{% static 'js/money-mask.js' %}"></script>
+  <script src="{% static 'js/money-display.js' %}"></script>
   <script src="{% static 'js/viacep-integration.js' %}"></script>
   <script src="{% static 'js/form-validation.js' %}"></script>
   

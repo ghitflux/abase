@@ -7,7 +7,7 @@
 {% block content %}
 <div class="space-y-6">
     <!-- Estatísticas Principais -->
-    <div class="grid grid-cols-4 gap-6">
+    <div class="grid grid-cols-6 gap-6">
         <!-- Total de Cadastros -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
@@ -83,6 +83,86 @@
                 </div>
             </div>
         </div>
+
+        <!-- Em Correção -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Em Correção</dt>
+                        <dd class="text-lg font-medium text-gray-900">{{ processos_enviados_correcao }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Correção Realizada -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.25-4.5a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 5.25v13.5A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V5.25z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Correção Realizada</dt>
+                        <dd class="text-lg font-medium text-gray-900">{{ processos_correcao_realizada }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Ações Rápidas</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="{% url 'analise:esteira_analise' %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div class="flex-shrink-0">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">Esteira de Análise</p>
+                    <p class="text-sm text-gray-500">Ver todos os processos</p>
+                </div>
+            </a>
+            
+            <a href="{% url 'analise:esteira_analise' %}?status=pendente" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div class="flex-shrink-0">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">Processos Pendentes</p>
+                    <p class="text-sm text-gray-500">{{ processos_pendentes }} aguardando análise</p>
+                </div>
+            </a>
+            
+            <a href="{% url 'analise:relatorio_analise' %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div class="flex-shrink-0">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">Relatórios</p>
+                    <p class="text-sm text-gray-500">Performance e estatísticas</p>
+                </div>
+            </a>
+        </div>
     </div>
 
     <!-- Processos Enviados para Correção -->
@@ -131,11 +211,28 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex space-x-2">
-                                <a href="{% url 'analise:detalhe_processo' processo.id %}" class="text-blue-600 hover:text-blue-900">Ver detalhes</a>
-                                <form method="post" action="{% url 'analise:marcar_correcao_realizada' processo.id %}" class="inline" onsubmit="return confirm('Confirma que a correção foi realizada?')">
+                            <div class="flex items-center justify-end space-x-3">
+                                <!-- Ver Detalhes -->
+                                <a href="{% url 'analise:detalhe_processo' processo.id %}"
+                                   class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                   title="Ver Detalhes">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </a>
+
+                                <!-- Marcar como Corrigido -->
+                                <form method="post" action="{% url 'analise:marcar_correcao_realizada' processo.id %}" class="inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="text-green-600 hover:text-green-900 bg-transparent border-none cursor-pointer">Marcar como Corrigido</button>
+                                    <button type="submit"
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                            title="Marcar como Corrigido"
+                                            onclick="return confirm('✅ Confirma que a correção foi realizada?')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </button>
                                 </form>
                             </div>
                         </td>
@@ -235,46 +332,5 @@
         </div>
     </div>
 
-    <!-- Ações Rápidas -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Ações Rápidas</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href="{% url 'analise:esteira_analise' %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                <div class="flex-shrink-0">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-gray-900">Esteira de Análise</p>
-                    <p class="text-sm text-gray-500">Ver todos os processos</p>
-                </div>
-            </a>
-            
-            <a href="{% url 'analise:esteira_analise' %}?status=pendente" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                <div class="flex-shrink-0">
-                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-gray-900">Processos Pendentes</p>
-                    <p class="text-sm text-gray-500">{{ processos_pendentes }} aguardando análise</p>
-                </div>
-            </a>
-            
-            <a href="{% url 'analise:relatorio_analise' %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                <div class="flex-shrink-0">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-gray-900">Relatórios</p>
-                    <p class="text-sm text-gray-500">Performance e estatísticas</p>
-                </div>
-            </a>
-        </div>
-    </div>
 </div>
 {% endblock %}

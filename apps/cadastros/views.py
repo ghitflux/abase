@@ -3,7 +3,7 @@ from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseBadRequest
 from django.contrib import messages
-from apps.accounts.decorators import admin_required, group_required
+from apps.accounts.decorators import group_required
 from apps.documentos.models import Documento, DocumentoRascunho
 from apps.documentos.views import ensure_draft_token
 from .forms import CadastroForm
@@ -187,7 +187,7 @@ def agente_create(request):
     # cria 3 parcelas padrão com o valor da mensalidade (só para novos)
     try:
         if not cadastro:
-            valor_parcela = cad.valor_total_antecipacao / 3 if cad.valor_total_antecipacao else Decimal('0.00')
+            valor_parcela = cad.valor_total_antecipacao / 3 if cad.valor_total_antecipacao else Decimal('0.00')  # noqa: F821
             for n in (1,2,3):
                 ParcelaAntecipacao.objects.get_or_create(
                     cadastro=cad, numero=n,
@@ -221,6 +221,32 @@ def agente_create(request):
     print("Redirecting to cadastros:agente-list")
     # redireciona para lista do agente (ou detalhe, conforme seu menu)
     return redirect("cadastros:agente-list")
+
+@login_required
+@group_required('AGENTE')
+@require_http_methods(["POST"])
+def reenviar_apos_correcao(request, cadastro_id):
+    """
+    Automatiza o reenvio do cadastro após correção.
+    Muda o status de PENDING_AGENT para RESUBMITTED.
+    """
+    cadastro = get_object_or_404(
+        Cadastro,
+        id=cadastro_id,
+        agente_responsavel=request.user,
+        status=StatusCadastro.PENDING_AGENT
+    )
+    
+    # Atualizar status para RESUBMITTED
+    cadastro.status = StatusCadastro.RESUBMITTED
+    cadastro.save()
+    
+    messages.success(
+        request, 
+        f'Cadastro #{cadastro_id} reenviado com sucesso! O processo retornará automaticamente para o analista responsável.'
+    )
+    
+    return redirect('cadastros:agente-detail', cadastro_id=cadastro_id)
 
 @login_required
 @group_required('AGENTE')

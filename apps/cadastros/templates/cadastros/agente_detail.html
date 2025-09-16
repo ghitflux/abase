@@ -5,6 +5,10 @@
 {% block title %}{{ cadastro.nome_completo }} - Detalhes{% endblock %}
 {% block page_title %}Detalhes do Cadastro{% endblock %}
 
+{% block extra_js %}
+<script src="{% static 'js/money-display.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="space-y-6">
     <!-- Cabeçalho do Cadastro -->
@@ -104,15 +108,27 @@
                 <dl class="space-y-2">
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Salário Bruto:</dt>
-                        <dd class="text-sm text-gray-900"><span data-brl-text>{{ cadastro.valor_bruto_total }}</span></dd>
+                        <dd class="text-sm font-semibold text-gray-900">
+                            <span data-brl-text class="inline-flex items-center px-2 py-1 rounded-md bg-green-50 text-green-800">
+                                {{ cadastro.valor_bruto_total }}
+                            </span>
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Salário Líquido:</dt>
-                        <dd class="text-sm text-gray-900"><span data-brl-text>{{ cadastro.valor_liquido }}</span></dd>
+                        <dd class="text-sm font-semibold text-gray-900">
+                            <span data-brl-text class="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-800">
+                                {{ cadastro.valor_liquido }}
+                            </span>
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Mensalidade:</dt>
-                        <dd class="text-sm text-gray-900"><span data-brl-text>{{ cadastro.mensalidade_associativa }}</span></dd>
+                        <dd class="text-sm font-semibold text-gray-900">
+                            <span data-brl-text class="inline-flex items-center px-2 py-1 rounded-md bg-red-50 text-red-800">
+                                {{ cadastro.mensalidade_associativa }}
+                            </span>
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">PIX:</dt>
@@ -139,7 +155,11 @@
                         {{ parcela.get_status_display }}
                     </span>
                 </div>
-                <p class="text-lg font-bold text-gray-900"><span data-brl-text>{{ parcela.valor }}</span></p>
+                <p class="text-lg font-bold">
+                    <span data-brl-text class="inline-flex items-center px-3 py-1 rounded-lg bg-gradient-to-r from-red-50 to-red-100 text-red-900 border border-red-200">
+                        {{ parcela.valor }}
+                    </span>
+                </p>
                 {% if parcela.vencimento %}
                 <p class="text-sm text-gray-500">Vencimento: {{ parcela.vencimento|date:"d/m/Y" }} (5º dia útil)</p>
                 <p class="text-xs text-blue-600 font-medium">{{ parcela.vencimento|days_until }}</p>
@@ -188,9 +208,23 @@
             ← Voltar para Lista
         </a>
         {% if cadastro.status == 'PENDING_AGENT' %}
-        <a href="{% url 'cadastros:agente-create' %}?edit={{ cadastro.id }}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-            Corrigir Cadastro
-        </a>
+        <div class="flex space-x-3">
+            <a href="{% url 'cadastros:agente-create' %}?edit={{ cadastro.id }}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Corrigir Cadastro
+            </a>
+            <form method="post" action="{% url 'cadastros:reenviar-apos-correcao' cadastro.id %}" class="inline" onsubmit="return confirm('Tem certeza que deseja reenviar este cadastro? Ele retornará automaticamente para o analista responsável.')">
+                {% csrf_token %}
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                    Reenviar após Correção
+                </button>
+            </form>
+        </div>
         {% endif %}
     </div>
 </div>

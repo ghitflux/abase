@@ -13,29 +13,98 @@
     <p class="text-gray-600 dark:text-gray-400">Gerencie os processos de análise de cadastros</p>
   </div>
 
+  <!-- Filtros Rápidos por Status -->
+  <div class="mb-6">
+    <div class="flex flex-wrap gap-2 mb-4">
+      <a href="?status=todos" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+         {% if not current_filters.status or current_filters.status == 'todos' %}
+           bg-red-600 text-white
+         {% else %}
+           bg-gray-100 text-gray-700 hover:bg-gray-200
+         {% endif %}">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        Todos ({{ total_processos }})
+      </a>
+
+      <a href="?status=pendente" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+         {% if current_filters.status == 'pendente' %}
+           bg-yellow-500 text-white
+         {% else %}
+           bg-yellow-50 text-yellow-700 hover:bg-yellow-100
+         {% endif %}">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Pendente ({{ pendentes_count|default:0 }})
+      </a>
+
+      <a href="?status=em_analise" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+         {% if current_filters.status == 'em_analise' %}
+           bg-blue-600 text-white
+         {% else %}
+           bg-blue-50 text-blue-700 hover:bg-blue-100
+         {% endif %}">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+        Em Análise ({{ em_analise_count|default:0 }})
+      </a>
+
+      <a href="?status=correcao" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+         {% if current_filters.status == 'correcao' %}
+           bg-orange-600 text-white
+         {% else %}
+           bg-orange-50 text-orange-700 hover:bg-orange-100
+         {% endif %}">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
+        Correção ({{ correcao_count|default:0 }})
+      </a>
+
+      <a href="?status=aprovado" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+         {% if current_filters.status == 'aprovado' %}
+           bg-green-600 text-white
+         {% else %}
+           bg-green-50 text-green-700 hover:bg-green-100
+         {% endif %}">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Aprovados ({{ aprovados_count|default:0 }})
+      </a>
+    </div>
+  </div>
+
   <!-- Filtros Avançados -->
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6" x-data="filterManager()">
     <!-- Barra de Filtros Básicos -->
     <div class="p-4 border-b border-gray-100 dark:border-gray-700">
       <form method="get" class="flex flex-wrap items-end gap-3">
+        <!-- Status (oculto - controlado pelos badges) -->
+        <input type="hidden" name="status" value="{{ current_filters.status }}">
+
         <!-- Prioridade -->
         <div class="min-w-0 flex-shrink-0">
           <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Prioridade</label>
-          <select name="prioridade" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+          <select name="prioridade" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-primary-foreground">
             <option value="">Todas</option>
-            <option value="1" {% if current_filters.prioridade == '1' %}selected{% endif %}>Baixa</option>
-            <option value="2" {% if current_filters.prioridade == '2' %}selected{% endif %}>Normal</option>
-            <option value="3" {% if current_filters.prioridade == '3' %}selected{% endif %}>Alta</option>
-            <option value="4" {% if current_filters.prioridade == '4' %}selected{% endif %}>Urgente</option>
+            <option value="1" {% if current_filters.prioridade == '1' %}selected{% endif %}>⬇️ Baixa</option>
+            <option value="2" {% if current_filters.prioridade == '2' %}selected{% endif %}>➡️ Normal</option>
+            <option value="3" {% if current_filters.prioridade == '3' %}selected{% endif %}>⬆️ Alta</option>
+            <option value="4" {% if current_filters.prioridade == '4' %}selected{% endif %}>🔥 Urgente</option>
           </select>
         </div>
 
         <!-- Analista -->
         <div class="min-w-0 flex-shrink-0">
           <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Analista</label>
-          <select name="analista" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+          <select name="analista" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-primary-foreground">
             <option value="">Todos</option>
-            <option value="sem_analista" {% if current_filters.analista == 'sem_analista' %}selected{% endif %}>Sem Analista</option>
+            <option value="sem_analista" {% if current_filters.analista == 'sem_analista' %}selected{% endif %}>👤 Sem Analista</option>
             {% for analista in analistas %}
             <option value="{{ analista.id }}" {% if current_filters.analista == analista.id|stringformat:"s" %}selected{% endif %}>{{ analista.get_full_name|default:analista.username }}</option>
             {% endfor %}
@@ -44,15 +113,15 @@
 
         <!-- Busca -->
         <div class="min-w-0 flex-1">
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Buscar</label>
-          <input type="text" name="search" value="{{ current_filters.search }}" 
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">🔍 Buscar</label>
+          <input type="text" name="search" value="{{ current_filters.search }}"
                  placeholder="Nome, CPF/CNPJ, matrícula..."
-                 class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+                 class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-primary-foreground">
         </div>
 
         <!-- Ações -->
         <div class="flex gap-2">
-          <button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-sm font-medium transition-colors">
+          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 text-sm font-medium transition-colors">
             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
@@ -264,6 +333,35 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                   </svg>
                 </button>
+                {% elif processo.status == 'correcao_realizada' %}
+                  <!-- Ações para processos com correção realizada -->
+                  <div class="flex items-center space-x-2">
+                    <!-- Validar e Aprovar -->
+                    <form method="post" action="{% url 'analise:validar_correcao_e_aprovar' processo.id %}" class="inline" 
+                          onsubmit="return confirm('Tem certeza que deseja validar a correção e aprovar este processo?')">
+                      {% csrf_token %}
+                      <button type="submit" 
+                              class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 transition-colors"
+                              title="Validar correção e aprovar">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                      </button>
+                    </form>
+                    
+                    <!-- Pendenciar Novamente -->
+                    <form method="post" action="{% url 'analise:pendenciar_correcao_novamente' processo.id %}" class="inline" 
+                          onsubmit="return confirm('Tem certeza que deseja pendenciar este processo novamente?')">
+                      {% csrf_token %}
+                      <button type="submit" 
+                              class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 transition-colors"
+                              title="Pendenciar novamente">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                      </button>
+                    </form>
+                  </div>
                 {% elif processo.status == 'correcao_feita' and not processo.analista_responsavel %}
                 <button onclick="assumirProcesso({{ processo.id }})" 
                         class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"

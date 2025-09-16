@@ -9,8 +9,6 @@ class StatusAnalise(models.TextChoices):
     PENDENTE = 'pendente', 'Pendente de Análise'
     EM_ANALISE = 'em_analise', 'Em Análise'
     APROVADO = 'aprovado', 'Aprovado - Encaminhado para Tesouraria'
-    REJEITADO = 'rejeitado', 'Rejeitado - Devolvido ao Agente'
-    SUSPENSO = 'suspenso', 'Suspenso - Aguardando Documentos'
     CORRECAO_FEITA = 'correcao_feita', 'Correção Feita - Aguardando Nova Análise'
     ENVIADO_PARA_CORRECAO = 'enviado_para_correcao', 'Enviado para Correção'
     CORRECAO_REALIZADA = 'correcao_realizada', 'Correção Realizada'

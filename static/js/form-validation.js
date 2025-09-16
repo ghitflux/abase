@@ -182,41 +182,94 @@
     }
 
     /**
-     * Calcula e exibe progresso do preenchimento
+     * Verifica se deve mostrar barra de progresso
+     */
+    function shouldShowProgressBar() {
+        // Verifica se é a página de cadastro de associado
+        const isNewCadastroPage = window.location.pathname.includes('/cadastros/novo/');
+        const isEditCadastroPage = window.location.pathname.includes('/cadastros/') && window.location.search.includes('edit=');
+        const hasFormWithManyFields = document.querySelectorAll('input, select, textarea').length > 15;
+
+        return (isNewCadastroPage || isEditCadastroPage) && hasFormWithManyFields;
+    }
+
+    /**
+     * Calcula e exibe progresso do preenchimento com barra flutuante
      */
     function updateFormProgress() {
-        const requiredFields = document.querySelectorAll('[required]');
-        const filledFields = Array.from(requiredFields).filter(field => field.value.trim() !== '');
+        if (!shouldShowProgressBar()) {
+            return;
+        }
 
-        const progress = Math.round((filledFields.length / requiredFields.length) * 100);
+        // Contar todos os campos (não só obrigatórios)
+        const allFields = document.querySelectorAll('input:not([type="hidden"]), select, textarea');
+        const filledFields = Array.from(allFields).filter(field => {
+            if (field.type === 'checkbox' || field.type === 'radio') {
+                return field.checked;
+            }
+            return field.value.trim() !== '';
+        });
+
+        const progress = Math.round((filledFields.length / allFields.length) * 100);
 
         let progressBar = document.querySelector('.form-progress');
         if (!progressBar) {
-            // Cria barra de progresso se não existe
+            // Cria barra de progresso flutuante
             progressBar = document.createElement('div');
-            progressBar.className = 'form-progress mb-6 p-4 bg-gray-50 rounded-lg';
+            progressBar.className = 'form-progress fixed top-0 left-0 right-0 z-50 bg-white shadow-md border-b transition-all duration-300';
+            progressBar.style.transform = 'translateY(-100%)';
             progressBar.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-700">Progresso do Formulário</span>
-                    <span class="text-sm text-gray-600"><span class="progress-percent">${progress}</span>%</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="progress-bar bg-red-600 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
-                </div>
-                <div class="text-xs text-gray-500 mt-1">
-                    <span class="filled-count">${filledFields.length}</span> de ${requiredFields.length} campos obrigatórios preenchidos
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-900">Progresso do Formulário</span>
+                        </div>
+                        <span class="text-sm font-semibold text-red-600"><span class="progress-percent">${progress}</span>%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="progress-bar bg-gradient-to-r from-red-500 to-red-600 h-2.5 rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="text-xs text-gray-600 mt-2 flex justify-between">
+                        <span><span class="filled-count">${filledFields.length}</span> de ${allFields.length} campos preenchidos</span>
+                        <span class="progress-message">${progress === 100 ? '✓ Formulário completo!' : `${allFields.length - filledFields.length} campos restantes`}</span>
+                    </div>
                 </div>
             `;
 
-            const form = document.querySelector('form');
-            if (form) {
-                form.insertBefore(progressBar, form.firstChild);
-            }
+            document.body.appendChild(progressBar);
+
+            // Controla visibilidade durante scroll
+            let scrollTimeout;
+            window.addEventListener('scroll', function() {
+                clearTimeout(scrollTimeout);
+
+                if (window.scrollY > 100) {
+                    progressBar.style.transform = 'translateY(0)';
+                } else {
+                    progressBar.style.transform = 'translateY(-100%)';
+                }
+
+                // Auto-hide após 3 segundos sem scroll
+                scrollTimeout = setTimeout(() => {
+                    if (window.scrollY > 100 && progress < 100) {
+                        progressBar.style.transform = 'translateY(-100%)';
+                    }
+                }, 3000);
+            });
         } else {
             // Atualiza barra existente
             progressBar.querySelector('.progress-percent').textContent = progress;
             progressBar.querySelector('.progress-bar').style.width = `${progress}%`;
             progressBar.querySelector('.filled-count').textContent = filledFields.length;
+
+            const progressMessage = progressBar.querySelector('.progress-message');
+            if (progressMessage) {
+                progressMessage.textContent = progress === 100 ? '✓ Formulário completo!' : `${allFields.length - filledFields.length} campos restantes`;
+                progressMessage.className = progress === 100 ? 'text-green-600 font-medium' : 'text-gray-600';
+            }
         }
     }
 
