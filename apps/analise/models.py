@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from apps.cadastros.models import Cadastro
-from apps.documentos.models import Documento
+# Remove unused import
 
 
 class StatusAnalise(models.TextChoices):
@@ -12,6 +12,8 @@ class StatusAnalise(models.TextChoices):
     REJEITADO = 'rejeitado', 'Rejeitado - Devolvido ao Agente'
     SUSPENSO = 'suspenso', 'Suspenso - Aguardando Documentos'
     CORRECAO_FEITA = 'correcao_feita', 'Correção Feita - Aguardando Nova Análise'
+    ENVIADO_PARA_CORRECAO = 'enviado_para_correcao', 'Enviado para Correção'
+    CORRECAO_REALIZADA = 'correcao_realizada', 'Correção Realizada'
     CANCELADO = 'cancelado', 'Cancelado Definitivamente'
 
 
@@ -50,7 +52,7 @@ class AnaliseProcesso(models.Model):
     
     # Status e controle
     status = models.CharField(
-        max_length=20,
+        max_length=25,
         choices=StatusAnalise.choices,
         default=StatusAnalise.PENDENTE,
         verbose_name='Status da Análise'
@@ -224,7 +226,7 @@ class HistoricoAnalise(models.Model):
     )
     
     status_anterior = models.CharField(
-        max_length=20,
+        max_length=25,
         choices=StatusAnalise.choices,
         null=True,
         blank=True,
@@ -232,7 +234,7 @@ class HistoricoAnalise(models.Model):
     )
     
     status_novo = models.CharField(
-        max_length=20,
+        max_length=25,
         choices=StatusAnalise.choices,
         null=True,
         blank=True,

@@ -17,8 +17,10 @@ urlpatterns = [
     path('processo/<int:processo_id>/assumir/', views.assumir_processo, name='assumir_processo'),
     path('processo/<int:processo_id>/aprovar/', views.aprovar_processo, name='aprovar_processo'),
     path('processo/<int:processo_id>/rejeitar/', views.rejeitar_processo, name='rejeitar_processo'),
+    path('processo/<int:processo_id>/pendenciar/', views.pendenciar_processo, name='pendenciar_processo'),
     path('processo/<int:processo_id>/suspender/', views.suspender_processo, name='suspender_processo'),
     path('processo/<int:processo_id>/cancelar/', views.cancelar_processo, name='cancelar_processo'),
+    path('processo/<int:processo_id>/marcar-correcao/', views.marcar_correcao_realizada, name='marcar_correcao_realizada'),
     
     # AJAX
     path('processo/<int:processo_id>/checklist/', views.atualizar_checklist, name='atualizar_checklist'),
