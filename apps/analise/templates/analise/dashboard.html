@@ -127,7 +127,7 @@
     <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Ações Rápidas</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href="{% url 'analise:esteira_analise' %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+            <a href="{% url 'analise:esteira' %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
                 <div class="flex-shrink-0">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
@@ -139,7 +139,7 @@
                 </div>
             </a>
             
-            <a href="{% url 'analise:esteira_analise' %}?status=pendente" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+            <a href="{% url 'analise:esteira' %}?status=pendente" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
                 <div class="flex-shrink-0">
                     <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -254,7 +254,7 @@
         <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-medium text-gray-900">Últimos Processos</h3>
-                <a href="{% url 'analise:esteira_analise' %}" class="text-sm text-blue-600 hover:text-blue-500">
+                <a href="{% url 'analise:esteira' %}" class="text-sm text-blue-600 hover:text-blue-500">
                     Ver todos
                 </a>
             </div>

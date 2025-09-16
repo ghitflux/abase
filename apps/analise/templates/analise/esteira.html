@@ -5,570 +5,152 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-6">
-  <!-- CSRF Token para JavaScript -->
-  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" id="csrf_token">
-  <!-- Header -->
   <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-900 dark:text-primary-foreground mb-2">Esteira de Análise</h1>
-    <p class="text-gray-600 dark:text-gray-400">Gerencie os processos de análise de cadastros</p>
+    <p class="text-gray-600 dark:text-gray-400">Gerencie os processos pendentes, em análise e em correção - {{ count_total }} processos no total</p>
   </div>
 
-  <!-- Filtros Rápidos por Status -->
-  <div class="mb-6">
-    <div class="flex flex-wrap gap-2 mb-4">
-      <a href="?status=todos" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
-         {% if not current_filters.status or current_filters.status == 'todos' %}
-           bg-red-600 text-white
-         {% else %}
-           bg-gray-100 text-gray-700 hover:bg-gray-200
-         {% endif %}">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-        </svg>
-        Todos ({{ total_processos }})
+  <!-- Filtros Rápidos -->
+  <div class="mb-4">
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'analise:esteira' %}" 
+         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if not request.GET.status %}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600{% endif %}">
+        Todos
       </a>
-
-      <a href="?status=pendente" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
-         {% if current_filters.status == 'pendente' %}
-           bg-yellow-500 text-white
-         {% else %}
-           bg-yellow-50 text-yellow-700 hover:bg-yellow-100
-         {% endif %}">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        Pendente ({{ pendentes_count|default:0 }})
+      <a href="?status=pendente" 
+         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if request.GET.status == 'pendente' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600{% endif %}">
+        Pendentes
       </a>
-
-      <a href="?status=em_analise" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
-         {% if current_filters.status == 'em_analise' %}
-           bg-blue-600 text-white
-         {% else %}
-           bg-blue-50 text-blue-700 hover:bg-blue-100
-         {% endif %}">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-        </svg>
-        Em Análise ({{ em_analise_count|default:0 }})
+      <a href="?status=em_analise" 
+         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if request.GET.status == 'em_analise' %}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600{% endif %}">
+        Em Análise
       </a>
-
-      <a href="?status=correcao" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
-         {% if current_filters.status == 'correcao' %}
-           bg-orange-600 text-white
-         {% else %}
-           bg-orange-50 text-orange-700 hover:bg-orange-100
-         {% endif %}">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-        </svg>
-        Correção ({{ correcao_count|default:0 }})
+      <a href="?status=em_correcao" 
+         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if request.GET.status == 'em_correcao' %}bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600{% endif %}">
+        Em Correção
       </a>
-
-      <a href="?status=aprovado" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
-         {% if current_filters.status == 'aprovado' %}
-           bg-green-600 text-white
-         {% else %}
-           bg-green-50 text-green-700 hover:bg-green-100
-         {% endif %}">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        Aprovados ({{ aprovados_count|default:0 }})
+      <a href="?status=aprovado" 
+         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if request.GET.status == 'aprovado' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600{% endif %}">
+        Aprovados
+      </a>
+      <a href="?status=cancelado" 
+         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if request.GET.status == 'cancelado' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600{% endif %}">
+        Cancelados
       </a>
     </div>
   </div>
 
-  <!-- Filtros Avançados -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6" x-data="filterManager()">
-    <!-- Barra de Filtros Básicos -->
-    <div class="p-4 border-b border-gray-100 dark:border-gray-700">
-      <form method="get" class="flex flex-wrap items-end gap-3">
-        <!-- Status (oculto - controlado pelos badges) -->
-        <input type="hidden" name="status" value="{{ current_filters.status }}">
-
-        <!-- Prioridade -->
-        <div class="min-w-0 flex-shrink-0">
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Prioridade</label>
-          <select name="prioridade" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-primary-foreground">
-            <option value="">Todas</option>
-            <option value="1" {% if current_filters.prioridade == '1' %}selected{% endif %}>⬇️ Baixa</option>
-            <option value="2" {% if current_filters.prioridade == '2' %}selected{% endif %}>➡️ Normal</option>
-            <option value="3" {% if current_filters.prioridade == '3' %}selected{% endif %}>⬆️ Alta</option>
-            <option value="4" {% if current_filters.prioridade == '4' %}selected{% endif %}>🔥 Urgente</option>
-          </select>
-        </div>
-
-        <!-- Analista -->
-        <div class="min-w-0 flex-shrink-0">
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Analista</label>
-          <select name="analista" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-primary-foreground">
-            <option value="">Todos</option>
-            <option value="sem_analista" {% if current_filters.analista == 'sem_analista' %}selected{% endif %}>👤 Sem Analista</option>
-            {% for analista in analistas %}
-            <option value="{{ analista.id }}" {% if current_filters.analista == analista.id|stringformat:"s" %}selected{% endif %}>{{ analista.get_full_name|default:analista.username }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <!-- Busca -->
-        <div class="min-w-0 flex-1">
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">🔍 Buscar</label>
-          <input type="text" name="search" value="{{ current_filters.search }}"
-                 placeholder="Nome, CPF/CNPJ, matrícula..."
-                 class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-primary-foreground">
-        </div>
-
-        <!-- Ações -->
-        <div class="flex gap-2">
-          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 text-sm font-medium transition-colors">
-            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            Filtrar
-          </button>
-          <button type="button" @click="toggleAdvanced" class="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 text-sm font-medium transition-colors">
-            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
-            </svg>
-            Avançado
-          </button>
-          {% if request.GET %}
-            <a href="?" class="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 text-sm font-medium transition-colors">
-              <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-              Limpar
-            </a>
-          {% endif %}
-        </div>
-      </form>
-    </div>
-
-    <!-- Filtros Avançados (Ocultos por padrão) -->
-    <div x-show="showAdvanced" x-transition class="p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-600">
-      <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Prioridade -->
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Prioridade</label>
-          <select name="prioridade" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
-            <option value="">Todas</option>
-            <option value="1" {% if current_filters.prioridade == '1' %}selected{% endif %}>Baixa</option>
-            <option value="2" {% if current_filters.prioridade == '2' %}selected{% endif %}>Normal</option>
-            <option value="3" {% if current_filters.prioridade == '3' %}selected{% endif %}>Alta</option>
-            <option value="4" {% if current_filters.prioridade == '4' %}selected{% endif %}>Urgente</option>
-          </select>
-        </div>
-
-        <!-- Data de Entrada -->
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Data de Entrada</label>
-          <div class="flex gap-2">
-            <input type="date" name="data_entrada_inicio" value="{{ current_filters.data_entrada_inicio }}"
-                   class="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
-            <span class="text-xs text-gray-500 dark:text-gray-400 self-center">até</span>
-            <input type="date" name="data_entrada_fim" value="{{ current_filters.data_entrada_fim }}"
-                   class="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
+  <!-- Filtros: remove prioridade; adiciona agente -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+    <div class="p-4">
+      <form id="filtros" method="get"
+            hx-get="{% url 'analise:esteira_block' %}"
+            hx-target="#blocks"
+            hx-include="#filtros"
+            hx-push-url="true">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Analista</label>
+            <select name="analista" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-primary-foreground">
+              <option value="">Todos</option>
+              {% for u in users %}
+                <option value="{{ u.id }}" {% if request.GET.analista == u.id|stringformat:"s" %}selected{% endif %}>
+                  {{ u.get_full_name|default:u.username }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Agente</label>
+            <select name="agente" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-primary-foreground">
+              <option value="">Todos</option>
+              {% for u in users %}
+                <option value="{{ u.id }}" {% if request.GET.agente == u.id|stringformat:"s" %}selected{% endif %}>
+                  {{ u.get_full_name|default:u.username }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buscar</label>
+            <input type="text" name="search" value="{{ request.GET.search }}" 
+                   class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-primary-foreground" 
+                   placeholder="Nome, CPF/CNPJ, observações...">
           </div>
         </div>
-
-        <!-- Tipo de Análise -->
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Tipo de Análise</label>
-          <select name="tipo_analise" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
-            <option value="">Todos os tipos</option>
-            <option value="documental" {% if current_filters.tipo_analise == 'documental' %}selected{% endif %}>Documental</option>
-            <option value="dados" {% if current_filters.tipo_analise == 'dados' %}selected{% endif %}>Dados</option>
-            <option value="completa" {% if current_filters.tipo_analise == 'completa' %}selected{% endif %}>Completa</option>
-          </select>
-        </div>
-
-        <!-- Ordenação -->
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ordenar por</label>
-          <select name="ordenacao" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-gray-700 dark:text-primary-foreground">
-            <option value="-prioridade,-data_entrada" {% if current_filters.ordenacao == '-prioridade,-data_entrada' %}selected{% endif %}>Padrão (Prioridade)</option>
-            <option value="-data_entrada" {% if current_filters.ordenacao == '-data_entrada' %}selected{% endif %}>Data (Mais recente)</option>
-            <option value="data_entrada" {% if current_filters.ordenacao == 'data_entrada' %}selected{% endif %}>Data (Mais antiga)</option>
-            <option value="cadastro__nome_completo" {% if current_filters.ordenacao == 'cadastro__nome_completo' %}selected{% endif %}>Nome (A-Z)</option>
-          </select>
-        </div>
-
-        <!-- Botões de ação avançados -->
-        <div class="lg:col-span-4 flex justify-end gap-2 pt-2">
-          <button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-sm font-medium transition-colors">
+        <div class="mt-4">
+          <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors" type="submit">
             Aplicar Filtros
           </button>
-          <button type="button" @click="resetAdvanced" class="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 text-sm font-medium transition-colors">
-            Limpar Avançados
-          </button>
+          <a href="{% url 'analise:esteira' %}" class="ml-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+            Limpar
+          </a>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Barra de Ações Múltiplas -->
-  <div id="bulkActions" class="hidden bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-4">
-        <span class="text-sm font-medium text-blue-900 dark:text-blue-100">
-          <span id="selectedCount">0</span> processo(s) selecionado(s)
-        </span>
-        <button onclick="clearSelection()" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100">
-          Limpar seleção
-        </button>
-      </div>
-      <div class="flex items-center space-x-3">
-        <button onclick="assumirProcessosSelecionados()" 
-                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-          </svg>
-          Assumir Selecionados
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- SEÇÃO PROCESSOS ATIVOS -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-      <h3 class="text-lg font-medium text-gray-900 dark:text-primary-foreground">
-        Processos Ativos 
-        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-          {{ total_ativos }}
-        </span>
-      </h3>
-      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Processos pendentes, em análise e em correção</p>
-    </div>
-    <div id="esteira-analista" 
-         hx-get="{% url 'analise:esteira_fragment' %}" 
-         hx-trigger="load, every 5s" 
+  <!-- Blocos: 5 containers; primeira carga via HTMX (load) -->
+  <div id="blocks" class="space-y-6">
+    <!-- Bloco Pendentes -->
+    <div id="block-pendentes"
+         hx-get="{% url 'analise:esteira_block' %}?block=pendentes&{{ request.GET.urlencode }}"
+         hx-trigger="load"
          hx-swap="outerHTML">
-      {# Render inicial (para não mostrar vazio na primeira carga): #}
-      {% include 'analise/partials/_esteira_lista.html' with itens=page_obj_ativos %}
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-center h-20">
+          <div class="text-gray-500">Carregando Pendentes...</div>
+        </div>
+      </div>
     </div>
 
-    
-    <!-- Paginação Processos Ativos -->
-    {% if page_obj_ativos.has_other_pages %}
-    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-      <nav class="flex justify-center items-center space-x-2">
-        {% if page_obj_ativos.has_previous %}
-          <a href="?page_ativos={{ page_obj_ativos.previous_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-            Anterior
-          </a>
-        {% endif %}
-        
-        <span class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
-          Página {{ page_obj_ativos.number }} de {{ page_obj_ativos.paginator.num_pages }}
-        </span>
-        
-        {% if page_obj_ativos.has_next %}
-          <a href="?page_ativos={{ page_obj_ativos.next_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-            Próxima
-          </a>
-        {% endif %}
-      </nav>
+    <!-- Bloco Em Análise -->
+    <div id="block-em_analise"
+         hx-get="{% url 'analise:esteira_block' %}?block=em_analise&{{ request.GET.urlencode }}"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-center h-20">
+          <div class="text-gray-500">Carregando Em Análise...</div>
+        </div>
+      </div>
     </div>
-    {% endif %}
+
+    <!-- Bloco Em Correção -->
+    <div id="block-em_correcao"
+         hx-get="{% url 'analise:esteira_block' %}?block=em_correcao&{{ request.GET.urlencode }}"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-center h-20">
+          <div class="text-gray-500">Carregando Em Correção...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloco Efetivados -->
+    <div id="block-efetivados"
+         hx-get="{% url 'analise:esteira_block' %}?block=efetivados&{{ request.GET.urlencode }}"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-center h-20">
+          <div class="text-gray-500">Carregando Efetivados...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloco Cancelados -->
+    <div id="block-cancelados"
+         hx-get="{% url 'analise:esteira_block' %}?block=cancelados&{{ request.GET.urlencode }}"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-center h-20">
+          <div class="text-gray-500">Carregando Cancelados...</div>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <!-- SEÇÃO PROCESSOS FINALIZADOS -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-      <h3 class="text-lg font-medium text-gray-900 dark:text-primary-foreground">
-        Processos Finalizados 
-        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-          {{ total_finalizados }}
-        </span>
-      </h3>
-      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Processos aprovados, rejeitados e cancelados</p>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead class="bg-gray-50 dark:bg-gray-700">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Processo</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tipo</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Analista</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Finalizado em</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ações</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          {% for processo in page_obj_finalizados %}
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm font-medium text-gray-900 dark:text-primary-foreground">
-                #{{ processo.id }}
-              </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">
-                {{ processo.cadastro.nome_completo|truncatechars:30 }}
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                {% if processo.tipo_analise == 'completa' %}
-                  bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
-                {% elif processo.tipo_analise == 'documental' %}
-                  bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
-                {% else %}
-                  bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                {% endif %}">
-                {{ processo.get_tipo_analise_display }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                {% if processo.status == 'aprovado' %}
-                  bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                {% elif processo.status == 'rejeitado' %}
-                  bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                {% elif processo.status == 'cancelado' %}
-                  bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
-                {% endif %}">
-                {{ processo.get_status_display }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900 dark:text-primary-foreground">
-                {{ processo.analista_responsavel.get_full_name|default:processo.analista_responsavel.username|default:"Não atribuído" }}
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900 dark:text-primary-foreground">
-                {{ processo.data_conclusao|date:"d/m/Y H:i"|default:"N/A" }}
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <div class="flex items-center space-x-2">
-                <a href="{% url 'analise:detalhe_processo' processo.id %}" 
-                   class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                   title="Ver detalhes">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                  </svg>
-                </a>
-              </div>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-              Nenhum processo finalizado encontrado.
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    
-    <!-- Paginação Processos Finalizados -->
-    {% if page_obj_finalizados.has_other_pages %}
-    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-      <nav class="flex justify-center items-center space-x-2">
-        {% if page_obj_finalizados.has_previous %}
-          <a href="?page_finalizados={{ page_obj_finalizados.previous_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-            Anterior
-          </a>
-        {% endif %}
-        
-        <span class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
-          Página {{ page_obj_finalizados.number }} de {{ page_obj_finalizados.paginator.num_pages }}
-        </span>
-        
-        {% if page_obj_finalizados.has_next %}
-          <a href="?page_finalizados={{ page_obj_finalizados.next_page_number }}" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-            Próxima
-          </a>
-        {% endif %}
-      </nav>
-    </div>
-    {% endif %}
-  </div>
-
 </div>
-
-<script>
-// Verificação inicial quando a página carrega
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('Esteira de análise carregada');
-  console.log('CSRF Token disponível:', document.getElementById('csrf_token') ? 'SIM' : 'NÃO');
-  console.log('Total de processos na página:', document.querySelectorAll('.processo-checkbox').length);
-});
-
-function assumirProcesso(processoId) {
-  console.log('Tentando assumir processo:', processoId);
-  if (confirm('Deseja assumir este processo?')) {
-    const csrfToken = document.getElementById('csrf_token').value;
-    console.log('CSRF Token obtido:', csrfToken ? 'OK' : 'ERRO');
-    fetch(`/analise/processo/${processoId}/assumir/`, {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': csrfToken,
-        'Content-Type': 'application/json',
-      },
-    })
-    .then(response => {
-      console.log('Response status:', response.status);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Response data:', data);
-      if (data.success) {
-        alert('Processo assumido com sucesso!');
-        location.reload();
-      } else {
-        alert('Erro ao assumir processo: ' + data.message);
-      }
-    })
-    .catch(error => {
-      console.error('Erro completo:', error);
-      alert('Erro ao assumir processo: ' + error.message);
-    });
-  }
-}
-
-// Funções para seleção múltipla
-function toggleAllProcessos(selectAllCheckbox) {
-  const checkboxes = document.querySelectorAll('.processo-checkbox');
-  checkboxes.forEach(checkbox => {
-    checkbox.checked = selectAllCheckbox.checked;
-  });
-  updateSelectedCount();
-}
-
-function updateSelectedCount() {
-  const checkboxes = document.querySelectorAll('.processo-checkbox:checked');
-  const count = checkboxes.length;
-  const selectedCountSpan = document.getElementById('selectedCount');
-  const bulkActions = document.getElementById('bulkActions');
-  const selectAllCheckbox = document.getElementById('selectAll');
-  
-  selectedCountSpan.textContent = count;
-  
-  if (count > 0) {
-    bulkActions.classList.remove('hidden');
-  } else {
-    bulkActions.classList.add('hidden');
-  }
-  
-  // Atualizar o estado do checkbox "Selecionar todos"
-  const allCheckboxes = document.querySelectorAll('.processo-checkbox');
-  if (count === 0) {
-    selectAllCheckbox.indeterminate = false;
-    selectAllCheckbox.checked = false;
-  } else if (count === allCheckboxes.length) {
-    selectAllCheckbox.indeterminate = false;
-    selectAllCheckbox.checked = true;
-  } else {
-    selectAllCheckbox.indeterminate = true;
-    selectAllCheckbox.checked = false;
-  }
-}
-
-function clearSelection() {
-  const checkboxes = document.querySelectorAll('.processo-checkbox');
-  const selectAllCheckbox = document.getElementById('selectAll');
-  
-  checkboxes.forEach(checkbox => {
-    checkbox.checked = false;
-  });
-  selectAllCheckbox.checked = false;
-  selectAllCheckbox.indeterminate = false;
-  
-  updateSelectedCount();
-}
-
-function assumirProcessosSelecionados() {
-  console.log('Tentando assumir processos selecionados');
-  const checkboxes = document.querySelectorAll('.processo-checkbox:checked');
-  const processoIds = Array.from(checkboxes).map(checkbox => checkbox.value);
-  console.log('Processos selecionados:', processoIds);
-  
-  if (processoIds.length === 0) {
-    alert('Selecione ao menos um processo.');
-    return;
-  }
-  
-  const count = processoIds.length;
-  const confirmMessage = count === 1 
-    ? 'Deseja assumir este processo?' 
-    : `Deseja assumir ${count} processos?`;
-  
-  if (confirm(confirmMessage)) {
-    // Mostrar indicador de carregamento
-    const button = document.querySelector('button[onclick="assumirProcessosSelecionados()"]');
-    if (!button) {
-      console.error('Botão não encontrado');
-      return;
-    }
-    const originalText = button.innerHTML;
-    button.disabled = true;
-    button.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Assumindo...';
-    
-    const csrfToken = document.getElementById('csrf_token').value;
-    fetch('/analise/processos/assumir-multiplos/', {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': csrfToken,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ processo_ids: processoIds })
-    })
-    .then(response => {
-      console.log('Bulk response status:', response.status);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Bulk response data:', data);
-      if (data.success) {
-        alert(`${data.count} processo(s) assumido(s) com sucesso!`);
-        location.reload();
-      } else {
-        alert('Erro ao assumir processos: ' + data.message);
-        button.disabled = false;
-        button.innerHTML = originalText;
-      }
-    })
-    .catch(error => {
-      console.error('Erro bulk:', error);
-      alert('Erro ao assumir processos: ' + error.message);
-      button.disabled = false;
-      button.innerHTML = originalText;
-    });
-  }
-}
-
-// Filter manager
-function filterManager() {
-    return {
-        showAdvanced: false,
-        
-        toggleAdvanced() {
-            this.showAdvanced = !this.showAdvanced;
-        },
-        
-        resetAdvanced() {
-            const advancedForm = document.querySelectorAll('[x-show="showAdvanced"] input, [x-show="showAdvanced"] select');
-            advancedForm.forEach(field => {
-                if (field.type === 'date' || field.type === 'number' || field.type === 'text') {
-                    field.value = '';
-                } else if (field.tagName === 'SELECT') {
-                    field.selectedIndex = 0;
-                }
-            });
-        }
-    }
-}
-</script>
 {% endblock %}

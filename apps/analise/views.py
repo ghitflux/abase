@@ -1,29 +1,172 @@
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.http import JsonResponse
-from django.db.models import Q
-from django.utils import timezone
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
+from django.db.models import Q
+from django.contrib.auth import get_user_model
+from django.contrib import messages
+# JsonResponse import removed as it was unused
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
+# csrf_exempt import removed as it was unused
 from django.db import transaction
+# json import removed as it was unused
 
-from .models import AnaliseProcesso, ChecklistAnalise, HistoricoAnalise, StatusAnalise, TipoAnalise
-# Cadastro is used indirectly through foreign key relationships
+from core.utils.model_paths import is_valid_text_path
+from .models import AnaliseProcesso, HistoricoAnalise, StatusAnalise
 from apps.cadastros.choices import StatusCadastro
 from apps.tesouraria.models import ProcessoTesouraria
 from apps.accounts.decorators import analista_required
+from apps.notificacoes.models import Notificacao
 
+User = get_user_model()
+
+# Mapeamento de status (permite variações que você já usa)
+STATUS_MAP = {
+    "pendentes": [
+        "PENDENTE", "ENVIADO_PARA_CORRECAO", "AGUARDANDO_CORRECAO"
+    ],
+    "em_analise": [
+        "EM_ANALISE"
+    ],
+    "em_correcao": [
+        "CORRECAO_REALIZADA", "CORRECAO_FEITA", "CORRECAO"
+    ],
+    "efetivados": [
+        "APROVADO", "EFETIVADO"
+    ],
+    "cancelados": [
+        "CANCELADO", "REPROVADO"
+    ],
+}
+
+# Campos candidatos para busca textual (apenas os válidos serão aplicados)
+SEARCH_FIELDS = [
+    "id",
+    "cadastro__nome_completo",
+    "cadastro__cpf_cnpj",
+    "observacoes_analista",
+    "feedback_agente",
+]
+
+def _status_q(status_list):
+    q = Q()
+    s_upper = [s.upper() for s in status_list]
+    # Tenta com enum (StatusAnalise.*). Se não existir, usa string direta.
+    for s in s_upper:
+        # suporte a enums no model
+        if hasattr(StatusAnalise, s):
+            q |= Q(status=getattr(StatusAnalise, s))
+        else:
+            q |= Q(status__iexact=s) | Q(status__icontains=s.replace("_", " "))
+    return q
+
+def _apply_search(model, qs, term):
+    if not term:
+        return qs
+    q = Q()
+    for path in SEARCH_FIELDS:
+        # id não precisa ser textual
+        if path == "id" and term.isdigit():
+            q |= Q(id=int(term))
+            continue
+        if is_valid_text_path(model, path):
+            q |= Q(**{f"{path}__icontains": term})
+    return qs.filter(q)
+
+def _apply_analista(qs, analista_id):
+    if not analista_id:
+        return qs
+    return qs.filter(analista_responsavel_id=analista_id)
+
+def _apply_agente(qs, agente_id):
+    if not agente_id:
+        return qs
+    # tente agente_responsavel via cadastro
+    return qs.filter(cadastro__agente_responsavel_id=agente_id)
+
+def _base_queryset(request):
+    qs = AnaliseProcesso.objects.all().select_related(
+        "analista_responsavel",
+        "cadastro__agente_responsavel",
+    )
+    # filtros
+    search = request.GET.get("search") or request.GET.get("q") or ""
+    analista = request.GET.get("analista") or ""
+    agente = request.GET.get("agente") or ""
+    status = request.GET.get("status") or ""
+
+    qs = _apply_search(AnaliseProcesso, qs, search)
+    qs = _apply_analista(qs, analista)
+    qs = _apply_agente(qs, agente)
+    
+    # Aplicar filtro por status dos filtros rápidos
+    if status:
+        if status == "pendente":
+            qs = qs.filter(_status_q(["PENDENTE", "ENVIADO_PARA_CORRECAO", "AGUARDANDO_CORRECAO"]))
+        elif status == "em_analise":
+            qs = qs.filter(_status_q(["EM_ANALISE"]))
+        elif status == "em_correcao":
+            qs = qs.filter(_status_q(["CORRECAO_REALIZADA", "CORRECAO_FEITA", "CORRECAO"]))
+        elif status == "aprovado":
+            qs = qs.filter(_status_q(["APROVADO", "EFETIVADO"]))
+        elif status == "cancelado":
+            qs = qs.filter(_status_q(["CANCELADO", "REPROVADO"]))
+    
+    return qs
 
 @login_required
 @analista_required
+def analise_redirect(request):
+    # /analise/ → /analise/esteira/
+    return redirect("analise:esteira")
+
+@login_required
+@analista_required
+def esteira(request):
+    """
+    Renderiza a Esteira com 5 blocos, cada um paginado em 10 (HTMX carrega fragmentos).
+    """
+    # Dados iniciais (primeira página de cada bloco) — render estático
+    qs = _base_queryset(request)
+
+    context = {
+        "users": User.objects.all().order_by("first_name","last_name","username"),
+        "count_total": qs.count(),
+    }
+    return render(request, "analise/esteira.html", context)
+
+@login_required
+@analista_required
+def esteira_block(request):
+    """
+    Fragmento HTMX para um bloco específico com paginação.
+    Parâmetros:
+      - block: pendentes|em_analise|em_correcao|efetivados|cancelados
+      - page: número (default 1)
+    """
+    block = request.GET.get("block", "pendentes")
+    page = int(request.GET.get("page", "1") or "1")
+
+    if block not in STATUS_MAP:
+      block = "pendentes"
+
+    qs = _base_queryset(request).filter(_status_q(STATUS_MAP[block]))
+
+    paginator = Paginator(qs.order_by("-id"), 10)
+    page_obj = paginator.get_page(page)
+
+    return render(request, "analise/partials/_esteira_block.html", {
+        "block": block,
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "request": request,
+    })
+
+# Manter outras views existentes
+@login_required
+@analista_required
 def dashboard(request):
-    """
-    Dashboard principal do módulo de análise.
-    
-    Exibe estatísticas da esteira de análise e processos pendentes.
-    """
+    """Dashboard principal do módulo de análise."""
     
     # Estatísticas gerais
     total_processos = AnaliseProcesso.objects.count()
@@ -38,13 +181,6 @@ def dashboard(request):
         prazo_analise__lt=timezone.now(),
         data_conclusao__isnull=True
     ).count()
-    
-    # Removido: Processos por prioridade (não mais necessário)
-    
-    # Processos enviados para correção (nova seção)
-    processos_para_correcao = AnaliseProcesso.objects.filter(
-        status__in=[StatusAnalise.ENVIADO_PARA_CORRECAO, StatusAnalise.CORRECAO_REALIZADA]
-    ).select_related('cadastro', 'analista_responsavel').order_by('-data_entrada')[:10]
     
     # Últimos processos
     ultimos_processos = AnaliseProcesso.objects.select_related(
@@ -65,822 +201,204 @@ def dashboard(request):
         'processos_enviados_correcao': processos_enviados_correcao,
         'processos_correcao_realizada': processos_correcao_realizada,
         'processos_em_atraso': processos_em_atraso,
-        'processos_para_correcao': processos_para_correcao,
         'ultimos_processos': ultimos_processos,
         'meus_processos': meus_processos,
     }
     
     return render(request, 'analise/dashboard.html', context)
 
-
-@login_required
-@analista_required
-def esteira_analise(request):
-    """
-    Lista todos os processos na esteira de análise com filtros e paginação.
-    CORREÇÃO: Prioriza processos com correção realizada.
-    """
-    
-    # Filtros
-    status_filter = request.GET.get('status', '')
-    prioridade_filter = request.GET.get('prioridade', '')
-    analista_filter = request.GET.get('analista', '')
-    search = request.GET.get('search', '')
-    page = request.GET.get('page', 1)
-    
-    # Query base
-    base_query = AnaliseProcesso.objects.select_related(
-        'cadastro', 'analista_responsavel'
-    ).prefetch_related('checklist_itens')
-    
-    # Aplicar filtros
-    if status_filter and status_filter != 'todos':
-        if status_filter == 'correcao':
-            # CORREÇÃO: Incluir CORRECAO_REALIZADA nos filtros de correção
-            base_query = base_query.filter(
-                status__in=[StatusAnalise.ENVIADO_PARA_CORRECAO, StatusAnalise.CORRECAO_REALIZADA, StatusAnalise.CORRECAO_FEITA]
-            )
-        else:
-            base_query = base_query.filter(status=status_filter)
-    
-    if prioridade_filter:
-        base_query = base_query.filter(prioridade=prioridade_filter)
-    
-    if analista_filter:
-        base_query = base_query.filter(analista_responsavel_id=analista_filter)
-    
-    if search:
-        base_query = base_query.filter(
-            Q(cadastro__nome_completo__icontains=search) |
-            Q(cadastro__cpf_cnpj__icontains=search) |
-            Q(observacoes_analista__icontains=search)
-        )
-    
-    # CORREÇÃO: Ordenação priorizando correções realizadas
-    processos = base_query.extra(
-        select={
-            'prioridade_correcao': "CASE WHEN status = 'correcao_realizada' THEN 1 ELSE 0 END"
-        }
-    ).order_by('-prioridade_correcao', '-prioridade', 'data_entrada')
-    
-    # CORREÇÃO: Contadores atualizados para incluir CORRECAO_REALIZADA
-    total_processos = AnaliseProcesso.objects.count()
-    pendentes_count = AnaliseProcesso.objects.filter(status=StatusAnalise.PENDENTE).count()
-    em_analise_count = AnaliseProcesso.objects.filter(status=StatusAnalise.EM_ANALISE).count()
-    correcao_count = AnaliseProcesso.objects.filter(
-        status__in=[StatusAnalise.ENVIADO_PARA_CORRECAO, StatusAnalise.CORRECAO_REALIZADA, StatusAnalise.CORRECAO_FEITA]
-    ).count()
-    aprovados_count = AnaliseProcesso.objects.filter(status=StatusAnalise.APROVADO).count()
-    
-    # Paginação
-    paginator = Paginator(processos, 25)  # 25 processos por página
-    page_obj = paginator.get_page(page)
-    
-    context = {
-        'page_obj': page_obj,
-        'processos': page_obj,  # Para compatibilidade com template existente
-        'status_choices': StatusAnalise.choices,
-        'prioridade_choices': [(1, 'Baixa'), (2, 'Normal'), (3, 'Alta'), (4, 'Urgente')],
-        'current_filters': {
-            'status': status_filter,
-            'prioridade': prioridade_filter,
-            'analista': analista_filter,
-            'search': search,
-        },
-        'total_processos': total_processos,
-        'pendentes_count': pendentes_count,
-        'em_analise_count': em_analise_count,
-        'correcao_count': correcao_count,
-        'aprovados_count': aprovados_count,
-    }
-    
-    return render(request, 'analise/esteira.html', context)
-
-
 @login_required
 @analista_required
 def detalhe_processo(request, processo_id):
-    """
-    Exibe detalhes de um processo de análise específico.
-    """
-    
+    """Visualização detalhada de um processo de análise"""
     processo = get_object_or_404(
         AnaliseProcesso.objects.select_related('cadastro', 'analista_responsavel'),
         id=processo_id
     )
     
-    # Checklist do processo
-    checklist_itens = processo.checklist_itens.all().order_by('obrigatorio', 'item')
+    # Buscar checklist associado
+    checklist_itens = processo.checklist_itens.all().order_by('id')
     
-    # Histórico do processo
-    historico = processo.historico.select_related('usuario').order_by('-data_acao')
+    # Buscar histórico
+    historico = processo.historico.all().order_by('-data_acao')
     
-    # Histórico completo: combinando histórico de análise com dados do cadastro
-    historico_completo = []
-    
-    # Adicionar histórico do processo de análise
-    for evento in historico:
-        historico_completo.append({
-            'tipo': 'analise',
-            'data': evento.data_acao,
-            'acao': evento.acao,
-            'usuario': evento.usuario,
-            'status_anterior': evento.status_anterior,
-            'status_novo': evento.status_novo,
-            'observacoes': evento.observacoes,
-        })
-    
-    # Adicionar marcos importantes do cadastro
-    if processo.cadastro.created_at:
-        historico_completo.append({
-            'tipo': 'cadastro',
-            'data': processo.cadastro.created_at,
-            'acao': 'Cadastro criado pelo agente',
-            'usuario': processo.cadastro.agente_responsavel,
-            'status_anterior': None,
-            'status_novo': None,
-            'observacoes': f'Status inicial: {processo.cadastro.get_status_display()}',
-        })
-    
-    if processo.cadastro.approved_at:
-        historico_completo.append({
-            'tipo': 'cadastro',
-            'data': processo.cadastro.approved_at,
-            'acao': 'Cadastro aprovado em análise',
-            'usuario': None,
-            'status_anterior': None,
-            'status_novo': None,
-            'observacoes': 'Cadastro aprovado e encaminhado para tesouraria',
-        })
-    
-    if processo.cadastro.paid_at:
-        historico_completo.append({
-            'tipo': 'cadastro',
-            'data': processo.cadastro.paid_at,
-            'acao': 'Pagamento efetuado',
-            'usuario': None,
-            'status_anterior': None,
-            'status_novo': None,
-            'observacoes': 'Cadastro efetivado com sucesso',
-        })
-    
-    # Ordenar histórico completo por data decrescente
-    historico_completo.sort(key=lambda x: x['data'], reverse=True)
-    
-    # Documentos do cadastro
-    documentos = processo.cadastro.documentos.all() if hasattr(processo.cadastro, 'documentos') else []
+    # Verificar se usuário pode assumir/analisar este processo
+    pode_assumir = not processo.analista_responsavel or processo.analista_responsavel == request.user
+    pode_analisar = processo.analista_responsavel == request.user
     
     context = {
         'processo': processo,
         'checklist_itens': checklist_itens,
         'historico': historico,
-        'historico_completo': historico_completo,
-        'documentos': documentos,
+        'pode_assumir': pode_assumir,
+        'pode_analisar': pode_analisar,
         'status_choices': StatusAnalise.choices,
-        'tipo_analise_choices': TipoAnalise.choices,
     }
     
     return render(request, 'analise/detalhe_processo.html', context)
-
 
 @login_required
 @analista_required
 @require_http_methods(["POST"])
 def assumir_processo(request, processo_id):
-    """
-    Permite que um analista assuma um processo para análise.
-    """
-    
+    """Permite ao analista assumir um processo pendente"""
     processo = get_object_or_404(AnaliseProcesso, id=processo_id)
-    
+
     if processo.analista_responsavel and processo.analista_responsavel != request.user:
-        error_message = 'Este processo já está sendo analisado por outro analista.'
-        # Verifica se é requisição AJAX
-        if request.headers.get('Content-Type') == 'application/json':
-            return JsonResponse({'success': False, 'message': error_message})
-        messages.error(request, error_message)
-        return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
+        messages.error(request, 'Este processo já está sendo analisado por outro analista.')
+        return redirect('analise:esteira')
+
     with transaction.atomic():
-        # Capturar status anterior para o histórico
-        status_anterior = processo.status
-        
-        # Atualizar processo
         processo.analista_responsavel = request.user
         processo.status = StatusAnalise.EM_ANALISE
         processo.data_inicio_analise = timezone.now()
         processo.save()
-        
-        # Se o cadastro foi resubmitido, atualizar seu status para enviado para análise
-        if processo.cadastro.status == StatusCadastro.RESUBMITTED:
-            processo.cadastro.status = StatusCadastro.SENT_REVIEW
-            processo.cadastro.save()
-        
+
         # Registrar no histórico
         HistoricoAnalise.objects.create(
             processo=processo,
             usuario=request.user,
-            acao='Processo assumido para análise',
-            status_anterior=status_anterior,
+            acao='Processo assumido pelo analista',
+            status_anterior=processo.status,
             status_novo=StatusAnalise.EM_ANALISE
         )
-    
-    success_message = f'Processo #{processo_id} assumido com sucesso!'
-    
-    # Verifica se é requisição AJAX
-    if request.headers.get('Content-Type') == 'application/json':
-        return JsonResponse({'success': True, 'message': success_message})
-    
-    messages.success(request, success_message)
-    return redirect('analise:detalhe_processo', processo_id=processo_id)
 
+    messages.success(request, f'Processo #{processo_id} assumido com sucesso!')
+    return redirect('analise:detalhe_processo', processo_id=processo_id)
 
 @login_required
 @analista_required
 @require_http_methods(["POST"])
 def aprovar_processo(request, processo_id):
-    """
-    Aprova um processo e o encaminha para a tesouraria.
-    """
-    
+    """Aprova um processo e envia para tesouraria"""
     processo = get_object_or_404(AnaliseProcesso, id=processo_id)
-    
+
     if processo.analista_responsavel != request.user:
         messages.error(request, 'Você não tem permissão para aprovar este processo.')
         return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    observacoes = request.POST.get('observacoes', '')
-    
+
     with transaction.atomic():
         # Atualizar processo
         processo.status = StatusAnalise.APROVADO
         processo.data_conclusao = timezone.now()
-        processo.observacoes_analista = observacoes
         processo.save()
-        
+
         # Atualizar status do cadastro
         processo.cadastro.status = StatusCadastro.APPROVED_REVIEW
-        processo.cadastro.approved_at = timezone.now()
         processo.cadastro.save()
-        
-        # Criar processo na tesouraria com os dados bancários e PIX
-        try:
-            # Verificar se já existe um processo na tesouraria para este cadastro
-            processo_tesouraria, created = ProcessoTesouraria.objects.get_or_create(
-                cadastro=processo.cadastro,
-                defaults={
-                    'origem_analise': processo,
-                    'status': 'pendente',
-                    'observacoes_analise': observacoes,
-                    'agente_responsavel': processo.cadastro.agente_responsavel
-                }
-            )
-            
-            # Se já existia, atualizar com as novas informações
-            if not created:
-                processo_tesouraria.origem_analise = processo
-                processo_tesouraria.status = 'pendente'
-                processo_tesouraria.observacoes_analise = observacoes
-                processo_tesouraria.agente_responsavel = processo.cadastro.agente_responsavel
-                processo_tesouraria.save()
-                
-        except Exception:
-            # Se não existir o modelo ProcessoTesouraria, criar uma movimentação básica
-            from apps.tesouraria.models import MovimentacaoTesouraria
-            MovimentacaoTesouraria.objects.create(
-                descricao=f'Processo aprovado - {processo.cadastro.nome_completo}',
-                valor=processo.cadastro.valor_total_antecipacao or 0,
-                tipo='entrada',
-                data=timezone.now().date(),
-                usuario=request.user,
-                observacoes=f'Cadastro aprovado. Agente: {processo.cadastro.agente_responsavel}. Obs: {observacoes}'
-            )
-        
+
+        # Criar processo na tesouraria
+        ProcessoTesouraria.objects.get_or_create(
+            cadastro=processo.cadastro,
+            defaults={
+                'analista_origem': request.user,
+                'status': 'PENDENTE',
+                'data_aprovacao': timezone.now()
+            }
+        )
+
         # Registrar no histórico
         HistoricoAnalise.objects.create(
             processo=processo,
             usuario=request.user,
-            acao='Processo aprovado e encaminhado para tesouraria',
-            status_anterior=StatusAnalise.EM_ANALISE,
-            status_novo=StatusAnalise.APROVADO,
-            observacoes=observacoes
+            acao='Processo aprovado e enviado para tesouraria',
+            status_anterior=processo.status,
+            status_novo=StatusAnalise.APROVADO
         )
-    
-    messages.success(request, f'Processo #{processo_id} aprovado e encaminhado para a tesouraria!')
-    return redirect('analise:esteira_analise')
 
+    messages.success(request, f'Processo #{processo_id} aprovado e enviado para tesouraria!')
+    return redirect('analise:esteira')
 
 @login_required
 @analista_required
 @require_http_methods(["POST"])
-def rejeitar_processo(request, processo_id):
-    """
-    Rejeita um processo e o devolve ao agente com pendências.
-    """
-    
+def enviar_para_correcao(request, processo_id):
+    """Envia processo para correção pelo agente"""
     processo = get_object_or_404(AnaliseProcesso, id=processo_id)
-    
+
     if processo.analista_responsavel != request.user:
-        messages.error(request, 'Você não tem permissão para rejeitar este processo.')
+        messages.error(request, 'Você não tem permissão para enviar este processo para correção.')
         return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    feedback_agente = request.POST.get('feedback_agente', '')
-    observacoes = request.POST.get('observacoes', '')
-    
-    if not feedback_agente:
+
+    feedback = request.POST.get('feedback_agente', '').strip()
+    if not feedback:
         messages.error(request, 'É obrigatório informar o feedback para o agente.')
         return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    with transaction.atomic():
-        # Atualizar processo - usar ENVIADO_PARA_CORRECAO em vez de REJEITADO
-        processo.status = StatusAnalise.ENVIADO_PARA_CORRECAO
-        processo.data_conclusao = timezone.now()
-        processo.feedback_agente = feedback_agente
-        processo.observacoes_analista = observacoes
-        processo.save()
-        
-        # Atualizar status do cadastro para pendência com agente
-        processo.cadastro.status = StatusCadastro.PENDING_AGENT
-        processo.cadastro.save()
-        
-        # Registrar no histórico
-        HistoricoAnalise.objects.create(
-            processo=processo,
-            usuario=request.user,
-            acao='Processo enviado para correção ao agente',
-            status_anterior=StatusAnalise.EM_ANALISE,
-            status_novo=StatusAnalise.ENVIADO_PARA_CORRECAO,
-            observacoes=f'Feedback: {feedback_agente}'
-        )
-    
-    messages.success(request, f'Processo #{processo_id} devolvido ao agente para correção!')
-    return redirect('analise:esteira_analise')
 
-
-@login_required
-@analista_required
-@require_http_methods(["POST"])
-def suspender_processo(request, processo_id):
-    """
-    Suspende um processo aguardando documentos adicionais.
-    """
-    
-    processo = get_object_or_404(AnaliseProcesso, id=processo_id)
-    
-    if processo.analista_responsavel != request.user:
-        messages.error(request, 'Você não tem permissão para suspender este processo.')
-        return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    motivo = request.POST.get('motivo', '')
-    
-    if not motivo:
-        messages.error(request, 'É obrigatório informar o motivo da suspensão.')
-        return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    with transaction.atomic():
-        # Atualizar processo - usar ENVIADO_PARA_CORRECAO em vez de SUSPENSO
-        processo.status = StatusAnalise.ENVIADO_PARA_CORRECAO
-        processo.observacoes_analista = motivo
-        processo.save()
-        
-        # Atualizar status do cadastro para pendência com agente
-        processo.cadastro.status = StatusCadastro.PENDING_AGENT
-        processo.cadastro.save()
-        
-        # Registrar no histórico
-        HistoricoAnalise.objects.create(
-            processo=processo,
-            usuario=request.user,
-            acao='Processo enviado para correção - aguardando documentos',
-            status_anterior=StatusAnalise.EM_ANALISE,
-            status_novo=StatusAnalise.ENVIADO_PARA_CORRECAO,
-            observacoes=motivo
-        )
-    
-    messages.success(request, 'Processo suspenso com sucesso!')
-    return redirect('analise:detalhe_processo', processo_id=processo_id)
-
-
-@login_required
-@analista_required
-@csrf_exempt
-def atualizar_checklist(request, processo_id):
-    """
-    Atualiza um item do checklist via AJAX.
-    """
-    
-    if request.method != 'POST':
-        return JsonResponse({'success': False, 'error': 'Método não permitido'})
-    
-    processo = get_object_or_404(AnaliseProcesso, id=processo_id)
-    
-    if processo.analista_responsavel != request.user:
-        return JsonResponse({'success': False, 'error': 'Sem permissão'})
-    
-    item_id = request.POST.get('item_id')
-    verificado = request.POST.get('verificado') == 'true'
-    observacoes = request.POST.get('observacoes', '')
-    
-    try:
-        item = ChecklistAnalise.objects.get(id=item_id, processo=processo)
-        item.verificado = verificado
-        item.observacoes = observacoes
-        item.verificado_por = request.user if verificado else None
-        item.data_verificacao = timezone.now() if verificado else None
-        item.save()
-        
-        return JsonResponse({'success': True})
-    except ChecklistAnalise.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Item não encontrado'})
-
-
-@login_required
-@analista_required
-@require_http_methods(["POST"])
-def assumir_processos_multiplos(request):
-    """
-    Assume múltiplos processos de uma vez.
-    """
-    import json
-    from django.db import transaction
-    
-    try:
-        data = json.loads(request.body)
-        processo_ids = data.get('processo_ids', [])
-        
-        if not processo_ids:
-            return JsonResponse({'success': False, 'message': 'Nenhum processo selecionado'})
-        
-        processos_assumidos = 0
-        processos_erro = []
-        
-        with transaction.atomic():
-            for processo_id in processo_ids:
-                try:
-                    processo = AnaliseProcesso.objects.get(id=processo_id)
-                    
-                    # Verificar se pode assumir
-                    if processo.analista_responsavel and processo.analista_responsavel != request.user:
-                        processos_erro.append(f'#{processo_id}: já assumido por outro analista')
-                        continue
-                    
-                    # Assumir processo
-                    status_anterior = processo.status
-                    processo.analista_responsavel = request.user
-                    processo.status = StatusAnalise.EM_ANALISE
-                    processo.data_inicio_analise = timezone.now()
-                    processo.save()
-                    
-                    # Se o cadastro foi resubmitido, atualizar seu status para enviado para análise
-                    if processo.cadastro.status == StatusCadastro.RESUBMITTED:
-                        processo.cadastro.status = StatusCadastro.SENT_REVIEW
-                        processo.cadastro.save()
-                    
-                    # Registrar no histórico
-                    HistoricoAnalise.objects.create(
-                        processo=processo,
-                        usuario=request.user,
-                        acao='Processo assumido (ação em lote)',
-                        status_anterior=status_anterior,
-                        status_novo=StatusAnalise.EM_ANALISE
-                    )
-                    
-                    processos_assumidos += 1
-                    
-                except AnaliseProcesso.DoesNotExist:
-                    processos_erro.append(f'#{processo_id}: não encontrado')
-                except Exception as e:
-                    processos_erro.append(f'#{processo_id}: {str(e)}')
-        
-        # Preparar resposta
-        message = f'{processos_assumidos} processo(s) assumido(s) com sucesso!'
-        if processos_erro:
-            message += f' Erros: {"; ".join(processos_erro)}'
-        
-        return JsonResponse({
-            'success': True,
-            'count': processos_assumidos,
-            'message': message,
-            'errors': processos_erro
-        })
-        
-    except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'message': 'Dados inválidos'})
-    except Exception as e:
-        return JsonResponse({'success': False, 'message': f'Erro interno: {str(e)}'})
-
-
-@login_required
-@analista_required
-def relatorio_analise(request):
-    """
-    Relatório de performance da análise.
-    """
-    
-    # Estatísticas por período
-    from datetime import timedelta
-    
-    hoje = timezone.now().date()
-    inicio_mes = hoje.replace(day=1)
-    inicio_semana = hoje - timedelta(days=hoje.weekday())
-    
-    # Processos por período
-    processos_hoje = AnaliseProcesso.objects.filter(data_entrada__date=hoje).count()
-    processos_semana = AnaliseProcesso.objects.filter(data_entrada__date__gte=inicio_semana).count()
-    processos_mes = AnaliseProcesso.objects.filter(data_entrada__date__gte=inicio_mes).count()
-    
-    # Tempo médio de análise
-    processos_concluidos = AnaliseProcesso.objects.filter(
-        data_conclusao__isnull=False,
-        data_entrada__date__gte=inicio_mes
-    )
-    
-    tempo_medio = None
-    if processos_concluidos.exists():
-        tempos = [(p.data_conclusao - p.data_entrada).total_seconds() / 3600 for p in processos_concluidos]
-        tempo_medio = sum(tempos) / len(tempos)
-    
-    context = {
-        'processos_hoje': processos_hoje,
-        'processos_semana': processos_semana,
-        'processos_mes': processos_mes,
-        'tempo_medio_horas': tempo_medio,
-        'processos_concluidos': processos_concluidos.count(),
-    }
-    
-    return render(request, 'analise/relatorio.html', context)
-
-
-@login_required
-@analista_required
-@require_http_methods(["POST"])
-def cancelar_processo(request, processo_id):
-    """
-    Cancela definitivamente um processo de análise.
-    """
-    
-    processo = get_object_or_404(AnaliseProcesso, id=processo_id)
-    
-    if processo.analista_responsavel != request.user:
-        messages.error(request, 'Você não tem permissão para cancelar este processo.')
-        return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    motivo_cancelamento = request.POST.get('motivo_cancelamento', '')
-    
-    if not motivo_cancelamento:
-        messages.error(request, 'É obrigatório informar o motivo do cancelamento.')
-        return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
     with transaction.atomic():
         # Atualizar processo
-        status_anterior = processo.status
-        processo.status = StatusAnalise.CANCELADO
-        processo.data_conclusao = timezone.now()
-        processo.feedback_agente = f'CADASTRO CANCELADO: {motivo_cancelamento}'
-        processo.observacoes_analista = f'Processo cancelado pelo analista: {motivo_cancelamento}'
-        processo.save()
-        
-        # Atualizar status do cadastro para cancelado
-        processo.cadastro.status = StatusCadastro.CANCELLED
-        processo.cadastro.save()
-        
-        # Registrar no histórico
-        HistoricoAnalise.objects.create(
-            processo=processo,
-            usuario=request.user,
-            acao='Processo cancelado definitivamente',
-            status_anterior=status_anterior,
-            status_novo=StatusAnalise.CANCELADO,
-            observacoes=f'Motivo: {motivo_cancelamento}'
-        )
-    
-    messages.success(request, f'Processo #{processo_id} cancelado definitivamente!')
-    return redirect('analise:esteira_analise')
-
-
-@login_required
-@analista_required
-@require_http_methods(["POST"])
-def pendenciar_processo(request, processo_id):
-    """
-    Pendencia um processo para correções sem rejeitá-lo.
-    Diferente de rejeitar, não altera o status do cadastro.
-    """
-    
-    processo = get_object_or_404(AnaliseProcesso, id=processo_id)
-    
-    if processo.analista_responsavel != request.user:
-        messages.error(request, 'Você não tem permissão para pendenciar este processo.')
-        return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    feedback_agente = request.POST.get('feedback_agente', '')
-    observacoes = request.POST.get('observacoes', '')
-    
-    if not feedback_agente:
-        messages.error(request, 'É obrigatório informar o feedback para o agente.')
-        return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    with transaction.atomic():
-        # Atualizar processo para status ENVIADO_PARA_CORRECAO
         processo.status = StatusAnalise.ENVIADO_PARA_CORRECAO
-        processo.feedback_agente = feedback_agente
-        processo.observacoes_analista = observacoes
-        processo.analista_responsavel = None  # Remove o analista responsável
-        processo.data_inicio_analise = None
+        processo.data_conclusao = timezone.now()
+        processo.feedback_agente = feedback
         processo.save()
-        
-        # IMPORTANTE: Atualizar o status do cadastro para PENDING_AGENT
-        # para que o agente saiba que precisa fazer correções
+
+        # Atualizar status do cadastro
         processo.cadastro.status = StatusCadastro.PENDING_AGENT
         processo.cadastro.save()
-        
+
         # Registrar no histórico
         HistoricoAnalise.objects.create(
             processo=processo,
             usuario=request.user,
             acao='Processo enviado para correção',
-            status_anterior=StatusAnalise.EM_ANALISE,
+            status_anterior=processo.status,
             status_novo=StatusAnalise.ENVIADO_PARA_CORRECAO,
-            observacoes=f'Feedback: {feedback_agente}. Obs: {observacoes}'
+            observacoes=f'Feedback: {feedback}'
         )
-    
-    messages.success(request, f'Processo #{processo_id} enviado para correção!')
-    return redirect('analise:esteira_analise')
 
-
-@login_required
-@require_http_methods(["POST"])
-def marcar_correcao_realizada(request, processo_id):
-    """
-    Permite ao agente marcar que realizou as correções solicitadas.
-    Altera o status para CORRECAO_REALIZADA e retorna para fila de análise.
-    """
-    
-    processo = get_object_or_404(AnaliseProcesso, id=processo_id)
-    
-    # Verificar se o processo está no status correto
-    if processo.status != StatusAnalise.ENVIADO_PARA_CORRECAO:
-        messages.error(request, 'Este processo não está aguardando correção.')
-        return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    # Verificar se o usuário é o agente responsável pelo cadastro
-    if processo.cadastro.agente_responsavel != request.user:
-        messages.error(request, 'Você não tem permissão para marcar correção neste processo.')
-        return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    observacoes_agente = request.POST.get('observacoes_agente', '')
-    
-    with transaction.atomic():
-        # CORREÇÃO: Atualizar processo para status CORRECAO_REALIZADA
-        status_anterior = processo.status
-        processo.status = StatusAnalise.CORRECAO_REALIZADA
-        # Limpar analista responsável para retornar à fila geral
-        processo.analista_responsavel = None
-        # Resetar data de início de análise
-        processo.data_inicio_analise = None
-        # Adicionar observações do agente
-        if observacoes_agente:
-            processo.observacoes_analista = f"{processo.observacoes_analista}\n\n[CORREÇÃO AGENTE - {timezone.now().strftime('%d/%m/%Y %H:%M')}]: {observacoes_agente}"
-        processo.save()
-        
-        # CORREÇÃO: Registrar no histórico com identificação completa do agente
-        HistoricoAnalise.objects.create(
-            processo=processo,
-            usuario=request.user,  # Agente responsável
-            acao=f'Correção realizada pelo agente {request.user.get_full_name()} - Retornado para fila de análise',
-            status_anterior=status_anterior,
-            status_novo=StatusAnalise.CORRECAO_REALIZADA,
-            observacoes=f'Observações do agente: {observacoes_agente}. Data/Hora: {timezone.now().strftime("%d/%m/%Y %H:%M:%S")}' if observacoes_agente else f'Correção realizada sem observações adicionais. Processo retornado para fila de análise. Data/Hora: {timezone.now().strftime("%d/%m/%Y %H:%M:%S")}'
-        )
-        
-        # CORREÇÃO: Atualizar status do cadastro para sincronização
-        processo.cadastro.status = StatusCadastro.RESUBMITTED
-        processo.cadastro.save()
-    
-    messages.success(request, f'✅ Processo #{processo_id} marcado como corrigido com sucesso! O cadastro de "{processo.cadastro.nome_completo}" retornou para a fila de análise.')
-    return redirect('analise:dashboard')
-
-
-@login_required
-@analista_required
-@require_http_methods(["POST"])
-def validar_correcao_e_aprovar(request, processo_id):
-    """
-    Permite ao analista validar a correção realizada e aprovar para tesouraria.
-    """
-    
-    processo = get_object_or_404(AnaliseProcesso, id=processo_id)
-    
-    # Verificar se o processo está no status correto
-    if processo.status != StatusAnalise.CORRECAO_REALIZADA:
-        messages.error(request, 'Este processo não está com correção realizada.')
-        return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    observacoes_validacao = request.POST.get('observacoes_validacao', '')
-    
-    with transaction.atomic():
-        # Atualizar processo para aprovado
-        processo.status = StatusAnalise.APROVADO
-        processo.analista_responsavel = request.user
-        processo.data_conclusao = timezone.now()
-        
-        # Adicionar observações da validação
-        if observacoes_validacao:
-            processo.observacoes_analista = f"{processo.observacoes_analista}\n\n[VALIDAÇÃO APROVAÇÃO - {timezone.now().strftime('%d/%m/%Y %H:%M')}]: {observacoes_validacao}"
-        
-        processo.save()
-        
-        # Registrar no histórico
-        HistoricoAnalise.objects.create(
-            processo=processo,
-            usuario=request.user,
-            acao='Correção validada e processo aprovado para tesouraria',
-            status_anterior=StatusAnalise.CORRECAO_REALIZADA,
-            status_novo=StatusAnalise.APROVADO,
-            observacoes=f'Validação: {observacoes_validacao}' if observacoes_validacao else 'Correção validada e aprovada sem observações adicionais.'
-        )
-        
-        # Criar processo na tesouraria
+        # Criar notificação para o agente
         try:
-            ProcessoTesouraria.objects.create(
-                cadastro=processo.cadastro,
-                processo_analise=processo,
-                status='pendente',
-                data_entrada=timezone.now()
+            Notificacao.objects.create(
+                usuario=processo.cadastro.agente_responsavel,
+                tipo='PROCESSO_REJEITADO',
+                titulo=f'Correções Necessárias - Processo #{processo.id}',
+                mensagem=f'O processo #{processo.id} foi rejeitado e precisa de correções. Feedback: {feedback}',
+                url_acao=f'/cadastros/{processo.cadastro.id}/?edit=1',
+                objeto_id=processo.id
             )
         except Exception:
-            # Log do erro mas não falha a operação
             pass
-    
-    messages.success(request, f'✅ Processo #{processo_id} validado e aprovado com sucesso! Encaminhado para tesouraria.')
-    return redirect('analise:esteira_analise')
 
-
-@login_required
-def esteira_fragment(request):
-    """
-    Retorna apenas o fragmento HTML da lista de processos para atualização via HTMX.
-    Foca nos processos que devem aparecer na esteira do analista.
-    """
-    user = request.user
-    
-    # Query base com os mesmos filtros da esteira principal
-    processos = AnaliseProcesso.objects.select_related(
-        'cadastro', 'analista_responsavel'
-    ).filter(
-        # Incluir processos que devem aparecer para o analista
-        status__in=[
-            StatusAnalise.PENDENTE,
-            StatusAnalise.EM_ANALISE, 
-            StatusAnalise.CORRECAO_FEITA
-        ]
-    ).order_by('-prioridade', 'data_entrada')[:50]  # Limitar para performance
-    
-    return render(request, "analise/partials/_esteira_lista.html", {"itens": processos})
-
+    messages.success(request, f'Processo #{processo_id} enviado para correção!')
+    return redirect('analise:esteira')
 
 @login_required
 @analista_required
 @require_http_methods(["POST"])
-def pendenciar_correcao_novamente(request, processo_id):
-    """
-    Permite ao analista pendenciar novamente um processo com correção realizada.
-    """
-    
+def cancelar_processo(request, processo_id):
+    """Cancela definitivamente um processo de análise"""
     processo = get_object_or_404(AnaliseProcesso, id=processo_id)
-    
-    # Verificar se o processo está no status correto
-    if processo.status != StatusAnalise.CORRECAO_REALIZADA:
-        messages.error(request, 'Este processo não está com correção realizada.')
+
+    if processo.analista_responsavel != request.user:
+        messages.error(request, 'Você não tem permissão para cancelar este processo.')
         return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
-    motivo_pendencia = request.POST.get('motivo_pendencia', '')
-    feedback_agente = request.POST.get('feedback_agente', '')
-    
-    if not motivo_pendencia:
-        messages.error(request, 'É obrigatório informar o motivo da nova pendência.')
+
+    motivo_cancelamento = request.POST.get('motivo_cancelamento', '').strip()
+    if not motivo_cancelamento:
+        messages.error(request, 'É obrigatório informar o motivo do cancelamento.')
         return redirect('analise:detalhe_processo', processo_id=processo_id)
-    
+
     with transaction.atomic():
-        # Atualizar processo para enviado para correção novamente
-        processo.status = StatusAnalise.ENVIADO_PARA_CORRECAO
-        processo.analista_responsavel = request.user
-        processo.feedback_agente = feedback_agente
-        
-        # Adicionar observações da nova pendência
-        processo.observacoes_analista = f"{processo.observacoes_analista}\n\n[NOVA PENDÊNCIA - {timezone.now().strftime('%d/%m/%Y %H:%M')}]: {motivo_pendencia}"
-        
+        # Atualizar processo
+        processo.status = StatusAnalise.CANCELADO
+        processo.data_conclusao = timezone.now()
+        processo.feedback_agente = f'CADASTRO CANCELADO: {motivo_cancelamento}'
+        processo.observacoes_analista = f'Processo cancelado pelo analista: {motivo_cancelamento}'
         processo.save()
-        
+
+        # Atualizar status do cadastro
+        processo.cadastro.status = StatusCadastro.CANCELLED
+        processo.cadastro.save()
+
         # Registrar no histórico
         HistoricoAnalise.objects.create(
             processo=processo,
             usuario=request.user,
-            acao='Processo pendenciado novamente após correção',
-            status_anterior=StatusAnalise.CORRECAO_REALIZADA,
-            status_novo=StatusAnalise.ENVIADO_PARA_CORRECAO,
-            observacoes=f'Nova pendência: {motivo_pendencia}. Feedback: {feedback_agente}' if feedback_agente else f'Nova pendência: {motivo_pendencia}'
+            acao='Processo cancelado definitivamente',
+            status_anterior=processo.status,
+            status_novo=StatusAnalise.CANCELADO,
+            observacoes=f'Motivo: {motivo_cancelamento}'
         )
-    
-    messages.warning(request, f'⚠️ Processo #{processo_id} pendenciado novamente. Feedback enviado ao agente.')
-    return redirect('analise:esteira_analise')
+
+    messages.success(request, f'Processo #{processo_id} cancelado definitivamente!')
+    return redirect('analise:esteira')

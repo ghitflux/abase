@@ -410,9 +410,6 @@
         <a href="{% url 'analise:esteira_analise' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
             ← Voltar para Esteira
         </a>
-        <a href="{% url 'analise:dashboard' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-            Dashboard
-        </a>
     </div>
 </div>
 
@@ -461,7 +458,7 @@
             <div class="mt-2 px-7 py-3">
                 <p class="text-sm text-gray-500">O cadastro será devolvido ao agente para correções. Informe quais ajustes são necessários.</p>
             </div>
-            <form method="post" action="{% url 'analise:pendenciar_processo' processo.id %}">
+            <form method="post" action="{% url 'analise:enviar_para_correcao' processo.id %}">
                 {% csrf_token %}
                 <div class="mt-4">
                     <textarea name="feedback_agente" placeholder="Informe o que precisa ser corrigido (obrigatório)" required

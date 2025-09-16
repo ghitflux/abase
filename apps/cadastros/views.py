@@ -159,7 +159,7 @@ def agente_create(request):
             print(f"New cadastro - Agent: {request.user}, Status: {cad.status}")
         else:  # Para edições, manter status atual ou reenviar para análise se necessário
             if cadastro.status == StatusCadastro.PENDING_AGENT:
-                cad.status = StatusCadastro.SENT_REVIEW  # Reenviar para análise após correção
+                cad.status = StatusCadastro.RESUBMITTED  # CORREÇÃO: Usar RESUBMITTED em vez de SENT_REVIEW
                 print(f"Resubmitted - Status changed to: {cad.status}")
                 
         cad.save()  # dispara recalc() no model
@@ -213,7 +213,10 @@ def agente_create(request):
     # Mensagem de sucesso
     if cadastro:
         print("UPDATE SUCCESS - Redirecting...")
-        messages.success(request, 'Cadastro atualizado com sucesso e enviado para análise!')
+        if cadastro.status == StatusCadastro.PENDING_AGENT:
+            messages.success(request, 'Cadastro atualizado com sucesso e reenviado automaticamente para análise! O processo retornará para o analista responsável.')
+        else:
+            messages.success(request, 'Cadastro atualizado com sucesso!')
     else:
         print("CREATE SUCCESS - Redirecting...")
         messages.success(request, 'Cadastro criado com sucesso e enviado para análise!')
@@ -222,31 +225,9 @@ def agente_create(request):
     # redireciona para lista do agente (ou detalhe, conforme seu menu)
     return redirect("cadastros:agente-list")
 
-@login_required
-@group_required('AGENTE')
-@require_http_methods(["POST"])
-def reenviar_apos_correcao(request, cadastro_id):
-    """
-    Automatiza o reenvio do cadastro após correção.
-    Muda o status de PENDING_AGENT para RESUBMITTED.
-    """
-    cadastro = get_object_or_404(
-        Cadastro,
-        id=cadastro_id,
-        agente_responsavel=request.user,
-        status=StatusCadastro.PENDING_AGENT
-    )
-    
-    # Atualizar status para RESUBMITTED
-    cadastro.status = StatusCadastro.RESUBMITTED
-    cadastro.save()
-    
-    messages.success(
-        request, 
-        f'Cadastro #{cadastro_id} reenviado com sucesso! O processo retornará automaticamente para o analista responsável.'
-    )
-    
-    return redirect('cadastros:agente-detail', cadastro_id=cadastro_id)
+# Função removida - agora o reenvio é automático quando o agente salva edições
+# A mudança de status PENDING_AGENT -> RESUBMITTED acontece automaticamente
+# na função agente_create() quando é uma edição de cadastro pendente
 
 @login_required
 @group_required('AGENTE')

@@ -1,9 +1,10 @@
+# apps/analise/apps.py
 from django.apps import AppConfig
-
+import importlib
 
 class AnaliseConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.analise'
-    
-    def ready(self):
-        import apps.analise.signals
+    name = "apps.analise"
+
+    def ready(self) -> None:
+        # importa o módulo para registrar os receivers
+        importlib.import_module("apps.analise.signals")

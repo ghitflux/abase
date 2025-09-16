@@ -134,7 +134,7 @@
       {% if request.user.is_superuser or request.user|has_group:"ANALISTA" or request.user|has_group:"Analistas" %}
       <li>
         <a 
-          href="{% url 'analise:dashboard' %}" 
+          href="{% url 'analise:esteira' %}" 
           class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-xl theme-transition relative overflow-hidden group focus-ring"
           data-menu-item
         >
@@ -162,6 +162,8 @@
         </a>
       </li>
       {% endif %}
+      
+
 
       {% if request.user.is_superuser or request.user|has_group:"TESOURARIA" or request.user|has_group:"ADMIN" %}
       <li>

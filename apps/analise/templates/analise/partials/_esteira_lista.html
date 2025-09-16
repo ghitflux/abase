@@ -44,18 +44,16 @@
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-            {% if processo.status == 'pendente' %}
+            {% if processo.status == 'PENDENTE' or processo.status == 'ENVIADO_PARA_CORRECAO' or processo.status == 'AGUARDANDO_CORRECAO' or processo.status == 'pendente' %}
               bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-            {% elif processo.status == 'em_analise' %}
+            {% elif processo.status == 'EM_ANALISE' or processo.status == 'em_analise' %}
               bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
-            {% elif processo.status == 'aprovado' %}
+            {% elif processo.status == 'APROVADO' or processo.status == 'EFETIVADO' or processo.status == 'aprovado' %}
               bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-            {% elif processo.status == 'rejeitado' %}
+            {% elif processo.status == 'CANCELADO' or processo.status == 'REPROVADO' or processo.status == 'rejeitado' %}
               bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-            {% elif processo.status == 'correcao_feita' %}
-              bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-            {% elif processo.status == 'correcao_realizada' %}
-              bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+            {% elif processo.status == 'CORRECAO_REALIZADA' or processo.status == 'CORRECAO_FEITA' or processo.status == 'CORRECAO' or processo.status == 'correcao_feita' or processo.status == 'correcao_realizada' %}
+              bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200
             {% else %}
               bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
             {% endif %}">
