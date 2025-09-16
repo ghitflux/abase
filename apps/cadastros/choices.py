@@ -25,6 +25,13 @@ class TipoConta(models.TextChoices):
     CC = "CC", "Conta Corrente"
     PP = "PP", "Poupança"
 
+class TipoChavePix(models.TextChoices):
+    CPF = "CPF", "CPF"
+    CNPJ = "CNPJ", "CNPJ"
+    EMAIL = "EMAIL", "E-mail"
+    TELEFONE = "TELEFONE", "Telefone"
+    ALEATORIA = "ALEATORIA", "Chave Aleatória"
+
 class SituacaoServidor(models.TextChoices):
     ATIVO = "ATIVO", "Ativo"
     EFETIVO = "EFETIVO", "Efetivo"

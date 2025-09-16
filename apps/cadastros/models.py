@@ -5,7 +5,7 @@ from decimal import Decimal
 from datetime import date, timedelta
 from .choices import (
     StatusCadastro, TipoPessoa, EstadoCivil, TipoConta,
-    SituacaoServidor, StatusParcela
+    SituacaoServidor, StatusParcela, TipoChavePix
 )
 
 def calcular_quinto_dia_util(ano, mes):
@@ -61,7 +61,8 @@ class Cadastro(models.Model):
     agencia              = models.CharField("Agência", max_length=15, blank=True)
     conta                = models.CharField("Conta", max_length=20, blank=True)
     tipo_conta           = models.CharField("Tipo de Conta", max_length=2, choices=TipoConta.choices, blank=True)
-    chave_pix            = models.CharField("Chave Pix", max_length=120, blank=True)
+    tipo_chave_pix       = models.CharField("Tipo de Chave PIX", max_length=10, choices=TipoChavePix.choices, blank=True, default="")
+    chave_pix            = models.CharField("Chave Pix", max_length=120, blank=True, default="")
 
     # ---- Contato e vínculo público ----
     celular              = models.CharField("Celular", max_length=20, blank=True)

@@ -74,9 +74,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- HTMX já carregado no base.html -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<!-- Sistema de máscara monetária unificado carregado no base.html -->
 {% endblock %}
 
 {% block content %}
@@ -84,7 +82,7 @@
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-900">Novo Cadastro</h1>
         <a href="{% url 'cadastros:agente-list' %}" 
-           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
             Voltar
         </a>
     </div>
@@ -112,7 +110,7 @@
           <label for="cpf" class="block text-sm font-medium text-gray-700 mb-2">CPF</label>
           <input 
             name="cpf" 
-            class="w-full px-4 py-3 text-sm border {% if form.cpf.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border {% if form.cpf.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             inputmode="numeric" 
             maxlength="14" 
             placeholder="000.000.000-00" 
@@ -131,7 +129,7 @@
             type="text" 
             name="nome_completo" 
             maxlength="180" 
-            class="w-full px-4 py-3 text-sm border {% if form.nome_completo.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border {% if form.nome_completo.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.nome_completo.id_for_label }}" 
             value="{{ form.instance.nome_completo|default_if_none:'' }}" 
             placeholder="Digite o nome completo">
@@ -146,7 +144,7 @@
           <input 
             type="date" 
             name="data_nascimento" 
-            class="w-full px-4 py-3 text-sm border {% if form.data_nascimento.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border {% if form.data_nascimento.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.data_nascimento.id_for_label }}" 
             value="{{ form.instance.data_nascimento|date:'Y-m-d'|default_if_none:'' }}">
           {% if form.data_nascimento.errors %}
@@ -161,7 +159,7 @@
             type="text" 
             name="profissao" 
             maxlength="120" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.profissao.id_for_label }}" 
             value="{{ form.instance.profissao|default_if_none:'' }}" 
             placeholder="Digite a profissão">
@@ -172,7 +170,7 @@
           <label for="{{ form.estado_civil.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Estado civil</label>
           <select 
             name="estado_civil" 
-            class="w-full px-4 py-3 text-sm border {% if form.estado_civil.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 bg-white" 
+            class="w-full px-4 py-3 text-sm border {% if form.estado_civil.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white" 
             id="{{ form.estado_civil.id_for_label }}">
             <option value="" {% if not form.instance.estado_civil %}selected{% endif %}>Selecione o estado civil</option>
             <option value="SOLTEIRO" {% if form.instance.estado_civil == 'SOLTEIRO' %}selected{% endif %}>Solteiro(a)</option>
@@ -201,7 +199,7 @@
           <label for="cep" class="block text-sm font-medium text-gray-700 mb-2">CEP</label>
           <input 
             name="cep" 
-            class="w-full px-4 py-3 text-sm border {% if form.cep.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border {% if form.cep.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="cep" 
             placeholder="00000-000" 
             maxlength="9" 
@@ -217,7 +215,7 @@
           <label for="{{ form.endereco.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Endereço</label>
           <input 
             name="endereco" 
-            class="w-full px-4 py-3 text-sm border {% if form.endereco.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border {% if form.endereco.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.endereco.id_for_label }}" 
             value="{{ form.instance.endereco|default_if_none:'' }}" 
             placeholder="Digite o endereço">
@@ -231,7 +229,7 @@
           <label for="{{ form.numero.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Nº</label>
           <input 
             name="numero" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.numero.id_for_label }}" 
             value="{{ form.instance.numero|default_if_none:'' }}" 
             placeholder="123">
@@ -242,7 +240,7 @@
           <label for="{{ form.complemento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Complemento</label>
           <input 
             name="complemento" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.complemento.id_for_label }}" 
             value="{{ form.instance.complemento|default_if_none:'' }}" 
             placeholder="Apto 101">
@@ -253,7 +251,7 @@
           <label for="{{ form.bairro.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Bairro</label>
           <input 
             name="bairro" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.bairro.id_for_label }}" 
             value="{{ form.instance.bairro|default_if_none:'' }}" 
             placeholder="Digite o bairro">
@@ -264,7 +262,7 @@
           <label for="{{ form.cidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
           <input 
             name="cidade" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.cidade.id_for_label }}" 
             value="{{ form.instance.cidade|default_if_none:'' }}" 
             placeholder="Digite a cidade">
@@ -275,7 +273,7 @@
           <label for="{{ form.uf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">UF</label>
           <select 
             name="uf" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 bg-white" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white" 
             id="{{ form.uf.id_for_label }}">
             <option value="" {% if not form.instance.uf %}selected{% endif %}>Selecione o estado</option>
             <option value="AC" {% if form.instance.uf == 'AC' %}selected{% endif %}>AC</option>
@@ -323,18 +321,52 @@
           <label for="{{ form.banco.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Banco</label>
           <select 
             name="banco" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 bg-white" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white" 
             id="{{ form.banco.id_for_label }}">
             <option value="" {% if not form.instance.banco %}selected{% endif %}>Selecione o banco</option>
+
+            <!-- Bancos Principais -->
             <option value="001" {% if form.instance.banco == '001' %}selected{% endif %}>001 - Banco do Brasil</option>
-            <option value="033" {% if form.instance.banco == '033' %}selected{% endif %}>033 - Santander</option>
             <option value="104" {% if form.instance.banco == '104' %}selected{% endif %}>104 - Caixa Econômica Federal</option>
             <option value="237" {% if form.instance.banco == '237' %}selected{% endif %}>237 - Bradesco</option>
             <option value="341" {% if form.instance.banco == '341' %}selected{% endif %}>341 - Itaú</option>
-            <option value="260" {% if form.instance.banco == '260' %}selected{% endif %}>260 - Nu Pagamentos</option>
+            <option value="033" {% if form.instance.banco == '033' %}selected{% endif %}>033 - Santander</option>
+
+            <!-- Bancos Digitais -->
+            <option value="260" {% if form.instance.banco == '260' %}selected{% endif %}>260 - Nu Pagamentos (Nubank)</option>
             <option value="077" {% if form.instance.banco == '077' %}selected{% endif %}>077 - Banco Inter</option>
-            <option value="212" {% if form.instance.banco == '212' %}selected{% endif %}>212 - Banco Original</option>
+            <option value="336" {% if form.instance.banco == '336' %}selected{% endif %}>336 - C6 Bank</option>
+            <option value="364" {% if form.instance.banco == '364' %}selected{% endif %}>364 - Gerencianet Pagamentos</option>
+            <option value="323" {% if form.instance.banco == '323' %}selected{% endif %}>323 - Mercado Pago</option>
+            <option value="380" {% if form.instance.banco == '380' %}selected{% endif %}>380 - PicPay</option>
+            <option value="637" {% if form.instance.banco == '637' %}selected{% endif %}>637 - Banco Sofisa</option>
+            <option value="654" {% if form.instance.banco == '654' %}selected{% endif %}>654 - Banco A.J.Renner</option>
+            <option value="655" {% if form.instance.banco == '655' %}selected{% endif %}>655 - Neon Pagamentos</option>
+            <option value="237" {% if form.instance.banco == '237' %}selected{% endif %}>237 - Next (Bradesco)</option>
             <option value="290" {% if form.instance.banco == '290' %}selected{% endif %}>290 - PagSeguro</option>
+
+            <!-- Bancos Regionais -->
+            <option value="041" {% if form.instance.banco == '041' %}selected{% endif %}>041 - Banrisul</option>
+            <option value="085" {% if form.instance.banco == '085' %}selected{% endif %}>085 - Ailos</option>
+            <option value="748" {% if form.instance.banco == '748' %}selected{% endif %}>748 - Sicredi</option>
+            <option value="004" {% if form.instance.banco == '004' %}selected{% endif %}>004 - Banco do Nordeste</option>
+            <option value="047" {% if form.instance.banco == '047' %}selected{% endif %}>047 - Banco do Estado de Sergipe</option>
+
+            <!-- Bancos de Investimento -->
+            <option value="208" {% if form.instance.banco == '208' %}selected{% endif %}>208 - BTG Pactual</option>
+            <option value="348" {% if form.instance.banco == '348' %}selected{% endif %}>348 - XP Investimentos</option>
+            <option value="269" {% if form.instance.banco == '269' %}selected{% endif %}>269 - HSBC Brasil</option>
+            <option value="623" {% if form.instance.banco == '623' %}selected{% endif %}>623 - Banco Pan</option>
+            <option value="212" {% if form.instance.banco == '212' %}selected{% endif %}>212 - Banco Original</option>
+            <option value="318" {% if form.instance.banco == '318' %}selected{% endif %}>318 - Banco BMG</option>
+
+            <!-- Cooperativas -->
+            <option value="136" {% if form.instance.banco == '136' %}selected{% endif %}>136 - Unicred</option>
+            <option value="097" {% if form.instance.banco == '097' %}selected{% endif %}>097 - CrediSIS</option>
+
+            <!-- Outros -->
+            <option value="422" {% if form.instance.banco == '422' %}selected{% endif %}>422 - Banco Safra</option>
+            <option value="655" {% if form.instance.banco == '655' %}selected{% endif %}>655 - Banco Votorantim</option>
           </select>
         </div>
         
@@ -343,7 +375,7 @@
           <label for="agencia" class="block text-sm font-medium text-gray-700 mb-2">Agência</label>
           <input 
             name="agencia" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="agencia" 
             placeholder="0001-9" 
             maxlength="6" 
@@ -355,7 +387,7 @@
           <label for="conta" class="block text-sm font-medium text-gray-700 mb-2">Conta</label>
           <input 
             name="conta" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="conta" 
             placeholder="123456-7" 
             maxlength="12" 
@@ -367,7 +399,7 @@
           <label for="{{ form.tipo_conta.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Conta</label>
           <select 
             name="tipo_conta" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 bg-white" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white" 
             id="{{ form.tipo_conta.id_for_label }}">
             <option value="" {% if not form.instance.tipo_conta %}selected{% endif %}>Selecione o tipo</option>
             <option value="CC" {% if form.instance.tipo_conta == 'CC' %}selected{% endif %}>Conta Corrente</option>
@@ -375,16 +407,40 @@
           </select>
         </div>
 
+        <!-- Tipo de Chave PIX -->
+        <div class="col-span-3">
+          <label for="{{ form.tipo_chave_pix.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 required-field">Tipo de Chave PIX</label>
+          <select
+            name="tipo_chave_pix"
+            class="w-full px-4 py-3 text-sm border {% if form.tipo_chave_pix.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white"
+            id="{{ form.tipo_chave_pix.id_for_label }}"
+            required>
+            <option value="" {% if not form.instance.tipo_chave_pix %}selected{% endif %}>Selecione o tipo</option>
+            <option value="CPF" {% if form.instance.tipo_chave_pix == 'CPF' %}selected{% endif %}>CPF</option>
+            <option value="CNPJ" {% if form.instance.tipo_chave_pix == 'CNPJ' %}selected{% endif %}>CNPJ</option>
+            <option value="EMAIL" {% if form.instance.tipo_chave_pix == 'EMAIL' %}selected{% endif %}>E-mail</option>
+            <option value="TELEFONE" {% if form.instance.tipo_chave_pix == 'TELEFONE' %}selected{% endif %}>Telefone</option>
+            <option value="ALEATORIA" {% if form.instance.tipo_chave_pix == 'ALEATORIA' %}selected{% endif %}>Chave Aleatória</option>
+          </select>
+          {% if form.tipo_chave_pix.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.tipo_chave_pix.errors.0 }}</p>
+          {% endif %}
+        </div>
+
         <!-- Chave Pix -->
-        <div class="col-span-12">
-          <label for="{{ form.chave_pix.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Chave Pix</label>
-          <input 
-            name="chave_pix" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.chave_pix.id_for_label }}" 
-            value="{{ form.instance.chave_pix|default_if_none:'' }}" 
-            placeholder="Digite a chave PIX (CPF, e-mail, telefone ou chave aleatória)">
-          <p class="text-xs text-gray-500 mt-2">Use a chave PIX principal do associado para futuros pagamentos.</p>
+        <div class="col-span-9">
+          <label for="{{ form.chave_pix.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 required-field">Chave PIX</label>
+          <input
+            name="chave_pix"
+            class="w-full px-4 py-3 text-sm border {% if form.chave_pix.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300"
+            id="{{ form.chave_pix.id_for_label }}"
+            value="{{ form.instance.chave_pix|default_if_none:'' }}"
+            placeholder="Digite a chave PIX conforme o tipo selecionado"
+            required>
+          {% if form.chave_pix.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.chave_pix.errors.0 }}</p>
+          {% endif %}
+          <p class="text-xs text-gray-500 mt-2">💡 Selecione o tipo e digite a chave PIX principal do associado para futuros pagamentos.</p>
         </div>
       </div>
     </div>
@@ -402,7 +458,7 @@
           <label for="{{ form.matricula_servidor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Matrícula do Servidor Público</label>
           <input 
             name="matricula_servidor" 
-            class="w-full px-4 py-3 text-sm border {% if form.matricula_servidor.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border {% if form.matricula_servidor.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.matricula_servidor.id_for_label }}" 
             value="{{ form.instance.matricula_servidor|default_if_none:'' }}" 
             placeholder="999999-9"
@@ -418,7 +474,7 @@
           <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Celular</label>
           <input 
             name="celular" 
-            class="w-full px-4 py-3 text-sm border {% if form.celular.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border {% if form.celular.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.celular.id_for_label }}" 
             value="{{ form.instance.celular|default_if_none:'' }}" 
             placeholder="(11) 99999-9999" 
@@ -435,7 +491,7 @@
           <input 
             name="email" 
             type="email" 
-            class="w-full px-4 py-3 text-sm border {% if form.email.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border {% if form.email.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.email.id_for_label }}" 
             value="{{ form.instance.email|default_if_none:'' }}" 
             placeholder="Digite o e-mail">
@@ -449,7 +505,7 @@
           <label for="{{ form.orgao_publico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Órgão Público</label>
           <input 
             name="orgao_publico" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.orgao_publico.id_for_label }}" 
             value="{{ form.instance.orgao_publico|default_if_none:'' }}" 
             placeholder="Digite o órgão público">
@@ -460,7 +516,7 @@
           <label for="{{ form.situacao_servidor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Situação do Servidor</label>
           <select 
             name="situacao_servidor" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 bg-white" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white" 
             id="{{ form.situacao_servidor.id_for_label }}">
             <option value="" {% if not form.instance.situacao_servidor %}selected{% endif %}>Selecione a situação</option>
             <option value="EFETIVO" {% if form.instance.situacao_servidor == 'EFETIVO' %}selected{% endif %}>Efetivo</option>
@@ -487,7 +543,7 @@
           <label for="{{ form.valor_bruto_total.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Valor Bruto Total</label>
           <input 
             name="valor_bruto_total" 
-            class="w-full px-4 py-3 text-sm border {% if form.valor_bruto_total.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border {% if form.valor_bruto_total.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.valor_bruto_total.id_for_label }}" 
             value="{{ form.instance.valor_bruto_total|default_if_none:'' }}" 
             placeholder="R$ 0,00" 
@@ -503,7 +559,7 @@
           <label for="{{ form.valor_liquido.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Valor Líquido (contra-cheque)</label>
           <input 
             name="valor_liquido" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.valor_liquido.id_for_label }}" 
             value="{{ form.instance.valor_liquido|default_if_none:'' }}" 
             placeholder="R$ 0,00" 
@@ -519,7 +575,7 @@
             type="number" 
             min="1" 
             max="120" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.prazo_antecipacao_meses.id_for_label }}" 
             value="{{ form.instance.prazo_antecipacao_meses|default_if_none:'' }}" 
             placeholder="12">
@@ -560,7 +616,7 @@
           <label for="{{ form.mensalidade_associativa.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Contribuição Associativa (R$)</label>
           <input 
             name="mensalidade_associativa" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.mensalidade_associativa.id_for_label }}" 
             value="{{ form.instance.mensalidade_associativa|default_if_none:'' }}" 
             placeholder="R$ 0,00" 
@@ -605,7 +661,7 @@
           <input 
             name="data_aprovacao" 
             type="date" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.data_aprovacao.id_for_label }}" 
             value="{{ form.instance.data_aprovacao|date:'Y-m-d'|default_if_none:'' }}">
         </div>
@@ -616,7 +672,7 @@
           <input 
             name="data_primeira_mensalidade" 
             type="date" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.data_primeira_mensalidade.id_for_label }}" 
             value="{{ form.instance.data_primeira_mensalidade|date:'Y-m-d'|default_if_none:'' }}">
         </div>
@@ -627,7 +683,7 @@
           <input 
             name="mes_averbacao" 
             type="month" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300" 
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
             id="{{ form.mes_averbacao.id_for_label }}" 
             value="{{ form.instance.mes_averbacao|default_if_none:'' }}">
         </div>
@@ -670,7 +726,7 @@
           <select 
             id="tipo_doc" 
             name="tipo"
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300">
+            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
             <option value="DOC_FRENTE">Documento (frente)</option>
             <option value="DOC_VERSO">Documento (verso)</option>
             <option value="COMP_ENDERECO">Comprovante de endereço</option>
@@ -690,7 +746,7 @@
               name="arquivo_doc"
               type="file" 
               accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp" 
-              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none hover:border-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" 
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-red-50 file:text-red-700 hover:file:bg-red-100" 
               onchange="validateFileSize(this)">
             <div class="text-xs text-gray-500 mt-1">
               Formatos aceitos: PDF, JPG, PNG, GIF, BMP, WebP (máx. 10MB)
@@ -703,7 +759,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">&nbsp;</label>
           <button 
             type="button" 
-            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl font-medium shadow-sm hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200" 
+            class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-xl font-medium shadow-sm hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200" 
             hx-post="{% url 'documentos:draft-upload' %}"
             hx-encoding="multipart/form-data"
             hx-include="#tipo_doc,#arquivo_doc"
@@ -729,7 +785,7 @@
                 <p class="text-xs text-gray-500">Enviado em {{ doc.created_at|date:"d/m/Y H:i" }}</p>
               </div>
             </div>
-            <a href="{% url 'serve_private' doc.id %}" target="_blank" class="text-blue-600 hover:text-blue-500 text-sm">
+            <a href="{% url 'serve_private' doc.id %}" target="_blank" class="text-red-600 hover:text-red-500 text-sm">
               Ver
             </a>
           </div>
@@ -764,11 +820,11 @@
 
   <div class="flex justify-end space-x-3">
     <a href="{% url 'cadastros:agente-list' %}" 
-       class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+       class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
         Cancelar
     </a>
     <button type="submit" 
-            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
         Enviar Cadastro
     </button>
   </div>
@@ -838,23 +894,20 @@ function maskMatricula(v){
   return v.replace(/(\d{6})(\d)/,"$1-$2"); // 6 dígitos + hífen + último dígito
 }
 
-// Função removida - agora usando brl-money.ts
-function parseMoney(s){
-  if(!s) return 0;
-  // Remove R$ e espaços
-  s = (s+"").replace(/R\$\s?/g,"").trim();
-  // Remove pontos de milhares (somente aqueles seguidos por exatamente 3 dígitos)
-  s = s.replace(/\.(?=\d{3}(?:\D|$))/g, "");
-  // Troca vírgula decimal por ponto
-  s = s.replace(",", ".");
-  let n = parseFloat(s);
-  return isNaN(n) ? 0 : n;
-}
-
+// Função de recálculo usando a nova API unificada
 function recalc(){
-  const bruto = parseMoney(document.querySelector('[name="valor_bruto_total"]').value);
-  const liquido = parseMoney(document.querySelector('[name="valor_liquido"]').value);
-  const mensal = parseMoney(document.querySelector('[name="mensalidade_associativa"]').value);
+  // Aguarda a API estar disponível
+  if (!window.ABASE || !window.ABASE.MoneyMask) {
+    setTimeout(recalc, 100);
+    return;
+  }
+
+  const parse = window.ABASE.MoneyMask.parse;
+  const format = window.ABASE.MoneyMask.formatBRL;
+
+  const bruto = parse(document.querySelector('[name="valor_bruto_total"]').value);
+  const liquido = parse(document.querySelector('[name="valor_liquido"]').value);
+  const mensal = parse(document.querySelector('[name="mensalidade_associativa"]').value);
 
   const trinta = +(bruto * 0.30).toFixed(2);
   const margem = +(liquido - trinta).toFixed(2);
@@ -863,13 +916,12 @@ function recalc(){
   const disp = +(total * 0.70).toFixed(2);
   const auxilioAgente = +(disp * 0.10).toFixed(2);
 
-  const f = n => "R$ " + n.toLocaleString('pt-BR', {minimumFractionDigits:2});
-  document.getElementById('trinta_bruto').value = f(trinta);
-  document.getElementById('margem_calc').value = f(margem);
-  document.getElementById('valor_total_ant').value = f(total);
-  document.getElementById('doacao').value = f(doacao);
-  document.getElementById('disponivel').value = f(disp);
-  document.getElementById('auxilio_agente').value = f(auxilioAgente);
+  document.getElementById('trinta_bruto').value = format(trinta);
+  document.getElementById('margem_calc').value = format(margem);
+  document.getElementById('valor_total_ant').value = format(total);
+  document.getElementById('doacao').value = format(doacao);
+  document.getElementById('disponivel').value = format(disp);
+  document.getElementById('auxilio_agente').value = format(auxilioAgente);
 }
 
 const cpf = document.getElementById('cpf');
@@ -877,10 +929,7 @@ const cnpj = document.getElementById('cnpj');
 if(cpf){ cpf.addEventListener('input',()=>cpf.value=maskCPF(cpf.value)); }
 if(cnpj){ cnpj.addEventListener('input',()=>cnpj.value=maskCNPJ(cnpj.value)); }
 
-const cep = document.getElementById('cep');
-if(cep){
-  cep.addEventListener('input', ()=> cep.value = maskCEP(cep.value));
-}
+// ViaCEP - gerenciado pelo script viacep-integration.js
 
 const matricula = document.querySelector('[name="matricula_servidor"]');
 if(matricula){
@@ -889,11 +938,14 @@ if(matricula){
 
 // Adicionar eventos de recálculo aos campos monetários
 document.addEventListener('DOMContentLoaded', function() {
-  recalc();
-  
-  // Adicionar eventos blur para recalcular quando os campos mudarem
+  // Recálculo inicial
+  setTimeout(recalc, 200); // Aguarda inicialização das máscaras
+
+  // Escutar eventos de mudança monetária
   const moneyFields = document.querySelectorAll('input[data-money="brl"]');
   moneyFields.forEach(field => {
+    field.addEventListener('money-changed', recalc);
+    // Fallback para blur caso o evento personalizado não funcione
     field.addEventListener('blur', recalc);
   });
 });

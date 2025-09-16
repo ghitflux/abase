@@ -180,7 +180,16 @@
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500">PIX:</dt>
-                            <dd class="text-sm text-gray-900">{{ processo.cadastro.chave_pix|default:"Não informado" }}</dd>
+                            <dd class="text-sm text-gray-900">
+                                {% if processo.cadastro.chave_pix %}
+                                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full mr-2">
+                                        {{ processo.cadastro.get_tipo_chave_pix_display|default:"N/A" }}
+                                    </span>
+                                    {{ processo.cadastro.chave_pix }}
+                                {% else %}
+                                    <span class="text-gray-400">Não informado</span>
+                                {% endif %}
+                            </dd>
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Endereço:</dt>

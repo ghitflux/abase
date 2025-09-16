@@ -39,14 +39,53 @@ class CadastroForm(forms.ModelForm):
             
             # --- Normalização de valores monetários ---
             def clean_money_field(value):
+                """
+                Converte string monetária para Decimal, suportando formatos:
+                - "400" → 400.00
+                - "400,50" → 400.50
+                - "1.234,56" → 1234.56
+                - "R$ 1.234,56" → 1234.56
+                - "1234.56" → 1234.56 (formato americano)
+                """
                 if not value:
                     return None
-                # Remove R$, pontos (milhares) e troca vírgula por ponto
-                value_str = str(value).replace("R$", "").replace(" ", "").replace(".", "").replace(",", ".")
+
+                from decimal import Decimal, InvalidOperation
+
+                # Remove R$ e espaços
+                value_str = str(value).replace("R$", "").strip()
+
+                # Se vazio após limpeza
+                if not value_str:
+                    return None
+
                 try:
-                    from decimal import Decimal, InvalidOperation
-                    return Decimal(value_str)
-                except (InvalidOperation, ValueError):
+                    # Se não tem vírgula, pode ser formato americano ou apenas inteiro
+                    if ',' not in value_str:
+                        # Remove pontos que são separadores de milhar
+                        # Mantém apenas o último ponto se for decimal (max 2 casas)
+                        parts = value_str.split('.')
+                        if len(parts) == 2 and len(parts[1]) <= 2:
+                            # Formato americano: 1234.56
+                            clean_str = value_str
+                        else:
+                            # Separadores de milhar: 1.234 ou 1.234.567
+                            clean_str = ''.join(parts)
+                    else:
+                        # Formato brasileiro com vírgula decimal
+                        parts = value_str.split(',')
+                        if len(parts) == 2:
+                            # Remove pontos da parte inteira (separadores de milhar)
+                            integer_part = parts[0].replace('.', '')
+                            decimal_part = parts[1]
+                            clean_str = f"{integer_part}.{decimal_part}"
+                        else:
+                            # Múltiplas vírgulas - erro de formato
+                            return None
+
+                    return Decimal(clean_str)
+
+                except (InvalidOperation, ValueError, IndexError):
                     return None
             
             # Limpar campos monetários
