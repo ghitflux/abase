@@ -14,4 +14,5 @@ urlpatterns = [
     path("processo/<int:processo_id>/aprovar/", views.aprovar_processo, name="aprovar_processo"),
     path("processo/<int:processo_id>/correcao/", views.enviar_para_correcao, name="enviar_para_correcao"),
     path("processo/<int:processo_id>/cancelar/", views.cancelar_processo, name="cancelar_processo"),
+    path("checklist/<int:item_id>/toggle/", views.toggle_checklist_item, name="toggle_checklist_item"),
 ]

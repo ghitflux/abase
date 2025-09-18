@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.contrib import messages
-# JsonResponse import removed as it was unused
+from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 # csrf_exempt import removed as it was unused
@@ -12,7 +12,7 @@ from django.db import transaction
 # json import removed as it was unused
 
 from core.utils.model_paths import is_valid_text_path
-from .models import AnaliseProcesso, HistoricoAnalise, StatusAnalise
+from .models import AnaliseProcesso, HistoricoAnalise, StatusAnalise, ChecklistAnalise
 from apps.cadastros.choices import StatusCadastro
 from apps.tesouraria.models import ProcessoTesouraria
 from apps.accounts.decorators import analista_required
@@ -215,27 +215,84 @@ def detalhe_processo(request, processo_id):
         AnaliseProcesso.objects.select_related('cadastro', 'analista_responsavel'),
         id=processo_id
     )
-    
+
     # Buscar checklist associado
     checklist_itens = processo.checklist_itens.all().order_by('id')
-    
-    # Buscar histórico
-    historico = processo.historico.all().order_by('-data_acao')
-    
+
+    # Buscar histórico completo - combinando histórico de análise e cadastro
+    historico_analise = processo.historico.all().order_by('-data_acao')
+
+    # Criar lista unificada de eventos para o histórico completo
+    historico_completo = []
+
+    # Adicionar eventos de análise
+    for evento in historico_analise:
+        historico_completo.append({
+            'tipo': 'analise',
+            'acao': evento.acao,
+            'usuario': evento.usuario,
+            'data_acao': evento.data_acao,
+            'data': evento.data_acao,  # Para compatibilidade com template
+            'status_anterior': evento.status_anterior,
+            'status_novo': evento.status_novo,
+            'observacoes': evento.observacoes,
+        })
+
+    # Adicionar eventos do cadastro se houver
+    cadastro = processo.cadastro
+    if hasattr(cadastro, 'historico_eventos'):
+        for evento in cadastro.historico_eventos.all().order_by('-data_criacao'):
+            historico_completo.append({
+                'tipo': 'cadastro',
+                'acao': evento.acao if hasattr(evento, 'acao') else 'Atualização do cadastro',
+                'usuario': evento.usuario if hasattr(evento, 'usuario') else None,
+                'data_acao': evento.data_criacao if hasattr(evento, 'data_criacao') else cadastro.updated_at,
+                'data': evento.data_criacao if hasattr(evento, 'data_criacao') else cadastro.updated_at,
+                'observacoes': evento.descricao if hasattr(evento, 'descricao') else '',
+            })
+
+    # Ordenar por data (mais recente primeiro)
+    historico_completo.sort(key=lambda x: x['data_acao'], reverse=True)
+
+    # Buscar mensalidades do cadastro
+    parcelas = processo.cadastro.parcelas.all().order_by('numero')
+
     # Verificar se usuário pode assumir/analisar este processo
     pode_assumir = not processo.analista_responsavel or processo.analista_responsavel == request.user
     pode_analisar = processo.analista_responsavel == request.user
-    
+
     context = {
         'processo': processo,
         'checklist_itens': checklist_itens,
-        'historico': historico,
+        'historico': historico_analise,  # Histórico original para compatibilidade
+        'historico_completo': historico_completo,  # Histórico unificado
+        'parcelas': parcelas,  # Mensalidades do associado
         'pode_assumir': pode_assumir,
         'pode_analisar': pode_analisar,
         'status_choices': StatusAnalise.choices,
     }
-    
+
     return render(request, 'analise/detalhe_processo.html', context)
+
+@login_required
+@analista_required
+@require_http_methods(["POST"])
+def toggle_checklist_item(request, item_id):
+    """Toggle do estado verificado de um item do checklist"""
+    item = get_object_or_404(ChecklistAnalise, id=item_id)
+
+    # Verificar se o usuário tem permissão (deve ser o analista responsável)
+    if item.processo.analista_responsavel != request.user:
+        return JsonResponse({'error': 'Sem permissão'}, status=403)
+
+    # Toggle do estado
+    verificado = request.POST.get('verificado', 'false').lower() == 'true'
+    item.verificado = verificado
+    item.verificado_por = request.user if verificado else None
+    item.data_verificacao = timezone.now() if verificado else None
+    item.save()
+
+    return JsonResponse({'success': True, 'verificado': item.verificado})
 
 @login_required
 @analista_required

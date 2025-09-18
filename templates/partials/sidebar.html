@@ -346,8 +346,39 @@
         </a>
       </li>
       {% endif %}
+
+      <!-- Logout Button -->
+      <li>
+        <a
+          href="{% url 'accounts:logout' %}"
+          class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-xl theme-transition relative overflow-hidden group focus-ring"
+          data-menu-item
+        >
+          <!-- Glow Effect -->
+          <div
+            class="absolute inset-0 opacity-0 transition-all duration-500 ease-out pointer-events-none rounded-xl"
+            data-menu-glow
+            style="background: radial-gradient(circle, rgba(239,68,68,0.15) 0%, rgba(220,38,38,0.06) 50%, rgba(185,28,28,0) 100%);"
+          ></div>
+
+          <!-- Icon -->
+          <div class="relative z-10 text-red-500">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </div>
+
+          <!-- Label -->
+          <span
+            class="relative z-10 font-medium theme-transition text-red-500"
+            data-menu-label
+          >
+            Sair
+          </span>
+        </a>
+      </li>
     </ul>
-    
+
     <!-- Admin Section - Bottom of Sidebar -->
     {% if request.user.is_superuser or request.user|has_group:"ADMIN" %}
     <div class="mt-auto p-4 border-t border-sidebar-border/50">

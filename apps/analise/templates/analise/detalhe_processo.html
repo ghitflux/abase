@@ -2,96 +2,134 @@
 {% load static %}
 {% load ui currency_filters %}
 
-{% block title %}Processo #{{ processo.id }} - Análise{% endblock %}
-{% block page_title %}Detalhes do Processo #{{ processo.id }}{% endblock %}
+{% block title %}{{ processo.cadastro.nome_completo }} - Análise{% endblock %}
+{% block page_title %}Análise do Processo{% endblock %}
 
 {% block extra_css %}
 <style>
-  /* -------- DS helpers locais para esta tela -------- */
-  .section-card{
-    background: var(--surface-card);
-    border: 1px solid var(--surface-border);
-    border-radius: 1rem; /* ~rounded-2xl */
+  /* Accordion igual ao agente */
+  details.accordion{
+    border:1px solid var(--surface-2);
+    border-radius:.75rem;
+    background:var(--surface-1);
+    margin-bottom:1rem;
+    overflow:hidden;
   }
-  .section-title{
-    font-weight: 700;
-    color: var(--field-fg);
-    letter-spacing: -.01em;
+  details.accordion>summary{
+    list-style:none; cursor:pointer;
+    padding:.9rem 1rem; display:flex; align-items:center; justify-content:space-between;
+    font-weight:600; user-select:none;
+    background:rgba(255,255,255,0.02);
+    transition:background 0.2s ease;
   }
-  .subtle{
-    color: var(--field-ph);
+  details.accordion>summary:hover{
+    background:rgba(255,255,255,0.04);
   }
-  /* chips de status (usando tokens / fallback) */
-  .chip{display:inline-flex;align-items:center;gap:.375rem;padding:.15rem .5rem;border-radius:9999px;font-size:.75rem;font-weight:600;line-height:1;white-space:nowrap}
-  .chip--pendente{background:rgba(234,179,8,.12);color:#facc15;border:1px solid rgba(234,179,8,.22)}
-  .chip--em_analise{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.22)}
-  .chip--aprovado{background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.22)}
-  .chip--rejeitado{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.22)}
-  .chip--suspenso{background:rgba(107,114,128,.12);color:#d1d5db;border:1px solid rgba(107,114,128,.22)}
-  .chip--correcao_feita{background:rgba(16,185,129,.12);color:#6ee7b7;border:1px solid rgba(16,185,129,.22)}
-  /* botões padrão DS-like */
-  .btn{display:inline-flex;align-items:center;justify-content:center;padding:.5rem 1rem;border-radius:.5rem;font-size:.875rem;font-weight:600;transition:.2s}
-  .btn svg{width:1rem;height:1rem;margin-right:.5rem}
-  .btn-primary{background:#2563eb;color:#fff}.btn-primary:hover{background:#1d4ed8}
-  .btn-success{background:#16a34a;color:#fff}.btn-success:hover{background:#15803d}
-  .btn-warning{background:#d97706;color:#fff}.btn-warning:hover{background:#b45309}
-  .btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
-  .btn-neutral{background:rgba(255,255,255,.06);color:var(--field-fg);border:1px solid var(--surface-border)}
-  .btn-neutral:hover{background:rgba(255,255,255,.09)}
-  .list-row{background:rgba(255,255,255,.03);border:1px solid var(--surface-border);border-radius:.675rem}
+  details.accordion>summary::-webkit-details-marker{display:none}
+  details.accordion .chev{transition:transform .2s ease; opacity:.8; font-size:.9rem}
+  details.accordion[open] .chev{transform:rotate(180deg)}
+  details.accordion .body{padding:1rem; border-top:1px solid var(--surface-2)}
+
+  /* Tipografia e contraste em dark */
+  .field-label{color:var(--muted); font-size:.9rem}
+  .field-value.name,
+  .field-value.value{font-weight:600; color:var(--text, #e6e9f0)}
+  .field-value.value{font-weight:700}
+
+  /* Doc name claro */
+  .doc-name{color:var(--text, #e6e9f0); font-weight:600}
+
+  /* Coluna de ações no header */
+  .side-actions{display:flex; flex-direction:column; align-items:flex-end; gap:.5rem}
+
+  /* Endereço: grid estável + no-wrap p/ campos curtos */
+  .no-wrap{white-space:nowrap}
+
+  /* Botões do analista */
+  .analyst-actions .btn{margin-right:.5rem; margin-bottom:.5rem}
+  .analyst-actions .btn svg{width:1rem;height:1rem;margin-right:.5rem}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="container-xl" style="margin-top:1rem">
 
-  <!-- Ações do Analista -->
-  <div class="section-card p-6 shadow-sm">
-    <h3 class="section-title text-lg mb-4">Ações do Analista</h3>
+  <!-- HEADER -->
+  <div class="card" style="padding:1rem; margin-bottom:1rem">
+    <div style="display:flex; justify-content:space-between; gap:1rem; align-items:flex-start">
+      <div>
+        <div class="section-title">{{ processo.cadastro.nome_completo }}</div>
+        <div class="text-muted">
+          CPF/CNPJ: {{ processo.cadastro.cpf_cnpj }}
+          {% if processo.cadastro.matricula_servidor %} • Matrícula: {{ processo.cadastro.matricula_servidor }}{% endif %}
+        </div>
+        {% if processo.data_entrada %}
+          <div class="text-muted" style="margin-top:.25rem">Entrada: {{ processo.data_entrada|date:"d/m/Y H:i" }}</div>
+        {% endif %}
+      </div>
 
-    <div class="space-y-4">
+      <div class="side-actions">
+        {% if processo.status %}
+          <span class="badge {{ processo.status|status_class }}">
+            {{ processo.get_status_display|default:processo.status }}
+          </span>
+        {% endif %}
+        {% if processo.analista_responsavel %}
+          <div class="text-muted" style="font-size:.9rem">
+            Analista: {{ processo.analista_responsavel.get_full_name|default:processo.analista_responsavel.username }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- AÇÕES DO ANALISTA -->
+  <div class="card" style="padding:1rem; margin-bottom:1rem">
+    <div class="section-title" style="margin-bottom:.75rem">Ações do Analista</div>
+
+    <div class="analyst-actions">
       {% if processo.status == 'pendente' or processo.status == 'correcao_feita' or processo.status == 'correcao_realizada' or processo.status == 'rejeitado' and processo.cadastro.status == 'RESUBMITTED' %}
         {% if processo.status == 'correcao_feita' or processo.status == 'correcao_realizada' or processo.cadastro.status == 'RESUBMITTED' or processo.status == 'rejeitado' and processo.cadastro.updated_at > processo.data_conclusao %}
-          <div class="mb-4 p-3 rounded-md border border-green-500/30 bg-green-500/10">
+          <div style="margin-bottom:1rem; padding:.75rem; border-radius:.5rem; border:1px solid rgba(34,197,94,.3); background:rgba(34,197,94,.1)">
             {% if processo.status == 'correcao_feita' %}
-              <p class="text-sm text-green-200"><strong>✓ Correção Feita:</strong> O agente corrigiu e reenviou o cadastro. Pronto para nova análise.</p>
+              <div style="color:#86efac; font-size:.9rem"><strong>✓ Correção Feita:</strong> O agente corrigiu e reenviou o cadastro. Pronto para nova análise.</div>
               {% if processo.feedback_agente %}
-                <p class="text-sm subtle mt-1"><strong>Feedback anterior:</strong> {{ processo.feedback_agente }}</p>
+                <div class="text-muted" style="font-size:.85rem; margin-top:.25rem"><strong>Feedback anterior:</strong> {{ processo.feedback_agente }}</div>
               {% endif %}
             {% elif processo.cadastro.status == 'RESUBMITTED' %}
-              <p class="text-sm text-blue-200"><strong>✓ Corrigido pelo Agente:</strong> O cadastro foi reenviado após correções.</p>
+              <div style="color:#93c5fd; font-size:.9rem"><strong>✓ Corrigido pelo Agente:</strong> O cadastro foi reenviado após correções.</div>
               {% if processo.feedback_agente %}
-                <p class="text-sm subtle mt-1"><strong>Feedback anterior:</strong> {{ processo.feedback_agente }}</p>
+                <div class="text-muted" style="font-size:.85rem; margin-top:.25rem"><strong>Feedback anterior:</strong> {{ processo.feedback_agente }}</div>
               {% endif %}
             {% elif processo.status == 'rejeitado' and processo.cadastro.updated_at > processo.data_conclusao %}
-              <p class="text-sm text-blue-200"><strong>✓ Processo Corrigido:</strong> O agente fez correções após a rejeição.</p>
+              <div style="color:#93c5fd; font-size:.9rem"><strong>✓ Processo Corrigido:</strong> O agente fez correções após a rejeição.</div>
               {% if processo.feedback_agente %}
-                <p class="text-sm subtle mt-1"><strong>Feedback anterior:</strong> {{ processo.feedback_agente }}</p>
+                <div class="text-muted" style="font-size:.85rem; margin-top:.25rem"><strong>Feedback anterior:</strong> {{ processo.feedback_agente }}</div>
               {% endif %}
             {% elif processo.feedback_agente %}
-              <p class="text-sm text-blue-200"><strong>Feedback Anterior:</strong> {{ processo.feedback_agente }}</p>
+              <div style="color:#93c5fd; font-size:.9rem"><strong>Feedback Anterior:</strong> {{ processo.feedback_agente }}</div>
             {% endif %}
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <button type="button" onclick="assumirEAprovar()" class="btn btn-success">
+          <div>
+            <button type="button" onclick="assumirEAprovar()" class="btn btn-accent">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
               Aprovar
             </button>
 
-            <button type="button" onclick="assumirEPendenciar()" class="btn btn-warning">
+            <button type="button" onclick="assumirEPendenciar()" class="btn" style="background:#d97706; color:#fff">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               Pendenciar
             </button>
 
-            <button type="button" onclick="assumirECancelar()" class="btn btn-danger">
+            <button type="button" onclick="assumirECancelar()" class="btn" style="background:#dc2626; color:#fff">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               Cancelar
             </button>
 
-            <form method="post" action="{% url 'analise:assumir_processo' processo.id %}">
+            <form method="post" action="{% url 'analise:assumir_processo' processo.id %}" style="display:inline">
               {% csrf_token %}
-              <button type="submit" class="btn btn-primary w-full">
+              <button type="submit" class="btn btn-ghost">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg>
                 Só Assumir
               </button>
@@ -100,25 +138,25 @@
         {% else %}
           <form method="post" action="{% url 'analise:assumir_processo' processo.id %}">
             {% csrf_token %}
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-accent">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg>
               Assumir Processo
             </button>
           </form>
         {% endif %}
       {% elif processo.status == 'em_analise' and processo.analista_responsavel == request.user %}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <button type="button" onclick="openApprovalModal()" class="btn btn-success">
+        <div>
+          <button type="button" onclick="openApprovalModal()" class="btn btn-accent">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             Aprovar
           </button>
 
-          <button type="button" onclick="openPendencyModal()" class="btn btn-warning">
+          <button type="button" onclick="openPendencyModal()" class="btn" style="background:#d97706; color:#fff">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             Pendenciar
           </button>
 
-          <button type="button" onclick="openCancelModal()" class="btn btn-danger">
+          <button type="button" onclick="openCancelModal()" class="btn" style="background:#dc2626; color:#fff">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             Cancelar
           </button>
@@ -127,219 +165,428 @@
     </div>
   </div>
 
-  <!-- Informações do Processo -->
-  <div class="section-card p-6 shadow-sm">
-    <div class="flex justify-between items-start mb-6">
-      <div>
-        <h2 class="text-xl font-semibold text-foreground">{{ processo.cadastro.nome_completo }}</h2>
-        <p class="text-sm subtle">CPF/CNPJ: {{ processo.cadastro.cpf_cnpj }}</p>
-        <p class="text-sm subtle">Matrícula: {{ processo.cadastro.matricula_servidor }}</p>
-      </div>
-      <div class="text-right">
-        <span class="chip chip--{{ processo.status }}">{{ processo.get_status_display }}</span>
-        <p class="text-sm subtle mt-1">Entrada: {{ processo.data_entrada|date:"d/m/Y H:i" }}</p>
-      </div>
-    </div>
+  <!-- MENSALIDADES (TOPO) -->
+  {% if parcelas %}
+  <div class="card" style="padding:1rem; margin-bottom:1rem">
+    <div class="section-title" style="margin-bottom:.75rem">Mensalidades</div>
+    <div class="row">
+      {% for parcela in parcelas %}
+      <div class="col-4 col-lg-12">
+        <div class="card" style="padding:1rem; border:1px solid var(--surface-2)">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem">
+            <div class="fw-600">{{ parcela.numero|default:forloop.counter }}ª Mensalidade</div>
+            <span class="badge {{ parcela.status|status_class }}">{{ parcela.get_status_display|default:parcela.status }}</span>
+          </div>
 
-    <!-- Cadastro Completo -->
-    <div class="mb-8">
-      <h3 class="section-title text-lg mb-4">Dados Completos do Cadastro</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Dados Pessoais -->
-        <div class="space-y-2">
-          <h4 class="text-md font-semibold text-foreground">Dados Pessoais</h4>
-          <dl class="space-y-2">
-            <div><dt class="text-sm subtle">Nome/Razão Social:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.nome_completo|default:"Não informado" }}</dd></div>
-            <div><dt class="text-sm subtle">CPF/CNPJ:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.cpf_cnpj|default:"Não informado" }}</dd></div>
-            <div><dt class="text-sm subtle">RG:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.rg|default:"Não informado" }}</dd></div>
-            <div><dt class="text-sm subtle">Data de Nascimento:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.data_nascimento|date:"d/m/Y"|default:"Não informado" }}</dd></div>
-            <div><dt class="text-sm subtle">Estado Civil:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.estado_civil|default:"Não informado" }}</dd></div>
-          </dl>
-        </div>
+          <!-- valor claro -->
+          <div class="field-value value" style="margin-bottom:.25rem">
+            R$ {{ parcela.valor|currency_brl }}
+          </div>
 
-        <!-- Contato -->
-        <div class="space-y-2">
-          <h4 class="text-md font-semibold text-foreground">Contato</h4>
-          <dl class="space-y-2">
-            <div><dt class="text-sm subtle">Email:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.email|default:"Não informado" }}</dd></div>
-            <div><dt class="text-sm subtle">Celular:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.celular|default:"Não informado" }}</dd></div>
-            <div>
-              <dt class="text-sm subtle">PIX:</dt>
-              <dd class="text-sm text-foreground">
-                {% if processo.cadastro.chave_pix %}
-                  <span class="chip chip--aprovado mr-2">{{ processo.cadastro.get_tipo_chave_pix_display|default:"N/A" }}</span>
-                  {{ processo.cadastro.chave_pix }}
-                {% else %}
-                  <span class="subtle">Não informado</span>
-                {% endif %}
-              </dd>
-            </div>
-            <div><dt class="text-sm subtle">Endereço:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.endereco|default:"Não informado" }}</dd></div>
-            <div><dt class="text-sm subtle">CEP:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.cep|default:"Não informado" }}</dd></div>
-          </dl>
-        </div>
-
-        <!-- Profissional -->
-        <div class="space-y-2">
-          <h4 class="text-md font-semibold text-foreground">Dados Profissionais</h4>
-          <dl class="space-y-2">
-            <div><dt class="text-sm subtle">Matrícula:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.matricula_servidor|default:"Não informado" }}</dd></div>
-            <div><dt class="text-sm subtle">Órgão Público:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.orgao_publico|default:"Não informado" }}</dd></div>
-            <div><dt class="text-sm subtle">Cargo:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.cargo|default:"Não informado" }}</dd></div>
-            <div><dt class="text-sm subtle">Salário Bruto:</dt><dd class="text-sm text-foreground">{% if processo.cadastro.valor_bruto_total %}R$ {{ processo.cadastro.valor_bruto_total|currency_brl }}{% else %}Não informado{% endif %}</dd></div>
-            <div><dt class="text-sm subtle">Salário Líquido:</dt><dd class="text-sm text-foreground">{% if processo.cadastro.valor_liquido %}R$ {{ processo.cadastro.valor_liquido|currency_brl }}{% else %}Não informado{% endif %}</dd></div>
-            <div><dt class="text-sm subtle">Mensalidade:</dt><dd class="text-sm text-foreground">{% if processo.cadastro.mensalidade_associativa %}R$ {{ processo.cadastro.mensalidade_associativa|currency_brl }}{% else %}Não informado{% endif %}</dd></div>
-            <div><dt class="text-sm subtle">Agente Responsável:</dt><dd class="text-sm text-foreground">{{ processo.cadastro.agente_responsavel.get_full_name|default:processo.cadastro.agente_responsavel.username|default:"Não informado" }}</dd></div>
-          </dl>
-        </div>
-      </div>
-    </div>
-
-    <!-- Informações da Análise + Documentos -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <h3 class="section-title text-lg mb-3">Informações da Análise</h3>
-        <dl class="space-y-2">
-          <div><dt class="text-sm subtle">Analista Responsável:</dt><dd class="text-sm text-foreground">{% if processo.analista_responsavel %}{{ processo.analista_responsavel.get_full_name|default:processo.analista_responsavel.username }}{% else %}Não atribuído{% endif %}</dd></div>
-          <div><dt class="text-sm subtle">Tipo de Análise:</dt><dd class="text-sm text-foreground">{{ processo.get_tipo_analise_display|default:"Normal" }}</dd></div>
-          {% if processo.data_inicio_analise %}
-          <div><dt class="text-sm subtle">Início da Análise:</dt><dd class="text-sm text-foreground">{{ processo.data_inicio_analise|date:"d/m/Y H:i" }}</dd></div>
+          {% if parcela.vencimento %}
+            <div class="text-muted">Vencimento: {{ parcela.vencimento|date:"d/m/Y" }} (5º dia útil)</div>
+            <div class="text-muted" style="font-size:.9em">{{ parcela.vencimento|days_until }}</div>
+          {% else %}
+            <div class="text-muted">Vencimento: Não informado</div>
           {% endif %}
-        </dl>
-      </div>
 
-      <div>
-        <h3 class="section-title text-lg mb-3">Documentos Anexados</h3>
-        {% if processo.cadastro.documentos.all %}
-          <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
-            {% for documento in processo.cadastro.documentos.all %}
-              <div class="list-row p-3 hover:bg-white/5 transition">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center">
-                    <svg class="w-5 h-5 subtle mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <div>
-                      <p class="text-sm font-medium text-foreground">{{ documento.nome|default:documento.tipo }}</p>
-                      <p class="text-xs subtle">Enviado em {{ documento.criado_em|date:"d/m/Y H:i" }}</p>
-                    </div>
-                  </div>
-                  <a href="{% url 'documentos:serve' %}?path={{ documento.arquivo.name }}" target="_blank" class="btn btn-neutral px-3 py-1.5">
-                    Visualizar
-                  </a>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="text-center py-6">
-            <svg class="w-12 h-12 subtle mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            <p class="text-sm subtle">Nenhum documento anexado ao cadastro.</p>
-          </div>
-        {% endif %}
+          {% if parcela.observacao %}
+            <div class="text-muted" style="font-size:.9em; margin-top:.5rem">Obs.: {{ parcela.observacao }}</div>
+          {% endif %}
+        </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Checklist -->
-  {% if checklist_itens %}
-  <div class="section-card p-6 shadow-sm">
-    <h3 class="section-title text-lg mb-4">Checklist de Análise</h3>
-    <div class="space-y-3">
-      {% for item in checklist_itens %}
-      <label class="flex items-center gap-3">
-        <input type="checkbox" id="checklist_{{ item.id }}" {% if item.concluido %}checked{% endif %}
-               class="h-4 w-4 rounded border-border text-primary focus:ring-primary/40 bg-background">
-        <span class="text-sm text-foreground">{{ item.item }}{% if item.obrigatorio %} <span class="text-red-400">*</span>{% endif %}</span>
-      </label>
       {% endfor %}
     </div>
   </div>
   {% endif %}
 
-  <!-- Histórico -->
-  {% if historico_completo %}
-  <div class="section-card p-6 shadow-sm">
-    <h3 class="section-title text-lg mb-4">Histórico Completo do Processo</h3>
-    <div class="flow-root">
-      <ul class="-mb-8">
-        {% for evento in historico_completo %}
-        <li>
-          <div class="relative pb-8">
-            {% if not forloop.last %}
-              <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-white/10" aria-hidden="true"></span>
-            {% endif %}
-            <div class="relative flex space-x-3">
-              <div>
-                {% if evento.tipo == 'analise' %}
-                  <span class="h-8 w-8 rounded-full bg-blue-600/80 flex items-center justify-center ring-8 ring-[var(--surface-card)]">
-                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg>
-                  </span>
-                {% else %}
-                  <span class="h-8 w-8 rounded-full bg-emerald-600/80 flex items-center justify-center ring-8 ring-[var(--surface-card)]">
-                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                  </span>
-                {% endif %}
-              </div>
-              <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <p class="text-sm font-medium text-foreground">{{ evento.acao }}</p>
-                    {% if evento.tipo == 'analise' %}
-                      <span class="chip chip--em_analise">Análise</span>
-                    {% else %}
-                      <span class="chip chip--aprovado">Cadastro</span>
-                    {% endif %}
-                  </div>
-                  {% if evento.usuario %}
-                    <p class="text-xs subtle">por {{ evento.usuario.get_full_name|default:evento.usuario.username|default:"Sistema" }}</p>
-                  {% else %}
-                    <p class="text-xs subtle">pelo sistema</p>
-                  {% endif %}
-                  {% if evento.status_anterior and evento.status_novo %}
-                    <p class="text-xs text-blue-300 mt-1">
-                      <span class="chip chip--suspenso">{{ evento.status_anterior }}</span>
-                      &nbsp;→&nbsp;
-                      <span class="chip chip--em_analise">{{ evento.status_novo }}</span>
-                    </p>
-                  {% endif %}
-                  {% if evento.observacoes %}
-                    <p class="text-xs subtle mt-2 italic">{{ evento.observacoes }}</p>
-                  {% endif %}
-                </div>
-                <div class="text-right text-sm whitespace-nowrap subtle">{{ evento.data|date:"d/m/Y H:i" }}</div>
-              </div>
-            </div>
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
+  <!-- COMENTÁRIO DO ANALISTA (ACCORDION – ABERTO) -->
+  {% if processo.feedback_agente %}
+  <details class="accordion" open>
+    <summary>
+      Comentário do Analista
+      <span class="chev">▾</span>
+    </summary>
+    <div class="body" style="background:rgba(245,158,11,.06)">
+      <div class="text-muted">{{ processo.feedback_agente }}</div>
     </div>
-  </div>
+  </details>
   {% endif %}
 
-  <!-- Navegação -->
-  <div class="flex justify-between">
-    <a href="{% url 'analise:esteira_analise' %}" class="btn btn-neutral">
+  <!-- DADOS PESSOAIS (open) -->
+  <details class="accordion" open>
+    <summary>Dados Pessoais <span class="chev">▾</span></summary>
+    <div class="body">
+      <div class="row">
+        <div class="col-6 col-lg-12">
+          <div class="field-label">Nome/Razão Social</div>
+          <div class="field-value name">{{ processo.cadastro.nome_completo|default:"Não informado" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Tipo de Pessoa</div>
+          <div class="field-value name">{{ processo.cadastro.get_tipo_pessoa_display|default:"Não informado" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">CPF</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.cpf|default:"Não informado" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">CNPJ</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.cnpj|default:"Não informado" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">RG</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.rg|default:"Não informado" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Órgão Expedidor</div>
+          <div class="field-value name">{{ processo.cadastro.orgao_expedidor|default:"Não informado" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Data de Nascimento</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.data_nascimento|date:"d/m/Y"|default:"Não informado" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Estado Civil</div>
+          <div class="field-value name">{{ processo.cadastro.get_estado_civil_display|default:"Não informado" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Profissão</div>
+          <div class="field-value name">{{ processo.cadastro.profissao|default:"Não informado" }}</div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- CONTATOS (open) -->
+  <details class="accordion" open>
+    <summary>Contatos <span class="chev">▾</span></summary>
+    <div class="body">
+      <div class="row">
+        <div class="col-6 col-lg-12">
+          <div class="field-label">Email</div>
+          <div class="field-value name">{{ processo.cadastro.email|default:"Não informado" }}</div>
+        </div>
+        <div class="col-6 col-lg-12">
+          <div class="field-label">Celular</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.celular|default:"Não informado" }}</div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- VÍNCULO PÚBLICO (open) -->
+  <details class="accordion" open>
+    <summary>Vínculo Público <span class="chev">▾</span></summary>
+    <div class="body">
+      <div class="row">
+        <div class="col-6 col-lg-12">
+          <div class="field-label">Órgão</div>
+          <div class="field-value name">{{ processo.cadastro.orgao_publico|default:"Não informado" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Situação do Servidor</div>
+          <div class="field-value name">{{ processo.cadastro.get_situacao_servidor_display|default:processo.cadastro.situacao_servidor|default:"Não informado" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Matrícula</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.matricula_servidor|default:"Não informado" }}</div>
+        </div>
+        <div class="col-6 col-lg-12">
+          <div class="field-label">Cargo</div>
+          <div class="field-value name">{{ processo.cadastro.cargo|default:"Não informado" }}</div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ENDEREÇO (open) -->
+  <details class="accordion" open>
+    <summary>Endereço <span class="chev">▾</span></summary>
+    <div class="body">
+      <div class="row">
+        <div class="col-4 col-lg-6">
+          <div class="field-label">CEP</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.cep|default:"Não informado" }}</div>
+        </div>
+        <div class="col-8 col-lg-12">
+          <div class="field-label">Logradouro</div>
+          <div class="field-value name">{{ processo.cadastro.endereco|default:"Não informado" }}</div>
+        </div>
+
+        <div class="col-2 col-lg-6">
+          <div class="field-label">Número</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.numero|default:"-" }}</div>
+        </div>
+        <div class="col-4 col-lg-6">
+          <div class="field-label">Complemento</div>
+          <div class="field-value name">{{ processo.cadastro.complemento|default:"-" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Bairro</div>
+          <div class="field-value name">{{ processo.cadastro.bairro|default:"-" }}</div>
+        </div>
+        <div class="col-5 col-lg-6">
+          <div class="field-label">Cidade</div>
+          <div class="field-value name">{{ processo.cadastro.cidade|default:"-" }}</div>
+        </div>
+        <div class="col-2 col-lg-6">
+          <div class="field-label">UF</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.uf|default:"-" }}</div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- CONTA BANCÁRIA (open) -->
+  <details class="accordion" open>
+    <summary>Conta Bancária <span class="chev">▾</span></summary>
+    <div class="body">
+      <div class="row">
+        <div class="col-4 col-lg-12">
+          <div class="field-label">Banco</div>
+          <div class="field-value name">{{ processo.cadastro.banco|default:"Não informado" }}</div>
+        </div>
+        <div class="col-4 col-lg-6">
+          <div class="field-label">Agência</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.agencia|default:"Não informado" }}</div>
+        </div>
+        <div class="col-4 col-lg-6">
+          <div class="field-label">Conta</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.conta|default:"Não informado" }}</div>
+        </div>
+        <div class="col-4 col-lg-6">
+          <div class="field-label">Tipo de Conta</div>
+          <div class="field-value name">{{ processo.cadastro.get_tipo_conta_display|default:processo.cadastro.tipo_conta|default:"Não informado" }}</div>
+        </div>
+        <div class="col-8 col-lg-6">
+          <div class="field-label">Chave PIX</div>
+          <div class="field-value name">
+            {% if processo.cadastro.chave_pix %}
+              {% if processo.cadastro.tipo_chave_pix %}
+                <span class="badge badge--ok">{{ processo.cadastro.get_tipo_chave_pix_display }}</span>
+              {% endif %}
+              {{ processo.cadastro.chave_pix }}
+            {% else %}
+              Não informado
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- FINANCEIRO (open) -->
+  <details class="accordion" open>
+    <summary>Financeiro <span class="chev">▾</span></summary>
+    <div class="body">
+      <div class="row">
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Salário Bruto</div>
+          <div class="field-value value">R$ {{ processo.cadastro.valor_bruto_total|currency_brl }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Salário Líquido</div>
+          <div class="field-value value">R$ {{ processo.cadastro.valor_liquido|currency_brl }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Mensalidade Associativa</div>
+          <div class="field-value value">R$ {{ processo.cadastro.mensalidade_associativa|currency_brl }}</div>
+        </div>
+
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Prazo de Antecipação (meses)</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.prazo_antecipacao_meses|default:"-" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Taxa de Antecipação (%)</div>
+          <div class="field-value name no-wrap">{{ processo.cadastro.taxa_antecipacao_percent|default:"-" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Auxílio do Agente</div>
+          <div class="field-value value">R$ {{ processo.cadastro.auxilio_agente_valor|currency_brl|default:"0,00" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Agente Responsável</div>
+          <div class="field-value name">{{ processo.cadastro.agente_responsavel.get_full_name|default:processo.cadastro.agente_responsavel.username|default:"Não informado" }}</div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- DOCUMENTOS (open) -->
+  <details class="accordion" open>
+    <summary>Documentos Anexados <span class="chev">▾</span></summary>
+    <div class="body">
+      {% if processo.cadastro.documentos.all %}
+        <div class="row">
+          {% for documento in processo.cadastro.documentos.all %}
+          <div class="col-6 col-lg-12">
+            <div class="card" style="padding:.75rem; display:flex; justify-content:space-between; align-items:center">
+              <div>
+                <div class="doc-name">{{ documento.nome|default:documento.tipo|default:"Documento" }}</div>
+                <div class="text-muted" style="font-size:.9em">{{ documento.criado_em|date:"d/m/Y H:i"|default:"Data não disponível" }}</div>
+              </div>
+              <a href="{% url 'documentos:serve' %}?path={{ documento.arquivo.name }}" target="_blank" class="btn btn-ghost">Ver</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-muted">Nenhum documento anexado.</div>
+      {% endif %}
+    </div>
+  </details>
+
+  <!-- INFORMAÇÕES DA ANÁLISE (open) -->
+  <details class="accordion" open>
+    <summary>Informações da Análise <span class="chev">▾</span></summary>
+    <div class="body">
+      <div class="row">
+        <div class="col-6 col-lg-12">
+          <div class="field-label">Analista Responsável</div>
+          <div class="field-value name">{% if processo.analista_responsavel %}{{ processo.analista_responsavel.get_full_name|default:processo.analista_responsavel.username }}{% else %}Não atribuído{% endif %}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Tipo de Análise</div>
+          <div class="field-value name">{{ processo.get_tipo_analise_display|default:"Normal" }}</div>
+        </div>
+        <div class="col-3 col-lg-6">
+          <div class="field-label">Prioridade</div>
+          <div class="field-value name">{{ processo.get_prioridade_display|default:"Normal" }}</div>
+        </div>
+        {% if processo.data_inicio_analise %}
+        <div class="col-6 col-lg-12">
+          <div class="field-label">Início da Análise</div>
+          <div class="field-value name">{{ processo.data_inicio_analise|date:"d/m/Y H:i" }}</div>
+        </div>
+        {% endif %}
+        {% if processo.observacoes_analista %}
+        <div class="col-12">
+          <div class="field-label">Observações do Analista</div>
+          <div class="field-value name">{{ processo.observacoes_analista }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </details>
+
+  <!-- CHECKLIST DE ANÁLISE (open) -->
+  {% if checklist_itens %}
+  <details class="accordion" open>
+    <summary>Checklist de Análise <span class="chev">▾</span></summary>
+    <div class="body">
+      <div style="display:flex; flex-direction:column; gap:.75rem">
+        {% for item in checklist_itens %}
+        <div>
+          <label class="checkbox">
+            <input type="checkbox" id="checklist_{{ item.id }}" {% if item.verificado %}checked{% endif %}
+                   onchange="toggleChecklistItem({{ item.id }}, this.checked)">
+            <span>{{ item.item }}{% if item.obrigatorio %} <span style="color:#ef4444">*</span>{% endif %}</span>
+          </label>
+          {% if item.observacoes %}
+            <div class="text-muted" style="font-size:.9em; margin-left:1.75rem; margin-top:.25rem">{{ item.observacoes }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </details>
+  {% endif %}
+
+  <!-- HISTÓRICO DO PROCESSO (open) -->
+  {% if historico_completo %}
+  <details class="accordion" open>
+    <summary>Histórico Completo do Processo <span class="chev">▾</span></summary>
+    <div class="body">
+      <div style="position:relative">
+        {% for evento in historico_completo %}
+        <div style="position:relative; padding-bottom:1.5rem">
+          {% if not forloop.last %}
+            <span style="position:absolute; top:1rem; left:.75rem; margin-left:-1px; height:100%; width:2px; background:rgba(255,255,255,.1)"></span>
+          {% endif %}
+          <div style="position:relative; display:flex; gap:.75rem">
+            <div>
+              {% if evento.tipo == 'analise' %}
+                <span style="height:1.5rem; width:1.5rem; border-radius:50%; background:#3b82f6; display:flex; align-items:center; justify-content:center; border:3px solid var(--surface-1)">
+                  <svg style="height:.75rem; width:.75rem; color:#fff" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg>
+                </span>
+              {% else %}
+                <span style="height:1.5rem; width:1.5rem; border-radius:50%; background:#10b981; display:flex; align-items:center; justify-content:center; border:3px solid var(--surface-1)">
+                  <svg style="height:.75rem; width:.75rem; color:#fff" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </span>
+              {% endif %}
+            </div>
+            <div style="flex:1; display:flex; justify-content:space-between; gap:1rem">
+              <div>
+                <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.25rem">
+                  <div class="field-value name" style="font-size:.9rem">{{ evento.acao }}</div>
+                  {% if evento.tipo == 'analise' %}
+                    {% if 'aprovado' in evento.acao|lower %}
+                      <span class="badge badge--aprovado">Aprovação</span>
+                    {% elif 'assumido' in evento.acao|lower %}
+                      <span class="badge badge--analise">Assumir</span>
+                    {% elif 'cancelado' in evento.acao|lower or 'cancelar' in evento.acao|lower %}
+                      <span class="badge badge--cancelado">Cancelamento</span>
+                    {% elif 'correção' in evento.acao|lower or 'correcao' in evento.acao|lower %}
+                      <span class="badge badge--enviado-correcao">Correção</span>
+                    {% else %}
+                      <span class="badge badge--analise">Análise</span>
+                    {% endif %}
+                  {% else %}
+                    <span class="badge badge--ok">Cadastro</span>
+                  {% endif %}
+                </div>
+                {% if evento.usuario %}
+                  <div class="text-muted" style="font-size:.8rem">por {{ evento.usuario.get_full_name|default:evento.usuario.username|default:"Sistema" }}</div>
+                {% else %}
+                  <div class="text-muted" style="font-size:.8rem">pelo sistema</div>
+                {% endif %}
+                {% if evento.status_anterior and evento.status_novo %}
+                  <div style="margin-top:.5rem; font-size:.8rem">
+                    <span class="badge {% if evento.status_anterior == 'pendente' %}badge--pendente{% elif evento.status_anterior == 'em_analise' %}badge--analise{% elif evento.status_anterior == 'aprovado' %}badge--aprovado{% elif evento.status_anterior == 'cancelado' %}badge--cancelado{% else %}badge--muted{% endif %}">{{ evento.status_anterior }}</span>
+                    <span style="margin:0 .25rem">→</span>
+                    <span class="badge {% if evento.status_novo == 'pendente' %}badge--pendente{% elif evento.status_novo == 'em_analise' %}badge--analise{% elif evento.status_novo == 'aprovado' %}badge--aprovado{% elif evento.status_novo == 'cancelado' %}badge--cancelado{% elif evento.status_novo == 'enviado_para_correcao' %}badge--enviado-correcao{% elif evento.status_novo == 'correcao_feita' %}badge--correcao-feita{% else %}badge--info{% endif %}">{{ evento.status_novo }}</span>
+                  </div>
+                {% endif %}
+                {% if evento.observacoes %}
+                  <div class="text-muted" style="font-size:.8rem; margin-top:.5rem; font-style:italic">{{ evento.observacoes }}</div>
+                {% endif %}
+              </div>
+              <div class="text-muted" style="font-size:.8rem; white-space:nowrap">{{ evento.data_acao|date:"d/m/Y H:i" }}</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </details>
+  {% endif %}
+
+  <!-- NAVEGAÇÃO -->
+  <div style="margin-top:2rem; display:flex; justify-content:space-between">
+    <a href="{% url 'analise:esteira' %}" class="btn btn-ghost">
       ← Voltar para Esteira
     </a>
   </div>
 </div>
 
-<!-- ===== Modais (mantidos, só com visual DS) ===== -->
+<!-- ===== MODAIS COM DESIGN SYSTEM ===== -->
 <!-- Aprovação -->
-<div id="approvalModal" class="hidden fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50">
-  <div class="relative top-20 mx-auto p-5 w-96 section-card shadow-lg">
-    <div class="mt-1 text-center">
-      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-600/15">
-        <svg class="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+<div id="approvalModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); overflow-y:auto; height:100%; width:100%; z-index:50">
+  <div class="card" style="position:relative; top:5rem; margin:0 auto; padding:1.5rem; width:24rem; max-width:90vw">
+    <div style="text-align:center">
+      <div style="margin:0 auto; display:flex; align-items:center; justify-content:center; height:3rem; width:3rem; border-radius:50%; background:rgba(34,197,94,.15)">
+        <svg style="height:1.5rem; width:1.5rem; color:#22c55e" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
       </div>
-      <h3 class="text-lg section-title mt-4">Aprovar Cadastro</h3>
-      <p class="text-sm subtle mt-2">O cadastro será aprovado e encaminhado para a tesouraria.</p>
-      <form method="post" action="{% url 'analise:aprovar_processo' processo.id %}" class="mt-4">
+      <h3 class="section-title" style="margin-top:1rem">Aprovar Cadastro</h3>
+      <p class="text-muted" style="margin-top:.5rem">O cadastro será aprovado e encaminhado para a tesouraria.</p>
+      <form method="post" action="{% url 'analise:aprovar_processo' processo.id %}" style="margin-top:1rem">
         {% csrf_token %}
-        <textarea name="observacoes" placeholder="Observações da análise (opcional)" class="w-full px-3 py-2 rounded-md text-sm border border-border bg-background text-foreground" rows="3"></textarea>
-        <div class="mt-4 space-y-2">
-          <button type="submit" class="btn btn-success w-full">Confirmar Aprovação</button>
-          <button type="button" onclick="closeApprovalModal()" class="btn btn-neutral w-full">Cancelar</button>
+        <textarea name="observacoes" placeholder="Observações da análise (opcional)" class="input" rows="3" style="width:100%"></textarea>
+        <div style="margin-top:1rem; display:flex; flex-direction:column; gap:.5rem">
+          <button type="submit" class="btn btn-accent" style="width:100%">Confirmar Aprovação</button>
+          <button type="button" onclick="closeApprovalModal()" class="btn btn-ghost" style="width:100%">Cancelar</button>
         </div>
       </form>
     </div>
@@ -347,21 +594,21 @@
 </div>
 
 <!-- Pendência -->
-<div id="pendencyModal" class="hidden fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50">
-  <div class="relative top-20 mx-auto p-5 w-96 section-card shadow-lg">
-    <div class="mt-1 text-center">
-      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-600/15">
-        <svg class="h-6 w-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+<div id="pendencyModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); overflow-y:auto; height:100%; width:100%; z-index:50">
+  <div class="card" style="position:relative; top:5rem; margin:0 auto; padding:1.5rem; width:24rem; max-width:90vw">
+    <div style="text-align:center">
+      <div style="margin:0 auto; display:flex; align-items:center; justify-content:center; height:3rem; width:3rem; border-radius:50%; background:rgba(234,179,8,.15)">
+        <svg style="height:1.5rem; width:1.5rem; color:#eab308" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       </div>
-      <h3 class="text-lg section-title mt-4">Pendenciar Cadastro</h3>
-      <p class="text-sm subtle mt-2">Informe quais ajustes o agente deve realizar.</p>
-      <form method="post" action="{% url 'analise:enviar_para_correcao' processo.id %}" class="mt-4">
+      <h3 class="section-title" style="margin-top:1rem">Pendenciar Cadastro</h3>
+      <p class="text-muted" style="margin-top:.5rem">Informe quais ajustes o agente deve realizar.</p>
+      <form method="post" action="{% url 'analise:enviar_para_correcao' processo.id %}" style="margin-top:1rem">
         {% csrf_token %}
-        <textarea name="feedback_agente" placeholder="O que precisa ser corrigido (obrigatório)" required class="w-full px-3 py-2 rounded-md text-sm border border-border bg-background text-foreground" rows="4"></textarea>
-        <textarea name="observacoes" placeholder="Observações internas (opcional)" class="w-full mt-2 px-3 py-2 rounded-md text-sm border border-border bg-background text-foreground" rows="2"></textarea>
-        <div class="mt-4 space-y-2">
-          <button type="submit" class="btn btn-warning w-full">Enviar para Revisão</button>
-          <button type="button" onclick="closePendencyModal()" class="btn btn-neutral w-full">Cancelar</button>
+        <textarea name="feedback_agente" placeholder="O que precisa ser corrigido (obrigatório)" required class="input" rows="4" style="width:100%"></textarea>
+        <textarea name="observacoes" placeholder="Observações internas (opcional)" class="input" rows="2" style="width:100%; margin-top:.5rem"></textarea>
+        <div style="margin-top:1rem; display:flex; flex-direction:column; gap:.5rem">
+          <button type="submit" class="btn" style="width:100%; background:#d97706; color:#fff">Enviar para Revisão</button>
+          <button type="button" onclick="closePendencyModal()" class="btn btn-ghost" style="width:100%">Cancelar</button>
         </div>
       </form>
     </div>
@@ -369,20 +616,20 @@
 </div>
 
 <!-- Cancelamento -->
-<div id="cancelModal" class="hidden fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50">
-  <div class="relative top-20 mx-auto p-5 w-96 section-card shadow-lg">
-    <div class="mt-1 text-center">
-      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-600/15">
-        <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+<div id="cancelModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); overflow-y:auto; height:100%; width:100%; z-index:50">
+  <div class="card" style="position:relative; top:5rem; margin:0 auto; padding:1.5rem; width:24rem; max-width:90vw">
+    <div style="text-align:center">
+      <div style="margin:0 auto; display:flex; align-items:center; justify-content:center; height:3rem; width:3rem; border-radius:50%; background:rgba(239,68,68,.15)">
+        <svg style="height:1.5rem; width:1.5rem; color:#ef4444" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </div>
-      <h3 class="text-lg section-title mt-4">Cancelar Cadastro</h3>
-      <p class="text-sm subtle mt-2">Esta ação é definitiva.</p>
-      <form method="post" action="{% url 'analise:cancelar_processo' processo.id %}" class="mt-4">
+      <h3 class="section-title" style="margin-top:1rem">Cancelar Cadastro</h3>
+      <p class="text-muted" style="margin-top:.5rem">Esta ação é definitiva.</p>
+      <form method="post" action="{% url 'analise:cancelar_processo' processo.id %}" style="margin-top:1rem">
         {% csrf_token %}
-        <textarea name="motivo_cancelamento" placeholder="Motivo do cancelamento (obrigatório)" required class="w-full px-3 py-2 rounded-md text-sm border border-border bg-background text-foreground" rows="4"></textarea>
-        <div class="mt-4 space-y-2">
-          <button type="submit" class="btn btn-danger w-full">Confirmar Cancelamento</button>
-          <button type="button" onclick="closeCancelModal()" class="btn btn-neutral w-full">Cancelar</button>
+        <textarea name="motivo_cancelamento" placeholder="Motivo do cancelamento (obrigatório)" required class="input" rows="4" style="width:100%"></textarea>
+        <div style="margin-top:1rem; display:flex; flex-direction:column; gap:.5rem">
+          <button type="submit" class="btn" style="width:100%; background:#dc2626; color:#fff">Confirmar Cancelamento</button>
+          <button type="button" onclick="closeCancelModal()" class="btn btn-ghost" style="width:100%">Cancelar</button>
         </div>
       </form>
     </div>
@@ -393,18 +640,18 @@
 
 {% block extra_js %}
 <script>
-  function openApprovalModal(){ document.getElementById('approvalModal').classList.remove('hidden'); }
-  function closeApprovalModal(){ document.getElementById('approvalModal').classList.add('hidden'); }
-  function openPendencyModal(){ document.getElementById('pendencyModal').classList.remove('hidden'); }
-  function closePendencyModal(){ document.getElementById('pendencyModal').classList.add('hidden'); }
-  function openCancelModal(){ document.getElementById('cancelModal').classList.remove('hidden'); }
-  function closeCancelModal(){ document.getElementById('cancelModal').classList.add('hidden'); }
+  function openApprovalModal(){ document.getElementById('approvalModal').style.display = 'block'; }
+  function closeApprovalModal(){ document.getElementById('approvalModal').style.display = 'none'; }
+  function openPendencyModal(){ document.getElementById('pendencyModal').style.display = 'block'; }
+  function closePendencyModal(){ document.getElementById('pendencyModal').style.display = 'none'; }
+  function openCancelModal(){ document.getElementById('cancelModal').style.display = 'block'; }
+  function closeCancelModal(){ document.getElementById('cancelModal').style.display = 'none'; }
 
   // fechar modal clicando no backdrop
   document.addEventListener('click', (e)=>{
     ['approvalModal','pendencyModal','cancelModal'].forEach(id=>{
       const el=document.getElementById(id);
-      if(e.target===el){ el.classList.add('hidden'); }
+      if(e.target===el){ el.style.display = 'none'; }
     });
   });
 
@@ -423,5 +670,29 @@
   async function assumirEAprovar(){ if(await assumirProcesso()) openApprovalModal(); }
   async function assumirEPendenciar(){ if(await assumirProcesso()) openPendencyModal(); }
   async function assumirECancelar(){ if(await assumirProcesso()) openCancelModal(); }
+
+  // Função para toggle do checklist
+  async function toggleChecklistItem(itemId, checked) {
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    fd.append('verificado', checked);
+
+    try {
+      const response = await fetch(`/analise/checklist/${itemId}/toggle/`, {
+        method: 'POST',
+        body: fd
+      });
+
+      if (!response.ok) {
+        // Reverter o estado do checkbox se a requisição falhou
+        document.getElementById(`checklist_${itemId}`).checked = !checked;
+        console.error('Erro ao atualizar checklist');
+      }
+    } catch (error) {
+      // Reverter o estado do checkbox se houve erro
+      document.getElementById(`checklist_${itemId}`).checked = !checked;
+      console.error('Erro ao comunicar com servidor:', error);
+    }
+  }
 </script>
 {% endblock %}
