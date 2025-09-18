@@ -13,6 +13,7 @@ from django.db import transaction
 
 from core.utils.model_paths import is_valid_text_path
 from .models import AnaliseProcesso, HistoricoAnalise, StatusAnalise, ChecklistAnalise
+from .services import KPIService
 from apps.cadastros.choices import StatusCadastro
 from apps.tesouraria.models import ProcessoTesouraria
 from apps.accounts.decorators import analista_required
@@ -23,22 +24,30 @@ User = get_user_model()
 # Mapeamento de status (permite variações que você já usa)
 STATUS_MAP = {
     "pendentes": [
-        "PENDENTE", "AGUARDANDO_CORRECAO"
+        # Não há processos pendentes no banco atualmente
+        # Adicionando status que podem ser considerados pendentes
+        "PENDENTE", "AGUARDANDO_ANALISE"
     ],
     "em_analise": [
-        "EM_ANALISE"
+        "em_analise"  # Status real no banco (minúsculo)
     ],
     "em_correcao": [
-        "ENVIADO_PARA_CORRECAO"  # Processos enviados para correção pelo analista
+        "enviado_para_correcao"  # Status real no banco (minúsculo)
     ],
     "correcao_realizada": [
-        "CORRECAO_REALIZADA", "CORRECAO_FEITA", "CORRECAO"  # Corrigidos pelo agente
+        "correcao_realizada"  # Status real no banco (minúsculo)
     ],
     "efetivados": [
-        "APROVADO", "EFETIVADO"
+        "aprovado"  # Status real no banco (minúsculo)
+    ],
+    "aprovado": [  # Adicionado mapeamento direto
+        "aprovado"  # Status real no banco (minúsculo)
     ],
     "cancelados": [
-        "CANCELADO", "REPROVADO"
+        "cancelado"  # Status real no banco (minúsculo)
+    ],
+    "cancelado": [  # Adicionado mapeamento direto
+        "cancelado"  # Status real no banco (minúsculo)
     ],
 }
 
@@ -53,14 +62,16 @@ SEARCH_FIELDS = [
 
 def _status_q(status_list):
     q = Q()
-    s_upper = [s.upper() for s in status_list]
-    # Tenta com enum (StatusAnalise.*). Se não existir, usa string direta.
-    for s in s_upper:
-        # suporte a enums no model
-        if hasattr(StatusAnalise, s):
-            q |= Q(status=getattr(StatusAnalise, s))
-        else:
-            q |= Q(status__iexact=s) | Q(status__icontains=s.replace("_", " "))
+    # Trabalhar com os status como estão (sem conversão para maiúsculo)
+    for s in status_list:
+        # Primeiro tenta busca exata
+        q |= Q(status__iexact=s)
+        # Depois tenta com enum se existir
+        s_upper = s.upper()
+        if hasattr(StatusAnalise, s_upper):
+            q |= Q(status=getattr(StatusAnalise, s_upper))
+        # Por último, tenta busca por conteúdo
+        q |= Q(status__icontains=s.replace("_", " "))
     return q
 
 def _apply_search(model, qs, term):
@@ -87,6 +98,36 @@ def _apply_agente(qs, agente_id):
     # tente agente_responsavel via cadastro
     return qs.filter(cadastro__agente_responsavel_id=agente_id)
 
+def _apply_data_entrada(qs, data_entrada):
+    if not data_entrada:
+        return qs
+    try:
+        from datetime import datetime
+        data = datetime.strptime(data_entrada, '%Y-%m-%d').date()
+        return qs.filter(data_entrada__date=data)
+    except (ValueError, TypeError):
+        return qs
+
+def _apply_data_periodo(qs, data_inicio, data_fim):
+    """Aplica filtro por período de datas"""
+    if data_inicio:
+        try:
+            from datetime import datetime
+            data = datetime.strptime(data_inicio, "%Y-%m-%d").date()
+            qs = qs.filter(data_entrada__date__gte=data)
+        except ValueError:
+            pass
+    
+    if data_fim:
+        try:
+            from datetime import datetime
+            data = datetime.strptime(data_fim, "%Y-%m-%d").date()
+            qs = qs.filter(data_entrada__date__lte=data)
+        except ValueError:
+            pass
+    
+    return qs
+
 def _base_queryset(request):
     qs = AnaliseProcesso.objects.all().select_related(
         "analista_responsavel",
@@ -97,15 +138,24 @@ def _base_queryset(request):
     analista = request.GET.get("analista") or ""
     agente = request.GET.get("agente") or ""
     status = request.GET.get("status") or ""
+    data_entrada = request.GET.get("data_entrada") or ""
+    data_inicio = request.GET.get("data_inicio") or ""
+    data_fim = request.GET.get("data_fim") or ""
 
     qs = _apply_search(AnaliseProcesso, qs, search)
     qs = _apply_analista(qs, analista)
     qs = _apply_agente(qs, agente)
     
+    # Aplicar filtro de data - priorizar período se fornecido
+    if data_inicio or data_fim:
+        qs = _apply_data_periodo(qs, data_inicio, data_fim)
+    elif data_entrada:
+        qs = _apply_data_entrada(qs, data_entrada)
+    
     # Aplicar filtro por status dos filtros rápidos
     if status:
         if status == "pendente":
-            qs = qs.filter(_status_q(["PENDENTE", "AGUARDANDO_CORRECAO"]))
+            qs = qs.filter(_status_q(["PENDENTE", "CORRECAO_FEITA"]))
         elif status == "em_analise":
             qs = qs.filter(_status_q(["EM_ANALISE"]))
         elif status == "em_correcao":
@@ -135,14 +185,34 @@ def esteira(request):
     # Dados iniciais
     qs = _base_queryset(request)
 
+    # Adicionar KPIs à esteira - calcular com base nos filtros aplicados
+    kpi_service = KPIService()
+    
+    # Extrair parâmetros de filtro para passar ao KPIService
+    analista = request.GET.get("analista") or ""
+    agente = request.GET.get("agente") or ""
+    data_inicio = request.GET.get("data_inicio") or ""
+    data_fim = request.GET.get("data_fim") or ""
+    search = request.GET.get("search") or request.GET.get("q") or ""
+    
+    # Calcular KPIs com filtros aplicados
+    kpis = kpi_service.get_filtered_kpis(
+        analista_id=analista,
+        agente_id=agente,
+        data_inicio=data_inicio,
+        data_fim=data_fim,
+        search=search
+    )
+
     context = {
         "users": User.objects.all().order_by("first_name","last_name","username"),
         "count_total": qs.count(),
+        "kpis": kpis,
     }
 
     # Se for requisição HTMX do formulário de filtros, renderizar apenas os blocos
     is_htmx = request.headers.get('HX-Request') == 'true'
-    has_filters = request.GET.get('analista') or request.GET.get('agente') or request.GET.get('search')
+    has_filters = request.GET.get('analista') or request.GET.get('agente') or request.GET.get('search') or request.GET.get('data_inicio') or request.GET.get('data_fim')
 
     if is_htmx and has_filters:
         return render(request, "analise/partials/_blocks_container.html", context)
@@ -169,57 +239,25 @@ def esteira_block(request):
     paginator = Paginator(qs.order_by("-id"), 5)
     page_obj = paginator.get_page(page)
 
+    # Mapear o block para o status correto para o badge
+    block_to_status = {
+        "pendentes": "pendente",
+        "em_analise": "em_analise", 
+        "em_correcao": "em_correcao",
+        "correcao_realizada": "correcao_realizada",
+        "efetivados": "aprovado",
+        "aprovado": "aprovado",  # Adicionado mapeamento direto
+        "cancelados": "cancelado",
+        "cancelado": "cancelado"  # Adicionado mapeamento direto
+    }
+
     return render(request, "analise/partials/_esteira_block.html", {
         "block": block,
+        "status": block_to_status.get(block, "pendente"),
         "page_obj": page_obj,
         "paginator": paginator,
         "request": request,
     })
-
-# Manter outras views existentes
-@login_required
-@analista_required
-def dashboard(request):
-    """Dashboard principal do módulo de análise."""
-    
-    # Estatísticas gerais
-    total_processos = AnaliseProcesso.objects.count()
-    processos_pendentes = AnaliseProcesso.objects.filter(status=StatusAnalise.PENDENTE).count()
-    processos_em_analise = AnaliseProcesso.objects.filter(status=StatusAnalise.EM_ANALISE).count()
-    processos_aprovados = AnaliseProcesso.objects.filter(status=StatusAnalise.APROVADO).count()
-    processos_enviados_correcao = AnaliseProcesso.objects.filter(status=StatusAnalise.ENVIADO_PARA_CORRECAO).count()
-    processos_correcao_realizada = AnaliseProcesso.objects.filter(status=StatusAnalise.CORRECAO_REALIZADA).count()
-    
-    # Processos em atraso
-    processos_em_atraso = AnaliseProcesso.objects.filter(
-        prazo_analise__lt=timezone.now(),
-        data_conclusao__isnull=True
-    ).count()
-    
-    # Últimos processos
-    ultimos_processos = AnaliseProcesso.objects.select_related(
-        'cadastro', 'analista_responsavel'
-    ).order_by('-data_entrada')[:10]
-    
-    # Processos do analista logado
-    meus_processos = AnaliseProcesso.objects.filter(
-        analista_responsavel=request.user,
-        status=StatusAnalise.EM_ANALISE
-    ).count()
-    
-    context = {
-        'total_processos': total_processos,
-        'processos_pendentes': processos_pendentes,
-        'processos_em_analise': processos_em_analise,
-        'processos_aprovados': processos_aprovados,
-        'processos_enviados_correcao': processos_enviados_correcao,
-        'processos_correcao_realizada': processos_correcao_realizada,
-        'processos_em_atraso': processos_em_atraso,
-        'ultimos_processos': ultimos_processos,
-        'meus_processos': meus_processos,
-    }
-    
-    return render(request, 'analise/dashboard.html', context)
 
 @login_required
 @analista_required

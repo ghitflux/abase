@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 from .models import MovimentacaoTesouraria, Mensalidade, ReconciliacaoLog, StatusMensalidade, ProcessoTesouraria, StatusProcessoTesouraria
 from .services import ReconciliacaoService
 from apps.accounts.decorators import admin_required, tesouraria_required
-from apps.documentos.models import Documento
+# Remove unused import
 
 
 @login_required
@@ -334,14 +334,8 @@ def reconciliacao_logs(request):
 
 # ========== VIEWS DE PROCESSOS DA TESOURARIA ==========
 
-@login_required
-@tesouraria_required
-def processos_tesouraria(request):
-    """
-    Lista todos os processos aprovados que chegaram da análise
-    """
-    # Filtros
-    status_filter = request.GET.get('status', '')
+def _base_queryset_tesouraria(request):
+    """QuerySet base para processos da tesouraria com filtros aplicados"""
     agente_filter = request.GET.get('agente', '')
     search = request.GET.get('search', '')
     
@@ -351,9 +345,6 @@ def processos_tesouraria(request):
     ).prefetch_related('cadastro__documentos')
     
     # Aplicar filtros
-    if status_filter:
-        processos = processos.filter(status=status_filter)
-    
     if agente_filter:
         processos = processos.filter(agente_responsavel_id=agente_filter)
     
@@ -365,26 +356,114 @@ def processos_tesouraria(request):
             Q(cadastro__matricula_servidor__icontains=search)
         )
     
-    # Ordenação por data de entrada
-    processos = processos.order_by('-data_entrada')
+    return processos.order_by('-data_entrada')
+
+@login_required
+@tesouraria_required
+def processos_tesouraria(request):
+    """
+    Lista todos os processos aprovados que chegaram da análise
+    """
+    # Filtros
+    status_filter = request.GET.get('status', '')
     
-    # Paginação
-    paginator = Paginator(processos, 15)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    # QuerySet base
+    processos_base = _base_queryset_tesouraria(request)
+    
+    # Calcular KPIs da tesouraria
+    from django.db.models import Sum
+    from decimal import Decimal
+    
+    # KPIs baseados no queryset filtrado
+    total_processos = ProcessoTesouraria.objects.count()
+    pendentes = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.PENDENTE).count()
+    processados = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.PROCESSADO).count()
+    rejeitados = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.REJEITADO).count()
+    
+    # Valores financeiros
+    valor_total_liberado = ProcessoTesouraria.objects.filter(
+        status=StatusProcessoTesouraria.PROCESSADO
+    ).aggregate(
+        total=Sum('cadastro__disponivel')
+    )['total'] or Decimal('0.00')
+    
+    valor_auxilio_agentes = ProcessoTesouraria.objects.filter(
+        status=StatusProcessoTesouraria.PROCESSADO
+    ).aggregate(
+        total=Sum('cadastro__doacao_associado')
+    )['total'] or Decimal('0.00')
     
     # Agentes disponíveis para filtro
     from django.contrib.auth.models import User
     agentes = User.objects.filter(groups__name='AGENTE').order_by('username')
     
+    # KPIs organizados
+    kpis = {
+        'total_processos': {
+            'valor': total_processos,
+            'label': 'Total de Processos',
+            'icon': 'clipboard-list',
+            'color': 'blue'
+        },
+        'pendentes': {
+            'valor': pendentes,
+            'label': 'Pendentes',
+            'icon': 'clock',
+            'color': 'yellow'
+        },
+        'processados': {
+            'valor': processados,
+            'label': 'Processados',
+            'icon': 'check-circle',
+            'color': 'green'
+        },
+        'rejeitados': {
+            'valor': rejeitados,
+            'label': 'Rejeitados',
+            'icon': 'x-circle',
+            'color': 'red'
+        },
+        'valor_liberado': {
+            'valor': valor_total_liberado,
+            'label': 'Valor Total Liberado',
+            'icon': 'currency-dollar',
+            'color': 'green',
+            'formato': 'moeda'
+        },
+        'valor_auxilio': {
+            'valor': valor_auxilio_agentes,
+            'label': 'Auxílio aos Agentes',
+            'icon': 'gift',
+            'color': 'blue',
+            'formato': 'moeda'
+        }
+    }
+    
+    # Preparar dados por status para as tabelas
+    processos_pendentes = None
+    processos_processados = None
+    processos_rejeitados = None
+    
+    if not status_filter or status_filter == 'PENDENTE':
+        processos_pendentes = processos_base.filter(status=StatusProcessoTesouraria.PENDENTE)[:10]
+    
+    if not status_filter or status_filter == 'PROCESSADO':
+        processos_processados = processos_base.filter(status=StatusProcessoTesouraria.PROCESSADO)[:10]
+    
+    if not status_filter or status_filter == 'REJEITADO':
+        processos_rejeitados = processos_base.filter(status=StatusProcessoTesouraria.REJEITADO)[:10]
+    
     context = {
-        'page_obj': page_obj,
         'status_choices': StatusProcessoTesouraria.choices,
         'agentes': agentes,
+        'kpis': kpis,
+        'processos_pendentes': processos_pendentes,
+        'processos_processados': processos_processados,
+        'processos_rejeitados': processos_rejeitados,
         'current_filters': {
             'status': status_filter,
-            'agente': agente_filter, 
-            'search': search,
+            'agente': request.GET.get('agente', ''), 
+            'search': request.GET.get('search', ''),
         }
     }
     
@@ -393,9 +472,65 @@ def processos_tesouraria(request):
 
 @login_required
 @tesouraria_required
+def processo_block(request):
+    """
+    Fragmento HTMX para um bloco específico com paginação.
+    Parâmetros:
+      - block: pendentes|processados|rejeitados
+      - page: número (default 1)
+    """
+    block = request.GET.get("block", "pendentes")
+    page = int(request.GET.get("page", "1") or "1")
+
+    # Mapear block para status
+    block_to_status = {
+        "pendentes": StatusProcessoTesouraria.PENDENTE,
+        "processados": StatusProcessoTesouraria.PROCESSADO,
+        "rejeitados": StatusProcessoTesouraria.REJEITADO,
+    }
+
+    if block not in block_to_status:
+        block = "pendentes"
+
+    qs = _base_queryset_tesouraria(request).filter(status=block_to_status[block])
+
+    paginator = Paginator(qs, 10)
+    page_obj = paginator.get_page(page)
+
+    return render(request, "tesouraria/partials/_processo_block.html", {
+        "block": block,
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "request": request,
+    })
+
+
+@login_required
+@tesouraria_required
 def detalhe_processo_tesouraria(request, processo_id):
     """
     Exibe detalhes de um processo da tesouraria com modal de ações
+    """
+    processo = get_object_or_404(
+        ProcessoTesouraria.objects.select_related(
+            'cadastro', 'origem_analise', 'agente_responsavel', 'processado_por'
+        ).prefetch_related('cadastro__documentos'),
+        id=processo_id
+    )
+    
+    context = {
+        'processo': processo,
+        'status_choices': StatusProcessoTesouraria.choices,
+    }
+    
+    return render(request, 'tesouraria/detalhe_processo.html', context)
+
+
+@login_required
+@tesouraria_required
+def processo_modal(request, processo_id):
+    """
+    Retorna o conteúdo do modal de detalhes do processo
     """
     processo = get_object_or_404(
         ProcessoTesouraria.objects.select_related(

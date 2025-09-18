@@ -3,16 +3,15 @@
 <div id="block-{{ block }}" class="ds-card">
   <div class="p-4 border-b border-gray-600" style="background-color: rgba(255, 255, 255, 0.05);">
     <div class="flex items-center justify-between">
-     {# Título em texto simples com fonte reduzida em 2pt (de text-2xl para text-xl) #}
-{% with s=status|stringformat:'s' %}
-  {% if s in 'aprovado efetivado' %}<h3 class="text-xl font-bold text-white">Aprovado</h3>
-  {% elif s in 'pendente' %}<h3 class="text-xl font-bold text-white">Pendente</h3>
-  {% elif s in 'em_analise' %}<h3 class="text-xl font-bold text-white">Em Análise</h3>
-  {% elif s in 'em_correcao enviado_para_correcao' %}<h3 class="text-xl font-bold text-white">Correção</h3>
-  {% elif s in 'correcao_realizada correcao_atualizada' %}<h3 class="text-xl font-bold text-white">Correção Realizada</h3>
-  {% elif s in 'cancelado rejeitado' %}<h3 class="text-xl font-bold text-white">Cancelado</h3>
-  {% else %}<h3 class="text-xl font-bold text-white">{{ s|default:"—" }}</h3>{% endif %}
-{% endwith %}
+      {% if block == 'pendentes' %}
+        <h3 class="text-xl font-bold text-white">Pendentes</h3>
+      {% elif block == 'processados' %}
+        <h3 class="text-xl font-bold text-white">Processados</h3>
+      {% elif block == 'rejeitados' %}
+        <h3 class="text-xl font-bold text-white">Rejeitados</h3>
+      {% else %}
+        <h3 class="text-xl font-bold text-white">{{ block|title }}</h3>
+      {% endif %}
 
       <span class="bg-gray-700 text-gray-200 text-xs font-medium px-2.5 py-0.5 rounded border border-gray-600">
         {{ page_obj.paginator.count }} item{{ page_obj.paginator.count|pluralize }}
@@ -28,7 +27,6 @@
           <th scope="col">Cadastro</th>
           <th scope="col">Status</th>
           <th scope="col">Agente</th>
-          <th scope="col">Analista</th>
           <th scope="col">Entrada</th>
           <th scope="col">Ações</th>
         </tr>
@@ -46,41 +44,43 @@
             </div>
           </td>
           <td>
-            {# Usando badges do design system #}
-            <span class="badge {{ p.status|status_class }}">
-              {{ p.get_status_display|default:p.status }}
-            </span>
-          </td>
-          <td class="text-gray-300">
-            {% if p.cadastro.agente_responsavel %}
-              {{ p.cadastro.agente_responsavel.get_full_name|default:p.cadastro.agente_responsavel.username }}
+            {% if p.status == 'AGUARDANDO_ANALISE' %}
+              <span class="badge badge--aguardando">{{ p.get_status_display }}</span>
+            {% elif p.status == 'EM_ANALISE' %}
+              <span class="badge badge--analise">{{ p.get_status_display }}</span>
+            {% elif p.status == 'APROVADO' %}
+              <span class="badge badge--aprovado">{{ p.get_status_display }}</span>
+            {% elif p.status == 'REJEITADO' %}
+              <span class="badge badge--cancelado">{{ p.get_status_display }}</span>
+            {% elif p.status == 'EFETIVADO' %}
+              <span class="badge badge--efetivado">{{ p.get_status_display }}</span>
             {% else %}
-              <span class="text-gray-500">—</span>
+              <span class="badge badge--default">{{ p.get_status_display }}</span>
             {% endif %}
           </td>
           <td class="text-gray-300">
-            {% if p.analista_responsavel %}
-              {{ p.analista_responsavel.get_full_name|default:p.analista_responsavel.username }}
+            {% if p.agente_responsavel %}
+              {{ p.agente_responsavel.get_full_name|default:p.agente_responsavel.username }}
             {% else %}
               <span class="text-gray-500">—</span>
             {% endif %}
           </td>
           <td class="text-gray-300">{{ p.data_entrada|date:"d/m/Y H:i" }}</td>
           <td>
-            <a href="{% url 'analise:detalhe_processo' p.id %}"
-               class="font-medium text-green-400 hover:text-green-300 hover:underline transition-colors"
-               title="Ver detalhes do processo">
+            <button onclick="openProcessoModal({{ p.id }})"
+                    class="font-medium text-green-400 hover:text-green-300 hover:underline transition-colors"
+                    title="Ver detalhes do processo">
               <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
               </svg>
               Ver
-            </a>
+            </button>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="7" class="text-center text-gray-400">
+          <td colspan="6" class="text-center text-gray-400">
             Nenhum processo encontrado nesta categoria.
           </td>
         </tr>
@@ -102,7 +102,7 @@
         <!-- Botão Anterior -->
         {% if page_obj.has_previous %}
           <button class="bg-gray-700 border border-gray-600 text-gray-200 hover:bg-gray-600 px-3 py-2 text-sm font-medium rounded-md transition-colors"
-                  hx-get="{% url 'analise:esteira_block' %}?block={{ block }}&page={{ page_obj.previous_page_number }}{% if request.GET.analista %}&analista={{ request.GET.analista }}{% endif %}{% if request.GET.agente %}&agente={{ request.GET.agente }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+                  hx-get="{% url 'tesouraria:processo_block' %}?block={{ block }}&page={{ page_obj.previous_page_number }}{% if request.GET.agente %}&agente={{ request.GET.agente }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
                   hx-target="#block-{{ block }}"
                   hx-swap="outerHTML">
             ← Anterior
@@ -122,7 +122,7 @@
         <!-- Botão Próxima -->
         {% if page_obj.has_next %}
           <button class="bg-gray-700 border border-gray-600 text-gray-200 hover:bg-gray-600 px-3 py-2 text-sm font-medium rounded-md transition-colors"
-                  hx-get="{% url 'analise:esteira_block' %}?block={{ block }}&page={{ page_obj.next_page_number }}{% if request.GET.analista %}&analista={{ request.GET.analista }}{% endif %}{% if request.GET.agente %}&agente={{ request.GET.agente }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+                  hx-get="{% url 'tesouraria:processo_block' %}?block={{ block }}&page={{ page_obj.next_page_number }}{% if request.GET.agente %}&agente={{ request.GET.agente }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
                   hx-target="#block-{{ block }}"
                   hx-swap="outerHTML">
             Próxima →

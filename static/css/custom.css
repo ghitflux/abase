@@ -124,9 +124,65 @@ body {
 .sidebar.collapsed .sidebar-item .relative.z-10:first-of-type,
 [data-sidebar].collapsed .sidebar-item .relative.z-10:first-of-type,
 [data-sidebar][data-expanded="false"] .sidebar-item .relative.z-10:first-of-type {
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: static !important;
+  margin-right: 0 !important;
+}
+
+/* Force visibility of SVG icons within collapsed sidebar */
+.sidebar.collapsed .sidebar-item .relative.z-10:first-of-type svg,
+[data-sidebar].collapsed .sidebar-item .relative.z-10:first-of-type svg,
+[data-sidebar][data-expanded="false"] .sidebar-item .relative.z-10:first-of-type svg {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+/* Ensure the icon container doesn't get hidden by other styles */
+.sidebar.collapsed .sidebar-item > div:first-child,
+[data-sidebar].collapsed .sidebar-item > div:first-child,
+[data-sidebar][data-expanded="false"] .sidebar-item > div:first-child {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+  min-width: 1.25rem;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Maintain hover effects on collapsed sidebar items */
+.sidebar.collapsed .sidebar-item:hover,
+[data-sidebar].collapsed .sidebar-item:hover,
+[data-sidebar][data-expanded="false"] .sidebar-item:hover {
+  background-color: hsl(var(--sidebar-hover)) !important;
+}
+
+/* Fix icon colors in collapsed state */
+.sidebar.collapsed .sidebar-item .text-button,
+[data-sidebar].collapsed .sidebar-item .text-button,
+[data-sidebar][data-expanded="false"] .sidebar-item .text-button {
+  color: hsl(var(--sidebar-foreground)) !important;
+}
+
+/* Fix active state for collapsed sidebar */
+.sidebar.collapsed .sidebar-item.active,
+[data-sidebar].collapsed .sidebar-item.active,
+[data-sidebar][data-expanded="false"] .sidebar-item.active {
+  background-color: hsl(var(--sidebar-active)) !important;
+  color: hsl(var(--sidebar-active-foreground)) !important;
+}
+
+.sidebar.collapsed .sidebar-item.active .text-button,
+[data-sidebar].collapsed .sidebar-item.active .text-button,
+[data-sidebar][data-expanded="false"] .sidebar-item.active .text-button {
+  color: hsl(var(--sidebar-active-foreground)) !important;
 }
 
 /* Form styles with theme support */

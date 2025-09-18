@@ -604,8 +604,14 @@
       <p class="text-muted" style="margin-top:.5rem">Informe quais ajustes o agente deve realizar.</p>
       <form method="post" action="{% url 'analise:enviar_para_correcao' processo.id %}" style="margin-top:1rem">
         {% csrf_token %}
-        <textarea name="feedback_agente" placeholder="O que precisa ser corrigido (obrigatório)" required class="input" rows="4" style="width:100%"></textarea>
-        <textarea name="observacoes" placeholder="Observações internas (opcional)" class="input" rows="2" style="width:100%; margin-top:.5rem"></textarea>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+          <div style="flex: 1;">
+            <textarea name="feedback_agente" placeholder="O que precisa ser corrigido (obrigatório)" required class="input" rows="4" style="width:100%"></textarea>
+          </div>
+          <div style="flex: 1;">
+            <textarea name="observacoes" placeholder="Observações internas (opcional)" class="input" rows="4" style="width:100%"></textarea>
+          </div>
+        </div>
         <div style="margin-top:1rem; display:flex; flex-direction:column; gap:.5rem">
           <button type="submit" class="btn" style="width:100%; background:#d97706; color:#fff">Enviar para Revisão</button>
           <button type="button" onclick="closePendencyModal()" class="btn btn-ghost" style="width:100%">Cancelar</button>

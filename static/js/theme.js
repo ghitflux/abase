@@ -3,6 +3,9 @@
  * Handles light theme application and UI updates
  */
 
+// Prevent redeclaration if already loaded
+if (typeof window.ThemeManager === 'undefined') {
+
 class ThemeManager {
   constructor() {
     this.theme = 'light';
@@ -298,3 +301,5 @@ if (document.readyState === 'loading') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { ThemeManager, SidebarManager };
 }
+
+} // End of redeclaration protection

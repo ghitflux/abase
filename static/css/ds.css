@@ -109,3 +109,58 @@ select option:hover{background:var(--surface-2);color:var(--text)}
 .badge--info{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.22)}
 .badge--error{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.22)}
 .badge--muted{background:rgba(107,114,128,.12);color:#d1d5db;border:1px solid rgba(107,114,128,.22)}
+
+/* ===== Esteira de Análise – DS helpers ===== */
+
+/* Cartão padrão escuro */
+.ds-card{
+  background:var(--surface-card);
+  border:1px solid var(--surface-border);
+  border-radius: .75rem;
+  box-shadow: 0 1px 0 rgba(0,0,0,.25);
+}
+
+/* Pills do filtro rápido */
+.ds-pills{display:flex;flex-wrap:wrap;gap:.5rem;}
+.ds-pill{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.5rem .875rem;border-radius:999px;font-weight:500;
+  background: #111827; /* fallback */
+  background: var(--surface-card);
+  border:1px solid var(--surface-border);
+  color: var(--field-fg);
+  transition: all .18s ease;
+}
+.ds-pill:hover{background: rgba(255,255,255,.04);}
+.ds-pill.is-active{
+  background: var(--accent-600);
+  border-color: transparent;
+  color:#fff;
+}
+
+/* Inputs/select/botões */
+.ds-label{display:block;font-size:.8rem;color:var(--field-ph);margin-bottom:.25rem;}
+.ds-input,.ds-select{
+  width:100%;
+  background:var(--field-bg);
+  color:var(--field-fg);
+  border:1px solid var(--field-border);
+  border-radius:.5rem;
+  padding:.625rem .75rem;
+}
+.ds-input::placeholder{color:var(--field-ph);}
+.ds-input:focus,.ds-select:focus{outline:none;box-shadow:0 0 0 3px var(--ring-accent);border-color:var(--accent-600);}
+
+.ds-actions{display:flex;gap:.5rem;align-items:center;}
+.ds-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:.5rem .9rem;border-radius:.5rem;font-weight:600;
+  border:1px solid transparent;transition:.18s;
+}
+.ds-btn--accent{background:var(--accent-600);color:#fff;}
+.ds-btn--accent:hover{background:var(--accent-700);}
+.ds-btn--ghost{background:var(--surface-card);color:var(--field-fg);border-color:var(--surface-border);}
+.ds-btn--ghost:hover{background:rgba(255,255,255,.04);}
+
+/* Placeholder de carregamento */
+.ds-skeleton{height:5rem;display:flex;align-items:center;justify-content:center;color:var(--field-ph);}

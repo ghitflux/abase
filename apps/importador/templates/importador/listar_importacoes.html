@@ -3,138 +3,149 @@
 {% block title %}Importações{% endblock %}
 
 {% block content %}
-<div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Importações de Mensalidades</h1>
-        <a href="{% url 'importador:upload_arquivo' %}" 
-           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Nova Importação
-        </a>
+<main class="min-h-screen" style="background: var(--bg); color: var(--text);">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="padding: 0.5rem; background: rgba(122, 19, 64, 0.1); border-radius: 0.5rem;">
+          <svg style="width: 1.5rem; height: 1.5rem; color: var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--heading);">Importações de Mensalidades</h1>
+          <p style="font-size: 0.875rem; color: var(--muted);">Gerencie e monitore suas importações de dados</p>
+        </div>
+      </div>
+      <a href="{% url 'importador:importar' %}"
+         class="ds-btn ds-btn--accent" style="padding: 0.5rem 1rem; font-weight: 500;">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Nova Importação
+      </a>
     </div>
     
-    <div class="bg-white shadow rounded-lg">
-        <div class="p-6 border-b border-gray-200">
-            <form method="get" class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                    <select name="status" id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        <option value="">Todos</option>
-                        {% for value, label in status_choices %}
-                            <option value="{{ value }}" {% if value == current_status %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
+    <!-- Filters Card -->
+    <div class="ds-card" style="margin-bottom: 1.5rem;">
+      <div class="p-6">
+        <form method="get" class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <label for="status" class="ds-label">Status</label>
+            <select name="status" id="status" class="ds-select">
+              <option value="">Todos</option>
+              {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if value == current_status %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label for="competencia" class="ds-label">Competência</label>
+            <input type="text" name="competencia" id="competencia" value="{{ current_competencia|default:'' }}"
+                   placeholder="YYYY-MM" class="ds-input">
+          </div>
+          <div class="flex items-end">
+            <!-- Botão removido conforme solicitado -->
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Data Table -->
+    <div class="ds-card" style="overflow: hidden;">
+      <div class="overflow-x-auto">
+        <table class="table table--dark" style="width: 100%;">
+          <thead>
+            <tr>
+              <th scope="col">Arquivo</th>
+              <th scope="col">Competência</th>
+              <th scope="col">Processamento</th>
+              <th scope="col">Upload</th>
+              <th scope="col">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for importacao in page_obj %}
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-8 w-8">
+                    {% if importacao.tipo_arquivo == 'CSV' %}
+                      <div class="chip chip--agente" style="width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 0.75rem; font-weight: 600;">CSV</span>
+                      </div>
+                    {% else %}
+                      <div style="width: 2rem; height: 2rem; border-radius: 50%; background: rgba(96, 165, 250, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 0.75rem; font-weight: 600; color: var(--info);">TXT</span>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="ml-4">
+                    <div style="font-size: 0.875rem; font-weight: 500; color: var(--text);">{{ importacao.nome_arquivo }}</div>
+                    <div style="font-size: 0.875rem; color: var(--muted);">{{ importacao.usuario.get_full_name|default:importacao.usuario.username }}</div>
+                  </div>
                 </div>
-                <div>
-                    <label for="competencia" class="block text-sm font-medium text-gray-700">Competência</label>
-                    <input type="text" name="competencia" id="competencia" value="{{ current_competencia|default:'' }}" 
-                           placeholder="YYYY-MM" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+              </td>
+              <td style="font-weight: 500;">{{ importacao.competencia }}</td>
+              <td>
+                {% if importacao.total_linhas > 0 %}
+                  {{ importacao.linhas_processadas }}/{{ importacao.total_linhas }}
+                  {% if importacao.linhas_com_erro > 0 %}
+                    <span style="color: var(--danger);">({{ importacao.linhas_com_erro }} erros)</span>
+                  {% endif %}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td style="color: var(--muted);">{{ importacao.data_upload|date:'d/m/Y H:i' }}</td>
+              <td style="display: flex; gap: 0.5rem;">
+                <a href="{% url 'importador:detalhe' importacao.id %}"
+                   style="color: #3b82f6; font-weight: 500; text-decoration: none;">Ver detalhes</a>
+                {% comment %}
+                {% if importacao.status == 'ERRO' %}
+                  <span style="color: var(--muted); font-size: 0.875rem;">Reprocessamento não disponível</span>
+                {% endif %}
+                {% endcomment %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" style="padding: 3rem 1.5rem; text-align: center;">
+                <div class="flex flex-col items-center">
+                  <svg style="width: 3rem; height: 3rem; color: var(--muted); margin-bottom: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  <p style="font-size: 0.875rem; color: var(--muted);">Nenhuma importação encontrada</p>
+                  <p style="font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem;">Faça sua primeira importação clicando no botão "Nova Importação"</p>
                 </div>
-                <div class="flex items-end">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Filtrar
-                    </button>
-                </div>
-            </form>
-        </div>
-        
-        <div class="overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Arquivo</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Competência</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Processamento</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Upload</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for importacao in page_obj %}
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-8 w-8">
-                                    {% if importacao.tipo_arquivo == 'CSV' %}
-                                        <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                                            <span class="text-xs font-medium text-green-800">CSV</span>
-                                        </div>
-                                    {% else %}
-                                        <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                            <span class="text-xs font-medium text-blue-800">TXT</span>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ importacao.nome_arquivo }}</div>
-                                    <div class="text-sm text-gray-500">{{ importacao.usuario.get_full_name|default:importacao.usuario.username }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ importacao.competencia }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if importacao.status == 'CONCLUIDO' %}
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Concluído</span>
-                            {% elif importacao.status == 'PROCESSANDO' %}
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Processando</span>
-                            {% elif importacao.status == 'ERRO' %}
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Erro</span>
-                            {% else %}
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Pendente</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {% if importacao.total_linhas > 0 %}
-                                {{ importacao.linhas_processadas }}/{{ importacao.total_linhas }}
-                                {% if importacao.linhas_com_erro > 0 %}
-                                    <span class="text-red-600">({{ importacao.linhas_com_erro }} erros)</span>
-                                {% endif %}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ importacao.data_upload|date:'d/m/Y H:i' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                            <a href="{% url 'importador:detalhe_importacao' importacao.id %}" 
-                               class="text-indigo-600 hover:text-indigo-900">Ver</a>
-                            {% if importacao.status == 'ERRO' %}
-                                <form method="post" action="{% url 'importador:reprocessar_arquivo' importacao.id %}" class="inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="text-green-600 hover:text-green-900">Reprocessar</button>
-                                </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Nenhuma importação encontrada</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
         
         {% if page_obj.has_other_pages %}
-        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <div class="ds-card" style="padding: 0.75rem 1rem; border-top: 1px solid var(--border);">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <p class="text-sm text-gray-700">
+                    <p style="font-size: 0.875rem; color: var(--muted);">
                         Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }} registros
                     </p>
                 </div>
                 <div class="flex">
                     {% if page_obj.has_previous %}
-                        <a href="?page=1" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Primeira</a>
-                        <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Anterior</a>
+                        <a href="?page=1" class="ds-btn ds-btn--ghost" style="padding: 0.5rem 0.75rem; border-radius: 0.375rem 0 0 0.375rem;">Primeira</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="ds-btn ds-btn--ghost" style="padding: 0.5rem 0.75rem; border-radius: 0;">Anterior</a>
                     {% endif %}
                     
-                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                    <span class="ds-btn ds-btn--accent" style="padding: 0.5rem 1rem;">
                         {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
                     </span>
                     
                     {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Próxima</a>
-                        <a href="?page={{ page_obj.paginator.num_pages }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Última</a>
+                        <a href="?page={{ page_obj.next_page_number }}" class="ds-btn ds-btn--ghost" style="padding: 0.5rem 0.75rem; border-radius: 0;">Próxima</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="ds-btn ds-btn--ghost" style="padding: 0.5rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0;">Última</a>
                     {% endif %}
                 </div>
             </div>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Modal de Confirmação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-6 text-center">Teste Modal de Confirmação</h1>
+        
+        <div class="space-y-4">
+            <button onclick="testModal1()" class="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                Teste Modal Padrão
+            </button>
+            
+            <button onclick="testModal2()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                Teste Modal Personalizado
+            </button>
+            
+            <button onclick="testModal3()" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                Teste Modal de Sucesso
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="p-6">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4" id="confirmation-icon">
+                        <img src="static/images/confirmation-icon.svg" alt="Ícone de confirmação" class="w-8 h-8">
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2" id="confirmation-title">Confirmar ação</h3>
+                        <p class="text-sm text-gray-500 mb-6" id="confirmation-message">Tem certeza que deseja realizar esta ação?</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 text-sm font-medium transition-colors" onclick="closeConfirmationModal()">Cancelar</button>
+                        <button type="button" class="flex-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm font-medium transition-colors" id="confirmation-action" onclick="confirmAction()">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/confirmation-modal.js"></script>
+    
+    <script>
+        function testModal1() {
+            showConfirmationModal(
+                'Excluir Item',
+                'Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.',
+                function() {
+                    alert('Item excluído com sucesso!');
+                }
+            );
+        }
+        
+        function testModal2() {
+            showConfirmationModal(
+                'Salvar Alterações',
+                'Deseja salvar as alterações realizadas?',
+                function() {
+                    alert('Alterações salvas!');
+                },
+                'Salvar',
+                '#3b82f6'
+            );
+        }
+        
+        function testModal3() {
+            showConfirmationModal(
+                'Finalizar Processo',
+                'Confirma a finalização deste processo?',
+                function() {
+                    alert('Processo finalizado!');
+                },
+                'Finalizar',
+                '#10b981'
+            );
+        }
+    </script>
+</body>
+</html>

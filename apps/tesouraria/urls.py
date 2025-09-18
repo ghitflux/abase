@@ -29,7 +29,9 @@ urlpatterns = [
     
     # Processos da Tesouraria
     path('processos/', views.processos_tesouraria, name='processos'),
+    path('processos/block/', views.processo_block, name='processo_block'),
     path('processos/<int:processo_id>/', views.detalhe_processo_tesouraria, name='detalhe_processo'),
+    path('processos/<int:processo_id>/modal/', views.processo_modal, name='processo_modal'),
     path('processos/<int:processo_id>/efetivar/', views.efetivar_contrato, name='efetivar_contrato'),
     path('processos/<int:processo_id>/cancelar/', views.cancelar_contrato, name='cancelar_contrato'),
     path('processos/<int:processo_id>/devolver/', views.devolver_analise, name='devolver_analise'),

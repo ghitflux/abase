@@ -47,6 +47,7 @@
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script defer src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="theme-dark" style="font-family: 'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;">
@@ -202,7 +203,9 @@
     <div class="flex items-center justify-center min-h-screen px-4">
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full" x-data="{ show: false }" x-show="show" x-transition>
         <div class="p-6">
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4" id="confirmation-icon"></div>
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4" id="confirmation-icon">
+            <img src="{% static 'images/confirmation-icon.svg' %}" alt="Ícone de confirmação" class="w-8 h-8">
+          </div>
           <div class="text-center">
             <h3 class="text-lg font-medium text-gray-900 mb-2" id="confirmation-title">Confirmar ação</h3>
             <p class="text-sm text-gray-500 mb-6" id="confirmation-message">Tem certeza que deseja realizar esta ação?</p>
@@ -227,6 +230,7 @@
   <script src="{% static 'js/money-display.js' %}"></script>
   <script src="{% static 'js/viacep-integration.js' %}"></script>
   <script src="{% static 'js/form-validation.js' %}"></script>
+  <script src="{% static 'js/confirmation-modal.js' %}"></script>
 
   <!-- ⬇️ permite JS específico por página (ex.: agente_detail, agente_form) -->
   {% block extra_js %}{% endblock %}

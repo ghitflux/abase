@@ -11,53 +11,209 @@
     <p class="text-gray-400">Gerencie os processos pendentes, em análise e em correção - {{ count_total }} processos no total</p>
   </div>
 
-  <!-- Filtros Rápidos -->
-  <div class="mb-4">
-    <div class="flex flex-wrap gap-2">
-      <a href="{% url 'analise:esteira' %}"
-         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if not request.GET.status %}bg-[#692E44]/20 text-[#692E44] border border-[#692E44]/30{% else %}bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600{% endif %}">
-        Todos
-      </a>
-      <a href="?status=pendente"
-         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if request.GET.status == 'pendente' %}bg-yellow-900 text-yellow-200 border border-yellow-700{% else %}bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600{% endif %}">
-        Pendentes
-      </a>
-      <a href="?status=em_analise"
-         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if request.GET.status == 'em_analise' %}bg-blue-900 text-blue-200 border border-blue-700{% else %}bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600{% endif %}">
-        Em Análise
-      </a>
-      <a href="?status=em_correcao"
-         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if request.GET.status == 'em_correcao' %}bg-orange-900 text-orange-200 border border-orange-700{% else %}bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600{% endif %}">
-        Em Correção
-      </a>
-      <a href="?status=correcao_realizada"
-         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if request.GET.status == 'correcao_realizada' %}bg-purple-900 text-purple-200 border border-purple-700{% else %}bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600{% endif %}">
-        Correção Realizada
-      </a>
-      <a href="?status=aprovado"
-         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if request.GET.status == 'aprovado' %}bg-green-900 text-green-200 border border-green-700{% else %}bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600{% endif %}">
-        Aprovados
-      </a>
-      <a href="?status=cancelado"
-         class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if request.GET.status == 'cancelado' %}bg-red-900 text-red-200 border border-red-700{% else %}bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600{% endif %}">
-        Cancelados
-      </a>
+  <!-- KPIs Dashboard -->
+  <div class="mb-6">
+    <div class="ds-card p-4">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        
+        <!-- Processos Pendentes -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-orange-50 border border-orange-200">
+          <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-orange-700 truncate">{{ kpis.pendentes.label }}</p>
+            <p class="text-lg font-bold text-orange-900">{{ kpis.pendentes.valor }}</p>
+            <div class="flex items-center text-xs">
+              {% if kpis.pendentes.variacao > 0 %}
+                <span class="text-red-600">+{{ kpis.pendentes.variacao }}%</span>
+              {% elif kpis.pendentes.variacao < 0 %}
+                <span class="text-green-600">{{ kpis.pendentes.variacao }}%</span>
+              {% else %}
+                <span class="text-gray-500">0%</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Em Análise -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+          <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-blue-700 truncate">{{ kpis.em_analise.label }}</p>
+            <p class="text-lg font-bold text-blue-900">{{ kpis.em_analise.valor }}</p>
+            <div class="flex items-center text-xs">
+              {% if kpis.em_analise.variacao > 0 %}
+                <span class="text-blue-600">+{{ kpis.em_analise.variacao }}%</span>
+              {% elif kpis.em_analise.variacao < 0 %}
+                <span class="text-blue-600">{{ kpis.em_analise.variacao }}%</span>
+              {% else %}
+                <span class="text-gray-500">0%</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Aprovados -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-green-50 border border-green-200">
+          <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-green-700 truncate">{{ kpis.aprovados.label }}</p>
+            <p class="text-lg font-bold text-green-900">{{ kpis.aprovados.valor }}</p>
+            <div class="flex items-center text-xs">
+              {% if kpis.aprovados.variacao > 0 %}
+                <span class="text-green-600">+{{ kpis.aprovados.variacao }}%</span>
+              {% elif kpis.aprovados.variacao < 0 %}
+                <span class="text-red-600">{{ kpis.aprovados.variacao }}%</span>
+              {% else %}
+                <span class="text-gray-500">0%</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Tempo Médio -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
+          <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-purple-700 truncate">{{ kpis.tempo_medio.label }}</p>
+            <p class="text-lg font-bold text-purple-900">{{ kpis.tempo_medio.valor }}{{ kpis.tempo_medio.sufixo|default:"" }}</p>
+            <div class="flex items-center text-xs">
+              {% if kpis.tempo_medio.variacao > 0 %}
+                <span class="text-red-600">+{{ kpis.tempo_medio.variacao }}%</span>
+              {% elif kpis.tempo_medio.variacao < 0 %}
+                <span class="text-green-600">{{ kpis.tempo_medio.variacao }}%</span>
+              {% else %}
+                <span class="text-gray-500">0%</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Taxa de Aprovação -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+          <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-indigo-700 truncate">{{ kpis.taxa_aprovacao.label }}</p>
+            <p class="text-lg font-bold text-indigo-900">{{ kpis.taxa_aprovacao.valor }}{{ kpis.taxa_aprovacao.sufixo|default:"" }}</p>
+            <div class="flex items-center text-xs">
+              {% if kpis.taxa_aprovacao.variacao > 0 %}
+                <span class="text-green-600">+{{ kpis.taxa_aprovacao.variacao }}%</span>
+              {% elif kpis.taxa_aprovacao.variacao < 0 %}
+                <span class="text-red-600">{{ kpis.taxa_aprovacao.variacao }}%</span>
+              {% else %}
+                <span class="text-gray-500">0%</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Em Atraso -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-red-50 border border-red-200">
+          <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-red-700 truncate">{{ kpis.em_atraso.label }}</p>
+            <p class="text-lg font-bold text-red-900">{{ kpis.em_atraso.valor }}</p>
+            <div class="flex items-center text-xs">
+              {% if kpis.em_atraso.variacao > 0 %}
+                <span class="text-red-600">+{{ kpis.em_atraso.variacao }}%</span>
+              {% elif kpis.em_atraso.variacao < 0 %}
+                <span class="text-green-600">{{ kpis.em_atraso.variacao }}%</span>
+              {% else %}
+                <span class="text-gray-500">0%</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 
-  <!-- Filtros: remove prioridade; adiciona agente -->
-  <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-6">
-    <div class="p-4">
-      <form id="filtros" method="get"
-            hx-get="{% url 'analise:esteira' %}"
-            hx-target="#blocks"
-            hx-include="#filtros"
-            hx-push-url="true"
-            hx-trigger="submit">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Analista</label>
-            <select name="analista" class="w-full border border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#692E44] focus:border-[#692E44] bg-gray-700 text-white">
+ <!-- Filtros Rápidos -->
+<div class="mb-4">
+  <div class="ds-pills">
+    <a href="{% url 'analise:esteira' %}"
+       class="ds-pill {% if not request.GET.status %}is-active{% endif %}">
+      Todos
+    </a>
+    <a href="?status=pendente"
+       class="ds-pill {% if request.GET.status == 'pendente' %}is-active{% endif %}"
+       style="{% if request.GET.status == 'pendente' %}background: #3b2a0a; border-color: #713f12; color: #facc15;{% endif %}">
+      Pendentes
+    </a>
+    <a href="?status=em_analise"
+       class="ds-pill {% if request.GET.status == 'em_analise' %}is-active{% endif %}"
+       style="{% if request.GET.status == 'em_analise' %}background: #1e293b; border-color: #334155; color: #93c5fd;{% endif %}">
+      Em Análise
+    </a>
+    <a href="?status=em_correcao"
+       class="ds-pill {% if request.GET.status == 'em_correcao' %}is-active{% endif %}"
+       style="{% if request.GET.status == 'em_correcao' %}background: #3b1a0a; border-color: #7c2d12; color: #ffcf99;{% endif %}">
+      Em Correção
+    </a>
+    <a href="?status=correcao_realizada"
+       class="ds-pill {% if request.GET.status == 'correcao_realizada' %}is-active{% endif %}"
+       style="{% if request.GET.status == 'correcao_realizada' %}background: #3a0f22; border-color: #7a134033; color: #ffd1e5;{% endif %}">
+      Correção Realizada
+    </a>
+    <a href="?status=aprovado"
+       class="ds-pill {% if request.GET.status == 'aprovado' %}is-active{% endif %}"
+       style="{% if request.GET.status == 'aprovado' %}background: #052e1b; border-color: #065f46; color: #34d399;{% endif %}">
+      Aprovados
+    </a>
+    <a href="?status=cancelado"
+       class="ds-pill {% if request.GET.status == 'cancelado' %}is-active{% endif %}"
+       style="{% if request.GET.status == 'cancelado' %}background: #3b0d0d; border-color: #7f1d1d; color: #fca5a5;{% endif %}">
+      Cancelados
+    </a>
+  </div>
+</div>
+
+ <!-- Filtros -->
+<div class="ds-card mb-4">
+  <div class="p-3">
+    <form id="filtros" method="get"
+          hx-get="{% url 'analise:esteira' %}"
+          hx-target="#blocks"
+          hx-include="#filtros"
+          hx-push-url="true"
+          hx-trigger="submit">
+      
+      <!-- Layout responsivo: 2 linhas em mobile, 1 linha em desktop -->
+      <div class="flex flex-col lg:flex-row gap-3">
+        <!-- Primeira linha: Filtros principais -->
+        <div class="flex flex-col sm:flex-row gap-3 flex-1">
+          <div class="flex-1 min-w-0">
+            <label class="ds-label text-sm mb-1">Analista</label>
+            <select name="analista" class="ds-select h-9"
+                    hx-get="{% url 'analise:esteira' %}"
+                    hx-target="#blocks"
+                    hx-include="#filtros"
+                    hx-push-url="true"
+                    hx-trigger="change">
               <option value="">Todos</option>
               {% for u in users %}
                 <option value="{{ u.id }}" {% if request.GET.analista == u.id|stringformat:"s" %}selected{% endif %}>
@@ -66,9 +222,14 @@
               {% endfor %}
             </select>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Agente</label>
-            <select name="agente" class="w-full border border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#692E44] focus:border-[#692E44] bg-gray-700 text-white">
+          <div class="flex-1 min-w-0">
+            <label class="ds-label text-sm mb-1">Agente</label>
+            <select name="agente" class="ds-select h-9"
+                    hx-get="{% url 'analise:esteira' %}"
+                    hx-target="#blocks"
+                    hx-include="#filtros"
+                    hx-push-url="true"
+                    hx-trigger="change">
               <option value="">Todos</option>
               {% for u in users %}
                 <option value="{{ u.id }}" {% if request.GET.agente == u.id|stringformat:"s" %}selected{% endif %}>
@@ -77,109 +238,123 @@
               {% endfor %}
             </select>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Buscar</label>
-            <input type="text" name="search" value="{{ request.GET.search }}"
-                   class="w-full border border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#692E44] focus:border-[#692E44] bg-gray-700 text-white placeholder-gray-400"
-                   placeholder="Nome, CPF/CNPJ, observações...">
+        </div>
+        
+        <!-- Segunda linha: Período de datas e busca -->
+        <div class="flex flex-col sm:flex-row gap-3 flex-1">
+          <div class="flex-1 min-w-0">
+            <label class="ds-label text-sm mb-1">Data Início</label>
+            <input type="date" name="data_inicio" value="{{ request.GET.data_inicio }}" class="ds-input h-9"
+                   hx-get="{% url 'analise:esteira' %}"
+                   hx-target="#blocks"
+                   hx-include="#filtros"
+                   hx-push-url="true"
+                   hx-trigger="change">
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="ds-label text-sm mb-1">Data Fim</label>
+            <input type="date" name="data_fim" value="{{ request.GET.data_fim }}" class="ds-input h-9"
+                   hx-get="{% url 'analise:esteira' %}"
+                   hx-target="#blocks"
+                   hx-include="#filtros"
+                   hx-push-url="true"
+                   hx-trigger="change">
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="ds-label text-sm mb-1">Buscar</label>
+            <input type="text" name="search" value="{{ request.GET.search }}" class="ds-input h-9"
+                   placeholder="Nome, CPF/CNPJ, observações..."
+                   hx-get="{% url 'analise:esteira' %}"
+                   hx-target="#blocks"
+                   hx-include="#filtros"
+                   hx-push-url="true"
+                   hx-trigger="keyup changed delay:500ms">
           </div>
         </div>
-        <div class="mt-4">
-          <button class="bg-[#692E44] hover:bg-[#692E44]/90 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors" type="submit">
-            Aplicar Filtros
-          </button>
-          <a href="{% url 'analise:esteira' %}" class="ml-2 bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-2 rounded-md text-sm font-medium transition-colors">
-            Limpar
-          </a>
+        
+        <!-- Botões de ação alinhados à direita -->
+        <div class="flex flex-col sm:flex-row gap-2 items-end justify-end min-w-fit">
+          <button class="ds-btn ds-btn--accent whitespace-nowrap h-9 px-4 text-sm" type="submit">Aplicar Filtros</button>
+          <a href="{% url 'analise:esteira' %}" class="ds-btn ds-btn--ghost whitespace-nowrap h-9 px-4 text-sm">Limpar</a>
         </div>
-      </form>
-    </div>
+      </div>
+    </form>
   </div>
+</div>
+
 
   <!-- Blocos: containers com lógica de filtro -->
   <div id="blocks" class="space-y-6">
     <!-- Bloco Pendentes -->
     {% if not request.GET.status or request.GET.status == 'pendente' %}
-    <div id="block-pendentes"
-         hx-get="{% url 'analise:esteira_block' %}?block=pendentes&{{ request.GET.urlencode }}"
-         hx-trigger="load"
-         hx-swap="outerHTML">
-      <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-6">
-        <div class="flex items-center justify-center h-20">
-          <div class="text-gray-400">Carregando Pendentes...</div>
-        </div>
-      </div>
-    </div>
+   <div id="block-pendentes"
+     hx-get="{% url 'analise:esteira_block' %}?block=pendentes&{{ request.GET.urlencode }}"
+     hx-trigger="load delay:100ms"
+     hx-swap="outerHTML">
+  <div class="ds-card p-6">
+    <div class="ds-skeleton">Carregando Pendentes...</div>
+  </div>
+</div>
     {% endif %}
 
     <!-- Bloco Em Análise -->
     {% if not request.GET.status or request.GET.status == 'em_analise' %}
     <div id="block-em_analise"
-         hx-get="{% url 'analise:esteira_block' %}?block=em_analise&{{ request.GET.urlencode }}"
-         hx-trigger="load"
-         hx-swap="outerHTML">
-      <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-6">
-        <div class="flex items-center justify-center h-20">
-          <div class="text-gray-400">Carregando Em Análise...</div>
-        </div>
-      </div>
-    </div>
+     hx-get="{% url 'analise:esteira_block' %}?block=em_analise&{{ request.GET.urlencode }}"
+     hx-trigger="load delay:200ms"
+     hx-swap="outerHTML">
+  <div class="ds-card p-6">
+    <div class="ds-skeleton">Carregando Em Análise...</div>
+  </div>
+</div>
     {% endif %}
 
     <!-- Bloco Em Correção -->
     {% if not request.GET.status or request.GET.status == 'em_correcao' %}
     <div id="block-em_correcao"
-         hx-get="{% url 'analise:esteira_block' %}?block=em_correcao&{{ request.GET.urlencode }}"
-         hx-trigger="load"
-         hx-swap="outerHTML">
-      <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-6">
-        <div class="flex items-center justify-center h-20">
-          <div class="text-gray-400">Carregando Em Correção...</div>
-        </div>
-      </div>
-    </div>
+     hx-get="{% url 'analise:esteira_block' %}?block=em_correcao&{{ request.GET.urlencode }}"
+     hx-trigger="load delay:300ms"
+     hx-swap="outerHTML">
+  <div class="ds-card p-6">
+    <div class="ds-skeleton">Carregando Em Correção...</div>
+  </div>
+</div>
     {% endif %}
 
     <!-- Bloco Correção Realizada -->
     {% if not request.GET.status or request.GET.status == 'correcao_realizada' %}
     <div id="block-correcao_realizada"
-         hx-get="{% url 'analise:esteira_block' %}?block=correcao_realizada&{{ request.GET.urlencode }}"
-         hx-trigger="load"
-         hx-swap="outerHTML">
-      <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-6">
-        <div class="flex items-center justify-center h-20">
-          <div class="text-gray-400">Carregando Correção Realizada...</div>
-        </div>
-      </div>
-    </div>
+     hx-get="{% url 'analise:esteira_block' %}?block=correcao_realizada&{{ request.GET.urlencode }}"
+     hx-trigger="load delay:400ms"
+     hx-swap="outerHTML">
+  <div class="ds-card p-6">
+    <div class="ds-skeleton">Carregando Correção Realizada...</div>
+  </div>
+</div>
     {% endif %}
 
-    <!-- Bloco Efetivados -->
+    <!-- Bloco Aprovados -->
     {% if not request.GET.status or request.GET.status == 'aprovado' %}
-    <div id="block-efetivados"
-         hx-get="{% url 'analise:esteira_block' %}?block=efetivados&{{ request.GET.urlencode }}"
-         hx-trigger="load"
-         hx-swap="outerHTML">
-      <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-6">
-        <div class="flex items-center justify-center h-20">
-          <div class="text-gray-400">Carregando Efetivados...</div>
-        </div>
-      </div>
-    </div>
+    <div id="block-aprovado"
+     hx-get="{% url 'analise:esteira_block' %}?block=aprovado&{{ request.GET.urlencode }}"
+     hx-trigger="load delay:500ms"
+     hx-swap="outerHTML">
+  <div class="ds-card p-6">
+    <div class="ds-skeleton">Carregando Aprovados...</div>
+  </div>
+</div>
     {% endif %}
 
     <!-- Bloco Cancelados -->
     {% if not request.GET.status or request.GET.status == 'cancelado' %}
-    <div id="block-cancelados"
-         hx-get="{% url 'analise:esteira_block' %}?block=cancelados&{{ request.GET.urlencode }}"
-         hx-trigger="load"
-         hx-swap="outerHTML">
-      <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-6">
-        <div class="flex items-center justify-center h-20">
-          <div class="text-gray-400">Carregando Cancelados...</div>
-        </div>
-      </div>
-    </div>
+    <div id="block-cancelado"
+     hx-get="{% url 'analise:esteira_block' %}?block=cancelado&{{ request.GET.urlencode }}"
+     hx-trigger="load delay:600ms"
+     hx-swap="outerHTML">
+  <div class="ds-card p-6">
+    <div class="ds-skeleton">Carregando Cancelados...</div>
+  </div>
+</div>
     {% endif %}
   </div>
 </div>

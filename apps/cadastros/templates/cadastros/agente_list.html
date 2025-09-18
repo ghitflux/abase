@@ -143,35 +143,6 @@
 </div>
 
 <script>
-const fullComments = {
-  {% for cadastro in cadastros %}
-    {% with processo=cadastro.analise_processo %}
-      {% if processo and processo.feedback_agente %}
-        '{{ cadastro.id }}': '{{ processo.feedback_agente|escapejs }}',
-      {% endif %}
-    {% endwith %}
-  {% endfor %}
-};
-
-function showFullComment(id){
-  const modal=document.getElementById('commentModal');
-  const comment=document.getElementById('fullComment');
-  if(fullComments[id]){
-    comment.textContent = fullComments[id];
-    modal.style.display='block';
-  }
-}
-function closeCommentModal(){
-  document.getElementById('commentModal').style.display='none';
-}
-document.addEventListener('click', function(e){
-  const modal=document.getElementById('commentModal');
-  if(e.target===modal){ closeCommentModal(); }
-});
-</script>
-
-
-<script>
 // Armazenar comentários completos
 const fullComments = {
     {% for cadastro in cadastros %}

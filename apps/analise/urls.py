@@ -1,18 +1,16 @@
 from django.urls import path
 from . import views
 
-app_name = "analise"
+app_name = 'analise'
 
 urlpatterns = [
-    path("", views.analise_redirect, name="index"),             # /analise/  -> esteira
-    path("esteira/", views.esteira, name="esteira"),            # tela principal
-    path("esteira/", views.esteira, name="esteira_analise"),    # alias para compatibilidade
-    path("esteira/block/", views.esteira_block, name="esteira_block"),  # fragmento HTMX
-
-    path("processo/<int:processo_id>/", views.detalhe_processo, name="detalhe_processo"),  # detalhe
-    path("processo/<int:processo_id>/assumir/", views.assumir_processo, name="assumir_processo"),
-    path("processo/<int:processo_id>/aprovar/", views.aprovar_processo, name="aprovar_processo"),
-    path("processo/<int:processo_id>/correcao/", views.enviar_para_correcao, name="enviar_para_correcao"),
-    path("processo/<int:processo_id>/cancelar/", views.cancelar_processo, name="cancelar_processo"),
-    path("checklist/<int:item_id>/toggle/", views.toggle_checklist_item, name="toggle_checklist_item"),
+    path('esteira/', views.esteira, name='esteira'),
+    path('esteira/block/', views.esteira_block, name='esteira_block'),
+    path('processo/<int:processo_id>/', views.detalhe_processo, name='detalhe_processo'),
+    path('assumir/<int:processo_id>/', views.assumir_processo, name='assumir_processo'),
+    path('aprovar/<int:processo_id>/', views.aprovar_processo, name='aprovar_processo'),
+    path('enviar-correcao/<int:processo_id>/', views.enviar_para_correcao, name='enviar_para_correcao'),
+    path('cancelar/<int:processo_id>/', views.cancelar_processo, name='cancelar_processo'),
+    path('toggle-checklist/<int:item_id>/', views.toggle_checklist_item, name='toggle_checklist_item'),
+    path('', views.analise_redirect, name='redirect'),
 ]

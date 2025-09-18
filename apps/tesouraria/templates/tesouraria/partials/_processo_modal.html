@@ -1,0 +1,143 @@
+<!-- Modal Header -->
+<div class="ds-card">
+  <div class="p-6 border-b border-gray-600" style="background-color: rgba(255, 255, 255, 0.05);">
+    <div class="flex items-center justify-between">
+      <h2 class="text-2xl font-bold text-white">Processo da Tesouraria #{{ processo.id }}</h2>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-300 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Body -->
+  <div class="p-6">
+    <!-- Status e Informações Gerais -->
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-medium text-white mb-2">Status do Processo</h3>
+          {% if processo.status == 'AGUARDANDO_ANALISE' %}
+            <span class="badge badge--aguardando">{{ processo.get_status_display }}</span>
+          {% elif processo.status == 'EM_ANALISE' %}
+            <span class="badge badge--analise">{{ processo.get_status_display }}</span>
+          {% elif processo.status == 'APROVADO' %}
+            <span class="badge badge--aprovado">{{ processo.get_status_display }}</span>
+          {% elif processo.status == 'REJEITADO' %}
+            <span class="badge badge--cancelado">{{ processo.get_status_display }}</span>
+          {% elif processo.status == 'EFETIVADO' %}
+            <span class="badge badge--efetivado">{{ processo.get_status_display }}</span>
+          {% else %}
+            <span class="badge badge--default">{{ processo.get_status_display }}</span>
+          {% endif %}
+        </div>
+        <div class="text-right">
+          <p class="text-sm text-gray-400">Data de Entrada</p>
+          <p class="text-sm font-medium text-white">{{ processo.data_entrada|date:"d/m/Y H:i" }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informações do Cadastro -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div class="space-y-4">
+        <div>
+          <h4 class="text-sm font-medium text-gray-400 mb-2">Dados do Cadastro</h4>
+          <div class="space-y-2">
+            <div>
+              <span class="text-sm text-gray-400">Nome:</span>
+              <p class="text-sm font-medium text-white">{{ processo.cadastro.nome_completo|default:"—" }}</p>
+            </div>
+            <div>
+              <span class="text-sm text-gray-400">CPF/CNPJ:</span>
+              <p class="text-sm font-medium text-white">{{ processo.cadastro.cpf_cnpj|default:"—" }}</p>
+            </div>
+            {% if processo.cadastro.email %}
+            <div>
+              <span class="text-sm text-gray-400">Email:</span>
+              <p class="text-sm font-medium text-white">{{ processo.cadastro.email }}</p>
+            </div>
+            {% endif %}
+            {% if processo.cadastro.celular %}
+            <div>
+              <span class="text-sm text-gray-400">Celular:</span>
+              <p class="text-sm font-medium text-white">{{ processo.cadastro.celular }}</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <h4 class="text-sm font-medium text-gray-400 mb-2">Informações do Processo</h4>
+          <div class="space-y-2">
+            <div>
+              <span class="text-sm text-gray-400">Agente Responsável:</span>
+              <p class="text-sm font-medium text-white">
+                {% if processo.agente_responsavel %}
+                  {{ processo.agente_responsavel.get_full_name|default:processo.agente_responsavel.username }}
+                {% else %}
+                  <span class="text-gray-500">—</span>
+                {% endif %}
+              </p>
+            </div>
+            {% if processo.valor_liberado %}
+            <div>
+              <span class="text-sm text-gray-400">Valor Liberado:</span>
+              <p class="text-sm font-medium text-white">R$ {{ processo.valor_liberado|floatformat:2 }}</p>
+            </div>
+            {% endif %}
+            {% if processo.auxilio_agente %}
+            <div>
+              <span class="text-sm text-gray-400">Auxílio Agente:</span>
+              <p class="text-sm font-medium text-white">R$ {{ processo.auxilio_agente|floatformat:2 }}</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Histórico de Processamento -->
+    {% if processo.status == 'PROCESSADO' %}
+    <div class="mb-6">
+      <h4 class="text-sm font-medium text-gray-400 mb-3">Histórico de Processamento</h4>
+      <div class="bg-gray-800 rounded-lg p-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-sm text-gray-400">Data de Processamento:</span>
+            <p class="text-sm font-medium text-white">{{ processo.data_processamento|date:"d/m/Y H:i"|default:"—" }}</p>
+          </div>
+        </div>
+        {% if processo.observacoes_tesouraria %}
+        <div class="mt-3">
+          <span class="text-sm text-gray-400">Observações:</span>
+          <p class="text-sm text-gray-300 mt-1">{{ processo.observacoes_tesouraria }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Observações Gerais -->
+    {% if processo.observacoes %}
+    <div class="mb-6">
+      <h4 class="text-sm font-medium text-gray-400 mb-2">Observações</h4>
+      <div class="bg-gray-800 rounded-lg p-4">
+        <p class="text-sm text-gray-300">{{ processo.observacoes }}</p>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <!-- Modal Footer -->
+  <div class="flex items-center justify-end p-6 border-t border-gray-600" style="background-color: rgba(255, 255, 255, 0.05);">
+    <button onclick="closeModal()" 
+            class="btn btn-ghost">
+      Fechar
+    </button>
+  </div>
+</div>

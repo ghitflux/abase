@@ -1,334 +1,432 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+{% load ui %}
 
 {% block title %}Processos da Tesouraria{% endblock %}
 
 {% block content %}
+<!-- Modal de Detalhes -->
+<div id="processo-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" onclick="closeModal(event)">
+  <div class="flex items-center justify-center min-h-screen px-4 py-8">
+    <div class="max-w-4xl w-full" onclick="event.stopPropagation()">
+      <div id="modal-content">
+        <!-- Conteúdo do modal será carregado aqui -->
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="container mx-auto px-4 py-6">
-    
-    <!-- Cabeçalho -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900">Processos da Tesouraria</h1>
-            <p class="text-gray-600 mt-1">Contratos aprovados pela análise aguardando processamento</p>
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-white mb-2">Processos da Tesouraria</h1>
+    <p class="text-gray-400">Gerencie os processos aprovados pela análise - {{ kpis.total_processos.valor }} processos no total</p>
+  </div>
+
+  <!-- KPIs Dashboard -->
+  <div class="mb-6">
+    <div class="ds-card p-4">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        
+        <!-- Total de Processos -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+          <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-blue-700 truncate">{{ kpis.total_processos.label }}</p>
+            <p class="text-lg font-bold text-blue-900">{{ kpis.total_processos.valor }}</p>
+          </div>
         </div>
+
+        <!-- Pendentes -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+          <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-yellow-700 truncate">{{ kpis.pendentes.label }}</p>
+            <p class="text-lg font-bold text-yellow-900">{{ kpis.pendentes.valor }}</p>
+          </div>
+        </div>
+
+        <!-- Processados -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-green-50 border border-green-200">
+          <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-green-700 truncate">{{ kpis.processados.label }}</p>
+            <p class="text-lg font-bold text-green-900">{{ kpis.processados.valor }}</p>
+          </div>
+        </div>
+
+        <!-- Rejeitados -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-red-50 border border-red-200">
+          <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-red-700 truncate">{{ kpis.rejeitados.label }}</p>
+            <p class="text-lg font-bold text-red-900">{{ kpis.rejeitados.valor }}</p>
+          </div>
+        </div>
+
+        <!-- Valor Total Liberado -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-green-50 border border-green-200">
+          <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-green-700 truncate">{{ kpis.valor_liberado.label }}</p>
+            <p class="text-lg font-bold text-green-900">R$ {{ kpis.valor_liberado.valor|floatformat:2 }}</p>
+          </div>
+        </div>
+
+        <!-- Auxílio aos Agentes -->
+        <div class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+          <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-blue-700 truncate">{{ kpis.valor_auxilio.label }}</p>
+            <p class="text-lg font-bold text-blue-900">R$ {{ kpis.valor_auxilio.valor|floatformat:2 }}</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="ds-card p-6 mb-6" x-data="{ 
+    showAdvanced: false,
+    filters: {
+      status: '{{ current_filters.status }}',
+      agente: '{{ current_filters.agente }}',
+      search: '{{ current_filters.search }}',
+      data_inicio: '',
+      data_fim: '',
+      valor_min: '',
+      valor_max: '',
+      tipo_pessoa: '',
+      ordenacao: 'data_entrada'
+    },
+    quickFilter: '',
+    setQuickFilter(status) {
+      this.quickFilter = status;
+      this.filters.status = status;
+      this.applyFilters();
+    },
+    clearFilters() {
+      this.filters = {
+        status: '',
+        agente: '',
+        search: '',
+        data_inicio: '',
+        data_fim: '',
+        valor_min: '',
+        valor_max: '',
+        tipo_pessoa: '',
+        ordenacao: 'data_entrada'
+      };
+      this.quickFilter = '';
+      this.applyFilters();
+    },
+    applyFilters() {
+      const params = new URLSearchParams();
+      Object.keys(this.filters).forEach(key => {
+        if (this.filters[key]) {
+          params.append(key, this.filters[key]);
+        }
+      });
+      window.location.search = params.toString();
+    }
+  }">
+    
+    <!-- Filtros Rápidos -->
+  <div class="mb-4">
+    <div class="ds-pills">
+      <a href="{% url 'tesouraria:processos' %}"
+         class="ds-pill {% if not request.GET.status %}is-active{% endif %}">
+        Todos
+      </a>
+      <a href="?status=pendente"
+         class="ds-pill {% if request.GET.status == 'pendente' %}is-active{% endif %}"
+         style="{% if request.GET.status == 'pendente' %}background: #3b2a0a; border-color: #713f12; color: #facc15;{% endif %}">
+        Pendentes
+      </a>
+      <a href="?status=processado"
+         class="ds-pill {% if request.GET.status == 'processado' %}is-active{% endif %}"
+         style="{% if request.GET.status == 'processado' %}background: #052e1b; border-color: #065f46; color: #34d399;{% endif %}">
+        Processados
+      </a>
+      <a href="?status=rejeitado"
+         class="ds-pill {% if request.GET.status == 'rejeitado' %}is-active{% endif %}"
+         style="{% if request.GET.status == 'rejeitado' %}background: #3b0d0d; border-color: #7f1d1d; color: #fca5a5;{% endif %}">
+        Rejeitados
+      </a>
+    </div>
+  </div>
+
+    <!-- Filtros -->
+    <div class="ds-card mb-4">
+      <div class="p-3">
+        <form id="filtros" method="get"
+              hx-get="{% url 'tesouraria:processos' %}"
+              hx-target="#processos-container"
+              hx-include="#filtros"
+              hx-push-url="true"
+              hx-trigger="submit">
+          
+          <!-- Layout responsivo: 2 linhas em mobile, 1 linha em desktop -->
+          <div class="flex flex-col lg:flex-row gap-3">
+            <!-- Primeira linha: Filtros principais -->
+            <div class="flex flex-col sm:flex-row gap-3 flex-1">
+              <div class="flex-1 min-w-0">
+                <label class="ds-label text-sm mb-1">Agente</label>
+                <select name="agente" class="ds-select h-9"
+                        hx-get="{% url 'tesouraria:processos' %}"
+                        hx-target="#processos-container"
+                        hx-include="#filtros"
+                        hx-push-url="true"
+                        hx-trigger="change">
+                  <option value="">Todos</option>
+                  {% for agente in agentes %}
+                    <option value="{{ agente.id }}" {% if request.GET.agente == agente.id|stringformat:"s" %}selected{% endif %}>
+                      {{ agente.get_full_name|default:agente.username }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="flex-1 min-w-0">
+                <label class="ds-label text-sm mb-1">Status</label>
+                <select name="status" class="ds-select h-9"
+                        hx-get="{% url 'tesouraria:processos' %}"
+                        hx-target="#processos-container"
+                        hx-include="#filtros"
+                        hx-push-url="true"
+                        hx-trigger="change">
+                  <option value="">Todos</option>
+                  <option value="pendente" {% if request.GET.status == 'pendente' %}selected{% endif %}>Pendente</option>
+                  <option value="processado" {% if request.GET.status == 'processado' %}selected{% endif %}>Processado</option>
+                  <option value="rejeitado" {% if request.GET.status == 'rejeitado' %}selected{% endif %}>Rejeitado</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Segunda linha: Período de datas e busca -->
+            <div class="flex flex-col sm:flex-row gap-3 flex-1">
+              <div class="flex-1 min-w-0">
+                <label class="ds-label text-sm mb-1">Data Início</label>
+                <input type="date" name="data_inicio" value="{{ request.GET.data_inicio }}" class="ds-input h-9"
+                       hx-get="{% url 'tesouraria:processos' %}"
+                       hx-target="#processos-container"
+                       hx-include="#filtros"
+                       hx-push-url="true"
+                       hx-trigger="change">
+              </div>
+              <div class="flex-1 min-w-0">
+                <label class="ds-label text-sm mb-1">Data Fim</label>
+                <input type="date" name="data_fim" value="{{ request.GET.data_fim }}" class="ds-input h-9"
+                       hx-get="{% url 'tesouraria:processos' %}"
+                       hx-target="#processos-container"
+                       hx-include="#filtros"
+                       hx-push-url="true"
+                       hx-trigger="change">
+              </div>
+              <div class="flex-1 min-w-0">
+                <label class="ds-label text-sm mb-1">Buscar</label>
+                <input type="text" name="search" value="{{ request.GET.search }}" class="ds-input h-9"
+                       placeholder="Nome, CPF/CNPJ, matrícula..."
+                       hx-get="{% url 'tesouraria:processos' %}"
+                       hx-target="#processos-container"
+                       hx-include="#filtros"
+                       hx-push-url="true"
+                       hx-trigger="keyup changed delay:500ms">
+              </div>
+            </div>
+            
+            <!-- Botões de ação alinhados à direita -->
+            <div class="flex flex-col sm:flex-row gap-2 items-end justify-end min-w-fit">
+              <button class="ds-btn ds-btn--accent whitespace-nowrap h-9 px-4 text-sm" type="submit">Aplicar Filtros</button>
+              <a href="{% url 'tesouraria:processos' %}" class="ds-btn ds-btn--ghost whitespace-nowrap h-9 px-4 text-sm">Limpar</a>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Filtros Avançados -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6" x-data="filterManager()">
-        <!-- Barra de Filtros Básicos -->
-        <div class="p-4 border-b border-gray-100">
-            <form method="get" class="flex flex-wrap items-end gap-3">
-                <!-- Status -->
-                <div class="min-w-0 flex-shrink-0">
-                    <label for="status" class="block text-xs font-medium text-gray-600 mb-1">Status</label>
-                    <select name="status" id="status" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
-                        <option value="">Todos os status</option>
-                        {% for value, display in status_choices %}
-                            <option value="{{ value }}" {% if current_filters.status == value %}selected{% endif %}>{{ display }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Agente -->
-                <div class="min-w-0 flex-shrink-0">
-                    <label for="agente" class="block text-xs font-medium text-gray-600 mb-1">Agente</label>
-                    <select name="agente" id="agente" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
-                        <option value="">Todos os agentes</option>
-                        {% for agente in agentes %}
-                            <option value="{{ agente.id }}" {% if current_filters.agente == agente.id|stringformat:"s" %}selected{% endif %}>{{ agente.username }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Busca -->
-                <div class="min-w-0 flex-1">
-                    <label for="search" class="block text-xs font-medium text-gray-600 mb-1">Buscar</label>
-                    <input type="text" name="search" id="search" value="{{ current_filters.search }}" 
-                           placeholder="Nome, CPF/CNPJ, matrícula..."
-                           class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
-                </div>
-
-                <!-- Ações -->
-                <div class="flex gap-2">
-                    <button type="submit" class="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-sm font-medium transition-colors">
-                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        Filtrar
-                    </button>
-                    <button type="button" @click="toggleAdvanced" class="bg-gray-100 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-200 text-sm font-medium transition-colors">
-                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
-                        </svg>
-                        Avançado
-                    </button>
-                    {% if request.GET %}
-                        <a href="?" class="bg-gray-100 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-200 text-sm font-medium transition-colors">
-                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            Limpar
-                        </a>
-                    {% endif %}
-                </div>
-            </form>
+    <div x-show="showAdvanced" x-transition class="border-t border-gray-200 pt-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div>
+          <label class="ds-label">Data de Entrada (Início)</label>
+          <input type="date" x-model="filters.data_inicio" class="ds-input">
         </div>
-
-        <!-- Filtros Avançados (Ocultos por padrão) -->
-        <div x-show="showAdvanced" x-transition class="p-4 bg-gray-50 border-t border-gray-100">
-            <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Data de Entrada -->
-                <div>
-                    <label for="data_entrada_inicio" class="block text-xs font-medium text-gray-600 mb-1">Data de Entrada</label>
-                    <div class="flex gap-2">
-                        <input type="date" name="data_entrada_inicio" id="data_entrada_inicio" 
-                               value="{{ current_filters.data_entrada_inicio }}"
-                               class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
-                        <span class="text-xs text-gray-500 self-center">até</span>
-                        <input type="date" name="data_entrada_fim" id="data_entrada_fim" 
-                               value="{{ current_filters.data_entrada_fim }}"
-                               class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
-                    </div>
-                </div>
-
-                <!-- Valor Liberado -->
-                <div>
-                    <label for="valor_min" class="block text-xs font-medium text-gray-600 mb-1">Valor Liberado</label>
-                    <div class="flex gap-2">
-                        <input type="number" name="valor_min" id="valor_min" step="0.01" 
-                               value="{{ current_filters.valor_min }}" placeholder="Mín" data-brl="money"
-                               class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
-                        <span class="text-xs text-gray-500 self-center">até</span>
-                        <input type="number" name="valor_max" id="valor_max" step="0.01" 
-                               value="{{ current_filters.valor_max }}" placeholder="Máx" data-brl="money"
-                               class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
-                    </div>
-                </div>
-
-                <!-- Tipo de Pessoa -->
-                <div>
-                    <label for="tipo_pessoa" class="block text-xs font-medium text-gray-600 mb-1">Tipo de Pessoa</label>
-                    <select name="tipo_pessoa" id="tipo_pessoa" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
-                        <option value="">Todos os tipos</option>
-                        <option value="PF" {% if current_filters.tipo_pessoa == 'PF' %}selected{% endif %}>Pessoa Física</option>
-                        <option value="PJ" {% if current_filters.tipo_pessoa == 'PJ' %}selected{% endif %}>Pessoa Jurídica</option>
-                    </select>
-                </div>
-
-                <!-- Ordenação -->
-                <div>
-                    <label for="ordenacao" class="block text-xs font-medium text-gray-600 mb-1">Ordenar por</label>
-                    <select name="ordenacao" id="ordenacao" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
-                        <option value="-data_entrada" {% if current_filters.ordenacao == '-data_entrada' %}selected{% endif %}>Data (Mais recente)</option>
-                        <option value="data_entrada" {% if current_filters.ordenacao == 'data_entrada' %}selected{% endif %}>Data (Mais antiga)</option>
-                        <option value="-cadastro__disponivel" {% if current_filters.ordenacao == '-cadastro__disponivel' %}selected{% endif %}>Valor (Maior)</option>
-                        <option value="cadastro__disponivel" {% if current_filters.ordenacao == 'cadastro__disponivel' %}selected{% endif %}>Valor (Menor)</option>
-                        <option value="cadastro__nome_completo" {% if current_filters.ordenacao == 'cadastro__nome_completo' %}selected{% endif %}>Nome (A-Z)</option>
-                    </select>
-                </div>
-
-                <!-- Botões de ação avançados -->
-                <div class="lg:col-span-4 flex justify-end gap-2 pt-2">
-                    <button type="submit" class="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-sm font-medium transition-colors">
-                        Aplicar Filtros
-                    </button>
-                    <button type="button" @click="resetAdvanced" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 text-sm font-medium transition-colors">
-                        Limpar Avançados
-                    </button>
-                </div>
-            </form>
+        
+        <div>
+          <label class="ds-label">Data de Entrada (Fim)</label>
+          <input type="date" x-model="filters.data_fim" class="ds-input">
         </div>
-
-        <!-- Resumo dos filtros ativos -->
-        {% if request.GET %}
-            <div class="px-4 py-2 bg-blue-50 border-t border-blue-100">
-                <div class="flex flex-wrap items-center gap-2 text-sm">
-                    <span class="font-medium text-blue-900">Filtros ativos:</span>
-                    {% if current_filters.status %}
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            Status: {{ current_filters.status|title }}
-                        </span>
-                    {% endif %}
-                    {% if current_filters.agente %}
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            Agente: {{ current_filters.agente_name|default:"ID "}}{{ current_filters.agente }}
-                        </span>
-                    {% endif %}
-                    {% if current_filters.search %}
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            Busca: "{{ current_filters.search }}"
-                        </span>
-                    {% endif %}
-                </div>
-            </div>
-        {% endif %}
+        
+        <div>
+          <label class="ds-label">Valor Mínimo</label>
+          <input type="number" x-model="filters.valor_min" placeholder="0,00" class="ds-input">
+        </div>
+        
+        <div>
+          <label class="ds-label">Valor Máximo</label>
+          <input type="number" x-model="filters.valor_max" placeholder="0,00" class="ds-input">
+        </div>
+        
+        <div>
+          <label class="ds-label">Ordenação</label>
+          <select x-model="filters.ordenacao" class="ds-input">
+            <option value="data_entrada">Data de Entrada</option>
+            <option value="-data_entrada">Data de Entrada (Desc)</option>
+            <option value="cadastro__disponivel">Valor Liberado</option>
+            <option value="-cadastro__disponivel">Valor Liberado (Desc)</option>
+            <option value="status">Status</option>
+          </select>
+        </div>
+      </div>
     </div>
 
-    <!-- Lista de Processos -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-        {% if page_obj.object_list %}
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Processo
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Associado
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                CPF/CNPJ
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Agente
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Valor Liberado
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Entrada
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Ações
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for processo in page_obj.object_list %}
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    #{{ processo.id }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">
-                                        {{ processo.cadastro.nome_completo|default:processo.cadastro.nome_completo|default:"Não informado" }}
-                                    </div>
-                                    <div class="text-sm text-gray-500">
-                                        Mat: {{ processo.cadastro.matricula_servidor|default:"N/A" }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ processo.cadastro.cpf|default:processo.cadastro.cnpj|default:"—" }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ processo.agente_responsavel.username|default:"—" }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                                    R$ {{ processo.cadastro.disponivel|floatformat:2|default:"0,00" }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    {% if processo.status == 'pendente' %}
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                            Pendente
-                                        </span>
-                                    {% elif processo.status == 'em_processamento' %}
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            Em Processamento
-                                        </span>
-                                    {% elif processo.status == 'processado' %}
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                            Processado
-                                        </span>
-                                    {% elif processo.status == 'rejeitado' %}
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                            Rejeitado
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ processo.data_entrada|date:"d/m/Y H:i" }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button onclick="openProcessModal({{ processo.id }})" 
-                                            class="text-blue-600 hover:text-blue-900 transition-colors duration-150">
-                                        Ver Detalhes
-                                    </button>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Paginação -->
-            {% if page_obj.has_other_pages %}
-                <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6">
-                    <div class="flex flex-1 justify-between sm:hidden">
-                        {% if page_obj.has_previous %}
-                            <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-                               class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                Anterior
-                            </a>
-                        {% endif %}
-                        {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
-                               class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                Próxima
-                            </a>
-                        {% endif %}
-                    </div>
-                    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                        <div>
-                            <p class="text-sm text-gray-700">
-                                Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }} processos
-                            </p>
-                        </div>
-                        <div>
-                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                                {% if page_obj.has_previous %}
-                                    <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
-                                       class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        <span class="sr-only">Anterior</span>
-                                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                        </svg>
-                                    </a>
-                                {% endif %}
-                                
-                                {% for num in page_obj.paginator.page_range %}
-                                    {% if num == page_obj.number %}
-                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
-                                            {{ num }}
-                                        </span>
-                                    {% else %}
-                                        <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
-                                           class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                            {{ num }}
-                                        </a>
-                                    {% endif %}
-                                {% endfor %}
-
-                                {% if page_obj.has_next %}
-                                    <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
-                                       class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        <span class="sr-only">Próxima</span>
-                                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                                        </svg>
-                                    </a>
-                                {% endif %}
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-        {% else %}
-            <!-- Estado vazio -->
-            <div class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum processo encontrado</h3>
-                <p class="mt-1 text-sm text-gray-500">
-                    Não há processos que correspondam aos filtros aplicados.
-                </p>
-            </div>
-        {% endif %}
+    <!-- Filtros Ativos -->
+    <div class="mt-4" x-show="Object.values(filters).some(v => v !== '')">
+      <div class="flex flex-wrap gap-2 items-center">
+        <span class="text-sm text-gray-600">Filtros ativos:</span>
+        <template x-for="[key, value] in Object.entries(filters)" :key="key">
+          <span x-show="value" class="ds-badge-info text-xs">
+            <span x-text="key + ': ' + value"></span>
+            <button @click="filters[key] = ''; applyFilters()" class="ml-1 text-blue-400 hover:text-blue-600">×</button>
+          </span>
+        </template>
+      </div>
     </div>
+  </div>
+
+  <!-- Conteúdo dos Processos -->
+  <div id="processos-container">
+    <div class="space-y-6">
+      <!-- Tabela de Processos Pendentes -->
+      {% if not request.GET.status or request.GET.status == 'PENDENTE' %}
+      {% if processos_pendentes %}
+      <div id="block-pendentes"
+           hx-get="{% url 'tesouraria:processo_block' %}?block=pendentes&{{ request.GET.urlencode }}"
+           hx-trigger="load delay:100ms"
+           hx-swap="outerHTML">
+        <div class="ds-card p-6">
+          <div class="ds-skeleton">Carregando Pendentes...</div>
+        </div>
+      </div>
+      {% endif %}
+      {% endif %}
+
+      <!-- Tabela de Processos Processados -->
+      {% if not request.GET.status or request.GET.status == 'PROCESSADO' %}
+      {% if processos_processados %}
+      <div id="block-processados"
+           hx-get="{% url 'tesouraria:processo_block' %}?block=processados&{{ request.GET.urlencode }}"
+           hx-trigger="load delay:200ms"
+           hx-swap="outerHTML">
+        <div class="ds-card p-6">
+          <div class="ds-skeleton">Carregando Processados...</div>
+        </div>
+      </div>
+      {% endif %}
+      {% endif %}
+
+      <!-- Tabela de Processos Rejeitados -->
+      {% if not request.GET.status or request.GET.status == 'REJEITADO' %}
+      {% if processos_rejeitados %}
+      <div id="block-rejeitados"
+           hx-get="{% url 'tesouraria:processo_block' %}?block=rejeitados&{{ request.GET.urlencode }}"
+           hx-trigger="load delay:300ms"
+           hx-swap="outerHTML">
+        <div class="ds-card p-6">
+          <div class="ds-skeleton">Carregando Rejeitados...</div>
+        </div>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Paginação -->
+  {% if page_obj.has_other_pages %}
+    <div class="ds-card mt-6">
+      <div class="px-4 py-3">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 flex justify-between sm:hidden">
+             {% if page_obj.has_previous %}
+               <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}" 
+                  class="ds-btn-secondary">Anterior</a>
+             {% endif %}
+             {% if page_obj.has_next %}
+               <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}" 
+                  class="ds-btn-secondary">Próximo</a>
+             {% endif %}
+           </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }} processos
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                 {% if page_obj.has_previous %}
+                   <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}" 
+                      class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                     <span class="sr-only">Anterior</span>
+                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                       <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                     </svg>
+                   </a>
+                 {% endif %}
+                 
+                 {% for num in page_obj.paginator.page_range %}
+                   {% if page_obj.number == num %}
+                     <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
+                       {{ num }}
+                     </span>
+                   {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                     <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}" 
+                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                       {{ num }}
+                     </a>
+                   {% endif %}
+                 {% endfor %}
+                 
+                 {% if page_obj.has_next %}
+                   <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}" 
+                      class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                     <span class="sr-only">Próximo</span>
+                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                       <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                     </svg>
+                   </a>
+                 {% endif %}
+               </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 
 </div>
 
@@ -342,59 +440,98 @@
         </div>
     </div>
 </div>
+</div>
+{% endblock content %}
 
+{% block extra_js %}
 <script>
-function openProcessModal(processoId) {
-    const modal = document.getElementById('processModal');
-    const content = document.getElementById('modalContent');
+  // Função para abrir modal de detalhes
+  function openProcessoModal(processoId) {
+    const modal = document.getElementById('processo-modal');
+    const modalContent = document.getElementById('modal-content');
+    
+    // Verificar se os elementos existem
+    if (!modal || !modalContent) {
+      console.error('Elementos do modal não encontrados:', { modal: !!modal, modalContent: !!modalContent });
+      return;
+    }
     
     // Mostrar modal com loading
+    modalContent.innerHTML = `
+      <div class="ds-card">
+        <div class="p-8 text-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p class="text-gray-400">Carregando detalhes...</p>
+        </div>
+      </div>
+    `;
     modal.classList.remove('hidden');
-    content.innerHTML = '<div class="p-8 text-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2 text-gray-600">Carregando...</p></div>';
+    document.body.style.overflow = 'hidden';
     
-    // Carregar conteúdo via fetch
-    fetch(`/tesouraria/processos/${processoId}/`)
-        .then(response => response.text())
-        .then(html => {
-            content.innerHTML = html;
-        })
-        .catch(error => {
-            content.innerHTML = '<div class="p-8 text-center text-red-600">Erro ao carregar detalhes do processo.</div>';
-        });
-}
-
-function closeModal() {
-    document.getElementById('processModal').classList.add('hidden');
-}
-
-// Fechar modal ao clicar fora
-document.getElementById('processModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeModal();
-    }
-});
-
-// Filter manager
-function filterManager() {
-    return {
-        showAdvanced: false,
-        
-        toggleAdvanced() {
-            this.showAdvanced = !this.showAdvanced;
-        },
-        
-        resetAdvanced() {
-            const advancedForm = document.querySelectorAll('[x-show="showAdvanced"] input, [x-show="showAdvanced"] select');
-            advancedForm.forEach(field => {
-                if (field.type === 'date' || field.type === 'number' || field.type === 'text') {
-                    field.value = '';
-                } else if (field.tagName === 'SELECT') {
-                    field.selectedIndex = 0;
-                }
-            });
+    // Carregar conteúdo do modal
+    fetch(`/tesouraria/processos/${processoId}/modal/`)
+      .then(response => response.text())
+      .then(html => {
+        if (modalContent) {
+          modalContent.innerHTML = html;
         }
-    }
-}
-</script>
+      })
+      .catch(error => {
+        console.error('Erro ao carregar modal:', error);
+        if (modalContent) {
+          modalContent.innerHTML = `
+            <div class="ds-card">
+              <div class="p-8 text-center">
+                <div class="text-red-500 mb-4">
+                  <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              </div>
+              <p class="text-gray-400 mb-4">Erro ao carregar detalhes do processo</p>
+              <button onclick="closeModal()" class="btn btn-ghost">Fechar</button>
+            </div>
+          </div>
+        `;
+        }
+      });
+  }
 
-{% endblock %}
+  // Função para fechar modal
+  function closeModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    
+    const modal = document.getElementById('processo-modal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // Fechar modal com ESC
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  });
+
+  // Filter manager
+  function filterManager() {
+    return {
+      showAdvanced: false,
+      
+      toggleAdvanced() {
+        this.showAdvanced = !this.showAdvanced;
+      },
+      
+      resetAdvanced() {
+        const advancedForm = document.querySelectorAll('[x-show="showAdvanced"] input, [x-show="showAdvanced"] select');
+        advancedForm.forEach(field => {
+          if (field.type === 'date' || field.type === 'number' || field.type === 'text') {
+            field.value = '';
+          } else if (field.tagName === 'SELECT') {
+            field.selectedIndex = 0;
+          }
+        });
+      }
+    }
+  }
+</script>
+{% endblock extra_js %}

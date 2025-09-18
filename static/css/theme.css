@@ -24,12 +24,12 @@
   --ring: 339 48% 30%;
   --radius: 0.5rem;
   
-  /* Sidebar specific */
-  --sidebar-background: 0 0% 98%;
-  --sidebar-foreground: 222.2 84% 4.9%;
-  --sidebar-border: 214.3 31.8% 91.4%;
-  --sidebar-hover: 210 40% 96%;
-  --sidebar-active: 339 48% 30%;
+  /* Sidebar specific - Dark Design System */
+  --sidebar-background: 220 13% 9%;     /* Escuro similar ao --surface */
+  --sidebar-foreground: 210 40% 98%;    /* Texto branco */
+  --sidebar-border: 217 19% 15%;        /* Borda sutil */
+  --sidebar-hover: 217 19% 27%;         /* Hover mais claro */
+  --sidebar-active: 338 71% 41%;        /* Cor accent #7a1340 */
   --sidebar-active-foreground: 210 40% 98%;
   
   /* Gradients */
