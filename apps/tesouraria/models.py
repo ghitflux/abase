@@ -216,6 +216,25 @@ class ProcessoTesouraria(models.Model):
         related_name='processos_tesouraria_processados',
         verbose_name='Processado por'
     )
+
+    # Analista que originou a aprovação (para retorno de pendências)
+    analista_origem = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='processos_tesouraria_origem',
+        verbose_name='Analista de Origem',
+        help_text='Analista que primeiro assumiu e aprovou este processo'
+    )
+
+    # Data em que a análise foi aprovada
+    data_aprovacao = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Data da Aprovação',
+        help_text='Data e hora em que o processo foi aprovado na análise'
+    )
     
     # Observações da tesouraria
     observacoes_tesouraria = models.TextField(

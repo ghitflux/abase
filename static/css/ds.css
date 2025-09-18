@@ -1,0 +1,111 @@
+/* DS tokens & componentes – DARK + Vinho + Ubuntu */
+:root{
+  --font-sans:"Ubuntu",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";
+  --bg:#0d1117; --surface:#121826; --surface-2:#0b1220; --border:#202a3a;
+  --text:#e5e7eb; --muted:#94a3b8; --heading:#fff;
+  --accent:#7a1340; --accent-600:#680e36; --accent-700:#5a0c2e; --accent-200:#f4d6e3;
+  --success:#16a34a; --info:#60a5fa; --warn:#f59e0b; --danger:#ef4444; --neutral:#94a3b8; --violet:#a78bfa;
+  --row:#0b1220; --row-alt:#0d1528; --row-hover:#121a2f;
+  --thead:#0f172a;
+  --shadow:0 12px 32px rgba(0,0,0,.45);
+}
+:root{ color-scheme:dark }
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+p{color:var(--text)}
+a{color:var(--accent-200);text-decoration:none}
+.container-xl{max-width:1280px;margin:0 auto;padding:0 1rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
+.section-title{color:var(--heading);font-weight:700;font-size:1.125rem}
+.kpi{display:flex;justify-content:space-between;align-items:center;padding:1rem;border-radius:16px;background:linear-gradient(180deg,#121a2f,#0b1220);border:1px solid var(--border)}
+.row{display:grid;gap:1rem;grid-template-columns:repeat(12,minmax(0,1fr))}
+.col-12{grid-column:span 12}.col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
+@media(max-width:1024px){.col-lg-12{grid-column:span 12}.col-lg-6{grid-column:span 6}.col-lg-4{grid-column:span 4}}
+.input,.select,select,textarea{width:100%;background:#0b1220;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:.6rem .8rem;transition:all 0.2s ease}
+.input::placeholder{color:#6b7280}
+.input:focus,.select:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(122,19,64,0.1)}
+.input:hover,.select:hover,select:hover,textarea:hover{border-color:#374151}
+
+/* ---------- Select/Dropdown aprimorado ---------- */
+select{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");background-position:right 0.5rem center;background-repeat:no-repeat;background-size:1.5em 1.5em;padding-right:2.5rem}
+select:focus{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%237a1340' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")}
+select option{background:var(--surface);color:var(--text);padding:0.5rem;border:none}
+select option:checked{background:var(--accent);color:#fff}
+select option:hover{background:var(--surface-2);color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem .95rem;border-radius:12px;border:1px solid var(--border);background:#0b1220;color:var(--text)}
+.btn:hover{background:#101834}
+.btn-accent{background:var(--accent);color:#fff;border-color:transparent}
+.btn-accent:hover{background:var(--accent-600)}
+.btn-ghost{background:transparent;border-color:var(--border)}
+.btn[disabled], .btn.disabled { opacity:.55; cursor:not-allowed; pointer-events:none; }
+.tabbar{display:flex;gap:.5rem;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:.25rem}
+.tab{flex:1;text-align:center;padding:.6rem .8rem;border-radius:10px;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--accent-700);color:#fff;font-weight:600}
+
+/* ---------- Tabelas ---------- */
+.table{width:100%;border-collapse:separate;border-spacing:0}
+.table thead th{text-align:left;font-size:.75rem;color:var(--muted);padding:.75rem 1rem;text-transform:uppercase;letter-spacing:.04em}
+.table tbody td{padding:.9rem 1rem;border-top:1px solid var(--border);color:var(--text)}
+.table--dark thead th{background:var(--thead);font-weight:600;color:#cbd5e1;border-bottom:1px solid var(--border)}
+.table--dark tbody tr{background:var(--row)}
+.table--dark tbody tr:nth-child(even){background:var(--row-alt)}
+.table--dark tbody tr:hover{background:var(--row-hover)}
+.table--dark tbody td{color:var(--text)}
+
+/* ---------- Badges (status) ---------- */
+.badge{display:inline-flex;align-items:center;gap:.4ch;padding:.25rem .6rem;border-radius:999px;font-size:.75rem;font-weight:600;border:1px solid transparent;white-space:nowrap}
+.badge--default{background:#0f172a;color:#cbd5e1;border-color:#1e293b}
+.badge--aprovado,.badge--efetivado{background:#052e1b;color:#34d399;border-color:#065f46}
+.badge--analise,.badge--andamento{background:#1e293b;color:#93c5fd;border-color:#334155}
+.badge--pendente,.badge--aguardando{background:#3b2a0a;color:#facc15;border-color:#713f12}
+.badge--correcao,.badge--em_correcao{background:#2a0f1c;color:#f1a4c6;border-color:#5a0c2e}
+.badge--correcao-feita{background:#3a0f22;color:#ffd1e5;border-color:#7a134033}
+.badge--enviado-correcao{background:#3b1a0a;color:#ffcf99;border-color:#7c2d12}
+.badge--cancelado,.badge--reprovado{background:#3b0d0d;color:#fca5a5;border-color:#7f1d1d}
+.badge--pago{background:#052e1b;color:#86efac;border-color:#065f46}
+.badge--atraso{background:#3b0d0d;color:#fecaca;border-color:#7f1d1d}
+.badge--aberto{background:#0f172a;color:#e2e8f0;border-color:#1e293b}
+
+/* ---------- Chips por papel (Agente/Analista/Tesouraria) ---------- */
+.chip{display:inline-flex;align-items:center;gap:.4ch;padding:.25rem .6rem;border-radius:8px;font-size:.72rem;font-weight:600;border:1px solid transparent}
+.chip--agente{background:#073042;color:#a7f3d0;border-color:#0b4a5f}
+.chip--analista{background:#201b39;color:#d6bcfa;border-color:#4c1d95}
+.chip--tesouraria{background:#2a0f1c;color:#f1a4c6;border-color:#5a0c2e}
+
+/* ---------- Checkbox e Radio ---------- */
+.checkbox,.radio{position:relative;display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--text)}
+.checkbox span,.radio span{color:var(--text)}
+.checkbox input[type="checkbox"],.radio input[type="radio"]{appearance:none;width:1.25rem;height:1.25rem;border:2px solid var(--border);background:#0b1220;border-radius:.25rem;position:relative;cursor:pointer;transition:all 0.2s ease}
+.radio input[type="radio"]{border-radius:50%}
+.checkbox input[type="checkbox"]:checked,.radio input[type="radio"]:checked{background:var(--accent);border-color:var(--accent)}
+.checkbox input[type="checkbox"]:checked::after{content:"✓";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:.75rem;font-weight:600}
+.radio input[type="radio"]:checked::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:.5rem;height:.5rem;background:#fff;border-radius:50%}
+.checkbox input[type="checkbox"]:focus,.radio input[type="radio"]:focus{outline:none;box-shadow:0 0 0 3px rgba(122,19,64,0.1)}
+
+/* ---------- Progress Bar ---------- */
+.progress{width:100%;height:.5rem;background:var(--surface-2);border-radius:.25rem;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-600));transition:width 0.3s ease}
+
+/* ---------- Toggle Switch ---------- */
+.toggle{position:relative;display:inline-block;width:3rem;height:1.5rem}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#374151;border-radius:1.5rem;transition:.3s}
+.toggle-slider:before{position:absolute;content:"";height:1.125rem;width:1.125rem;left:.1875rem;bottom:.1875rem;background:white;border-radius:50%;transition:.3s}
+.toggle input:checked + .toggle-slider{background:var(--accent)}
+.toggle input:checked + .toggle-slider:before{transform:translateX(1.5rem)}
+
+/* ---------- Tipografia utilitários ---------- */
+.fw-400{font-weight:400;color:var(--text)}
+.fw-500{font-weight:500;color:var(--text)}
+.fw-600{font-weight:600;color:var(--text)}
+.fw-700{font-weight:700;color:var(--heading)}
+.text-muted{color:var(--muted)}
+.name-strong{font-weight:500;color:var(--text)}
+.value-strong{font-weight:700;color:var(--heading)}
+
+.badge{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .55rem;border-radius:9999px;font:600 .75rem/1 Ubuntu,system-ui}
+.badge--ok{background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.22)}
+.badge--warn{background:rgba(234,179,8,.12);color:#facc15;border:1px solid rgba(234,179,8,.22)}
+.badge--info{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.22)}
+.badge--error{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.22)}
+.badge--muted{background:rgba(107,114,128,.12);color:#d1d5db;border:1px solid rgba(107,114,128,.22)}

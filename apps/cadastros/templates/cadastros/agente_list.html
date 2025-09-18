@@ -1,228 +1,110 @@
 {% extends "base.html" %}
+{% load static %}
+{% load ui %}
 {% block title %}Lista de Cadastros • ABASE{% endblock %}
 
 {% block content %}
-<div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Meus Cadastros</h1>
-        <a href="{% url 'cadastros:agente-create' %}" 
-           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Novo Cadastro
-        </a>
+    <div class="p-6">
+         <div class="card" style="padding:1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+         <div class="section-title">Meus Cadastros</div>
+         <a href="{% url 'cadastros:agente-create' %}" class="btn btn-accent">Novo Cadastro</a>
     </div>
+
 
     <!-- Alertas para cadastros pendentes de revisão -->
     {% if cadastros_pendentes %}
-    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-            </div>
-            <div class="ml-3">
-                <h3 class="text-sm font-medium text-yellow-800">
-                    Você tem {{ total_pendentes }} cadastro{{ total_pendentes|pluralize }} pendente{{ total_pendentes|pluralize }} de revisão
-                </h3>
-                <div class="mt-2 text-sm text-yellow-700">
-                    <p>Cadastros devolvidos pelo analista para correção. Verifique os comentários abaixo.</p>
-                </div>
-            </div>
-        </div>
+    {% if cadastros_pendentes %}
+    <div class="card" style="padding:1rem; margin-bottom:1rem; border-left:4px solid var(--warn);">
+        <div class="fw-600">Você tem {{ total_pendentes }} cadastro{{ total_pendentes|pluralize }} pendente{{ total_pendentes|pluralize }} de revisão</div>
+        <div class="text-muted" style="margin-top:.25rem">Cadastros devolvidos pelo analista para correção. Verifique os comentários abaixo.</div>
     </div>
+{% endif %}
+
     {% endif %}
 
     <!-- Estatísticas Rápidas -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total de Cadastros</dt>
-                            <dd class="text-lg font-medium text-gray-900">{{ total_cadastros }}</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Pendente de Revisão</dt>
-                            <dd class="text-lg font-medium text-gray-900">{{ total_pendentes }}</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Em Análise</dt>
-                            <dd class="text-lg font-medium text-gray-900">{{ cadastros|dictsort:"status"|dictsortreversed:"status"|length }}</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Aprovados</dt>
-                            <dd class="text-lg font-medium text-gray-900">0</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="row" style="margin-bottom:1rem">
+        <div class="col-3 col-lg-12"><div class="kpi"><div>Total de Cadastros</div><div class="value-strong">{{ total_cadastros }}</div></div></div>
+        <div class="col-3 col-lg-12"><div class="kpi"><div>Pendente de Revisão</div><div class="value-strong">{{ total_pendentes }}</div></div></div>
+        <div class="col-3 col-lg-12"><div class="kpi"><div>Em Análise</div><div class="value-strong">{{ cadastros|length }}</div></div></div>
+        <div class="col-3 col-lg-12"><div class="kpi"><div>Aprovados</div><div class="value-strong">0</div></div></div>
     </div>
+
 
     <!-- Lista de Cadastros -->
     {% if cadastros %}
     <div class="bg-white shadow rounded-lg overflow-hidden">
-        <div class="px-4 py-5 sm:p-6">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Seus Cadastros</h3>
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Associado
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                CPF/CNPJ
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Criado em
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Comentários do Analista
-                            </th>
-                            <th scope="col" class="relative px-6 py-3">
-                                <span class="sr-only">Ações</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for cadastro in cadastros %}
-                        <tr class="{% if cadastro.status == 'PENDING_AGENT' %}bg-yellow-50{% endif %}">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10">
-                                        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                                            <span class="text-sm font-medium text-gray-700">
-                                                {{ cadastro.nome_completo|first|upper }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ cadastro.nome_completo|truncatechars:30 }}</div>
-                                        <div class="text-sm text-gray-500">{{ cadastro.email|default:"Sem email" }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ cadastro.cpf_cnpj|default:"Não informado" }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {% if cadastro.status == 'DRAFT' %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        Rascunho
-                                    </span>
-                                {% elif cadastro.status == 'SENT_REVIEW' %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        Em Análise
-                                    </span>
-                                {% elif cadastro.status == 'PENDING_AGENT' %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                        Pendente de Revisão
-                                    </span>
-                                {% elif cadastro.status == 'APPROVED_REVIEW' %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        Aprovado
-                                    </span>
-                                {% elif cadastro.status == 'CANCELLED' %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                        Cancelado
-                                    </span>
-                                {% else %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        {{ cadastro.get_status_display }}
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ cadastro.created_at|date:"d/m/Y H:i" }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-500">
-                                {% with processo=cadastro.analise_processo %}
-                                    {% if processo and processo.feedback_agente %}
-                                        <div class="max-w-xs">
-                                            <p class="text-sm text-yellow-800 bg-yellow-50 p-2 rounded">
-                                                {{ processo.feedback_agente|truncatewords:10 }}
-                                            </p>
-                                            {% if processo.feedback_agente|length > 50 %}
-                                                <button onclick="showFullComment('{{ cadastro.id }}')"
-                                                        class="text-xs text-blue-600 hover:text-blue-800 mt-1">
-                                                    Ver completo
-                                                </button>
-                                            {% endif %}
-                                        </div>
-                                    {% else %}
-                                        <span class="text-gray-400">Sem comentários</span>
-                                    {% endif %}
-                                {% endwith %}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                {% if cadastro.status == 'PENDING_AGENT' %}
-                                    <a href="{% url 'cadastros:agente-create' %}?edit={{ cadastro.id }}" 
-                                       class="text-yellow-600 hover:text-yellow-900 mr-3">Corrigir</a>
-                                {% endif %}
-                                <a href="{% url 'cadastros:agente-detail' cadastro.id %}" class="text-indigo-600 hover:text-indigo-900">Ver Detalhes</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+       <div class="card" style="padding:0">
+  <div style="padding:1rem 1rem 0"><div class="section-title">Seus Cadastros</div></div>
+  <div style="overflow-x:auto; padding:1rem">
+    <table class="table table--dark">
+      <thead>
+        <tr>
+          <th>Associado</th>
+          <th>CPF/CNPJ</th>
+          <th>Status</th>
+          <th>Criado em</th>
+          <th>Comentários do Analista</th>
+          <th class="text-muted">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cadastro in cadastros %}
+          <tr {% if cadastro.status == 'PENDING_AGENT' %}style="outline:1px solid var(--warn); outline-offset:-1px"{% endif %}>
+            <td>
+              <div style="display:flex; align-items:center; gap:.75rem">
+                <div style="width:40px;height:40px;border-radius:999px;background:#1f2937;display:flex;align-items:center;justify-content:center;">
+                  <span class="fw-600">{{ cadastro.nome_completo|first|upper }}</span>
+                </div>
+                <div>
+                  <div class="name-strong">{{ cadastro.nome_completo|truncatechars:30 }}</div>
+                  <div class="text-muted">{{ cadastro.email|default:"Sem email" }}</div>
+                </div>
+              </div>
+            </td>
+
+            <td class="name-strong">{{ cadastro.cpf_cnpj|default:"Não informado" }}</td>
+
+            <td>
+              <span class="badge {{ cadastro.status|status_class }}">
+                {{ cadastro.get_status_display|default:cadastro.status }}
+              </span>
+            </td>
+
+            <td class="text-muted">{{ cadastro.created_at|date:"d/m/Y H:i" }}</td>
+
+            <td>
+              {% with processo=cadastro.analise_processo %}
+                {% if processo and processo.feedback_agente %}
+                  <div style="max-width:28ch">
+                    <p class="text-muted" style="background:rgba(245,158,11,.1); padding:.5rem; border-radius:8px; border:1px solid rgba(245,158,11,.25)">
+                      {{ processo.feedback_agente|truncatewords:10 }}
+                    </p>
+                    {% if processo.feedback_agente|length > 50 %}
+                      <button onclick="showFullComment('{{ cadastro.id }}')" class="btn btn-ghost" style="padding:.25rem .5rem; margin-top:.25rem">
+                        Ver completo
+                      </button>
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <span class="text-muted">Sem comentários</span>
+                {% endif %}
+              {% endwith %}
+            </td>
+
+            <td style="text-align:right">
+              {% if cadastro.status == 'PENDING_AGENT' %}
+                <a href="{% url 'cadastros:agente-create' %}?edit={{ cadastro.id }}" class="btn" style="margin-right:.5rem">Corrigir</a>
+              {% endif %}
+              <a href="{% url 'cadastros:agente-detail' cadastro.id %}" class="btn btn-accent">Ver Detalhes</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
     </div>
     {% else %}
     <div class="bg-white shadow rounded-lg">
@@ -249,21 +131,45 @@
 </div>
 
 <!-- Modal para exibir comentário completo -->
-<div id="commentModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Comentário do Analista</h3>
-            <div id="fullComment" class="text-sm text-gray-700 bg-yellow-50 p-3 rounded border border-yellow-200">
-                <!-- Conteúdo do comentário será inserido aqui -->
-            </div>
-            <div class="mt-4 flex justify-end">
-                <button onclick="closeCommentModal()" class="px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded-md shadow-sm hover:bg-gray-400">
-                    Fechar
-                </button>
-            </div>
-        </div>
+<div id="commentModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9998">
+  <div class="card" style="position:relative; margin:10vh auto; padding:1rem; width:min(520px,92vw)">
+    <div class="section-title" style="margin-bottom:.5rem">Comentário do Analista</div>
+    <div id="fullComment" class="text-muted" style="background:rgba(245,158,11,.08); padding:.75rem; border-radius:10px; border:1px solid rgba(245,158,11,.2)">
     </div>
+    <div style="margin-top:.75rem; display:flex; justify-content:flex-end">
+      <button onclick="closeCommentModal()" class="btn">Fechar</button>
+    </div>
+  </div>
 </div>
+
+<script>
+const fullComments = {
+  {% for cadastro in cadastros %}
+    {% with processo=cadastro.analise_processo %}
+      {% if processo and processo.feedback_agente %}
+        '{{ cadastro.id }}': '{{ processo.feedback_agente|escapejs }}',
+      {% endif %}
+    {% endwith %}
+  {% endfor %}
+};
+
+function showFullComment(id){
+  const modal=document.getElementById('commentModal');
+  const comment=document.getElementById('fullComment');
+  if(fullComments[id]){
+    comment.textContent = fullComments[id];
+    modal.style.display='block';
+  }
+}
+function closeCommentModal(){
+  document.getElementById('commentModal').style.display='none';
+}
+document.addEventListener('click', function(e){
+  const modal=document.getElementById('commentModal');
+  if(e.target===modal){ closeCommentModal(); }
+});
+</script>
+
 
 <script>
 // Armazenar comentários completos

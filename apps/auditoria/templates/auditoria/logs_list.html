@@ -12,8 +12,8 @@
         <div class="p-6 border-b border-gray-200">
             <form method="get" class="grid grid-cols-1 gap-4 sm:grid-cols-4">
                 <div>
-                    <label for="event" class="block text-sm font-medium text-gray-700">Evento</label>
-                    <select name="event" id="event" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <label for="event" class="text-muted">Evento</label>
+                    <select name="event" id="event" class="select">
                         <option value="">Todos</option>
                         {% for value, label in event_choices %}
                             <option value="{{ value }}" {% if value == current_event %}selected{% endif %}>{{ label }}</option>
@@ -21,17 +21,17 @@
                     </select>
                 </div>
                 <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700">Usuário</label>
-                    <input type="text" name="username" id="username" value="{{ current_username|default:'' }}" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <label for="username" class="text-muted">Usuário</label>
+                    <input type="text" name="username" id="username" value="{{ current_username|default:'' }}"
+                           class="input" placeholder="Nome do usuário">
                 </div>
                 <div>
-                    <label for="ip" class="block text-sm font-medium text-gray-700">IP</label>
-                    <input type="text" name="ip" id="ip" value="{{ current_ip|default:'' }}" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <label for="ip" class="text-muted">IP</label>
+                    <input type="text" name="ip" id="ip" value="{{ current_ip|default:'' }}"
+                           class="input" placeholder="Endereço IP">
                 </div>
                 <div class="flex items-end">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <button type="submit" class="btn btn-accent">
                         Filtrar
                     </button>
                 </div>
@@ -39,34 +39,34 @@
         </div>
         
         <div class="overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table class="table table--dark">
+                <thead>
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data/Hora</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evento</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Agent</th>
+                        <th>Data/Hora</th>
+                        <th>Evento</th>
+                        <th>Usuário</th>
+                        <th>IP</th>
+                        <th>User Agent</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody>
                     {% for log in page_obj %}
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ log.created_at|date:'d/m/Y H:i:s' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="value-strong">{{ log.created_at|date:'d/m/Y H:i:s' }}</td>
+                        <td>
                             {% if log.event == 'LOGIN' %}
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Login</span>
+                                <span class="badge badge--aprovado">Login</span>
                             {% elif log.event == 'LOGOUT' %}
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Logout</span>
+                                <span class="badge badge--analise">Logout</span>
                             {% elif log.event == 'LOGIN_FAILED' %}
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Login Failed</span>
+                                <span class="badge badge--cancelado">Login Failed</span>
                             {% else %}
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">{{ log.event }}</span>
+                                <span class="badge badge--default">{{ log.event }}</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ log.username }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ log.ip|default:'—' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">{{ log.user_agent|default:'—' }}</td>
+                        <td class="name-strong">{{ log.username }}</td>
+                        <td>{{ log.ip|default:'—' }}</td>
+                        <td class="text-muted">{{ log.user_agent|default:'—' }}</td>
                     </tr>
                     {% empty %}
                     <tr>

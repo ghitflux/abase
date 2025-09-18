@@ -292,8 +292,10 @@ def aprovar_processo(request, processo_id):
             cadastro=processo.cadastro,
             defaults={
                 'analista_origem': request.user,
-                'status': 'PENDENTE',
-                'data_aprovacao': timezone.now()
+                'status': 'pendente',
+                'data_aprovacao': timezone.now(),
+                'origem_analise': processo,
+                'agente_responsavel': processo.cadastro.agente_responsavel
             }
         )
 

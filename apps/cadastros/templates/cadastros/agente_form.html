@@ -1,75 +1,61 @@
 {% extends "base.html" %}
 {% load form_utils %}
+{% load ui %}
 {% block title %}{% if is_edit %}Editar Cadastro{% else %}Novo Cadastro{% endif %} • ABASE{% endblock %}
 
 {% block extra_css %}
 <style>
-  /* Aprimoramento dos títulos dos grupos */
-  .group-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    position: relative;
+  /* Cards e cabeçalho */
+  .group-container{
+    background:var(--surface-card) !important;
+    border-color:var(--surface-border) !important;
   }
-  
-  .group-title::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 0;
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 2px;
+  .group-container .border-gray-100{
+    border-color:var(--surface-border)!important;
   }
-  
-  /* Aprimoramento dos inputs de data */
-  input[type="date"], input[type="month"] {
-    position: relative;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23667eea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 16px;
+  .group-container .px-8 .text-gray-800{ color:#E5E7EB!important; } /* título do card */
+
+  /* Labels */
+  .group-container label{ color:#CBD5E1!important; } /* text-slate-300 */
+
+  /* Campos (input/select/textarea) */
+  .group-container input:not([type="file"]),
+  .group-container select,
+  .group-container textarea{
+    background:var(--field-bg)!important;
+    border-color:var(--field-border)!important;
+    color:var(--field-fg)!important;
   }
-  
-  input[type="date"]::-webkit-calendar-picker-indicator,
-  input[type="month"]::-webkit-calendar-picker-indicator {
-    opacity: 0;
-    position: absolute;
-    right: 12px;
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
+  .group-container input::placeholder,
+  .group-container textarea::placeholder{
+    color:var(--field-ph)!important;
+    opacity:1;
   }
-  
-  /* Hover effects para os grupos */
-  .group-container {
-    transition: all 0.3s ease;
+  .group-container select{ color:var(--field-fg)!important; }
+  .group-container input:focus,
+  .group-container select:focus,
+  .group-container textarea:focus{
+    outline:0!important;
+    border-color:var(--accent-600)!important;
+    box-shadow:0 0 0 3px var(--ring-accent)!important;
   }
-  
-  .group-container:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* File input (linha de documentos) */
+  #arquivo_doc{
+    color:var(--field-fg)!important;
+    background:var(--field-bg)!important;
+    border-color:var(--field-border)!important;
   }
-  
-  /* Animação suave para os inputs */
-  .form-input {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Botão primário coerente com DS */
+  .btn-primary{
+    background:var(--accent-600)!important;
+    border-color:var(--accent-600)!important;
   }
-  
-  .form-input:focus {
-    transform: translateY(-1px);
-  }
-  
-  /* Estilo para campos obrigatórios */
-  .required-field::after {
-    content: ' *';
-    color: #ef4444;
-    font-weight: bold;
-  }
+  .btn-primary:hover{ background:var(--accent-700)!important; }
+
+  /* Título da página no dark */
+  .page-title{ color:#F3F4F6!important; } /* text-gray-100 */
 </style>
 {% endblock %}
 
@@ -79,886 +65,606 @@
 
 {% block content %}
 <div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Novo Cadastro</h1>
-        <a href="{% url 'cadastros:agente-list' %}" 
-           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-            Voltar
-        </a>
-    </div>
-
-<form method="post" enctype="multipart/form-data" class="space-y-6">
-  {% csrf_token %}
-  {% if is_edit %}
-    <input type="hidden" name="edit_id" value="{{ cadastro.id }}">
-  {% endif %}
-  
-  <!-- Campo tipo_pessoa fixado como PF -->
-  <select name="tipo_pessoa" style="display: none;">
-            <option value="PF" selected>Pessoa Física</option>
-          </select>
-
-  <!-- ========== DADOS CADASTRAIS ========== -->
-  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
-    <div class="px-8 py-6 border-b border-gray-100">
-      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Dados Cadastrais</h2>
-    </div>
-    <div class="p-6">
-      <div class="grid grid-cols-12 gap-6">
-        <!-- Campo CPF com design aprimorado -->
-        <div class="col-span-4">
-          <label for="cpf" class="block text-sm font-medium text-gray-700 mb-2">CPF</label>
-          <input 
-            name="cpf" 
-            class="w-full px-4 py-3 text-sm border {% if form.cpf.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            inputmode="numeric" 
-            maxlength="14" 
-            placeholder="000.000.000-00" 
-            id="cpf" 
-            value="{{ form.instance.cpf|default_if_none:'' }}"
-            data-mask="000.000.000-00">
-          {% if form.cpf.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.cpf.errors.0 }}</p>
-          {% endif %}
-        </div>
-        
-        <!-- Nome completo -->
-        <div class="col-span-8">
-          <label for="{{ form.nome_completo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Nome completo</label>
-          <input 
-            type="text" 
-            name="nome_completo" 
-            maxlength="180" 
-            class="w-full px-4 py-3 text-sm border {% if form.nome_completo.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.nome_completo.id_for_label }}" 
-            value="{{ form.instance.nome_completo|default_if_none:'' }}" 
-            placeholder="Digite o nome completo">
-          {% if form.nome_completo.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.nome_completo.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <!-- Data de nascimento -->
-        <div class="col-span-3">
-          <label for="{{ form.data_nascimento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Data de nascimento</label>
-          <input 
-            type="date" 
-            name="data_nascimento" 
-            class="w-full px-4 py-3 text-sm border {% if form.data_nascimento.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.data_nascimento.id_for_label }}" 
-            value="{{ form.instance.data_nascimento|date:'Y-m-d'|default_if_none:'' }}">
-          {% if form.data_nascimento.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.data_nascimento.errors.0 }}</p>
-          {% endif %}
-        </div>
-        
-        <!-- Profissão -->
-        <div class="col-span-5">
-          <label for="{{ form.profissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Profissão</label>
-          <input 
-            type="text" 
-            name="profissao" 
-            maxlength="120" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.profissao.id_for_label }}" 
-            value="{{ form.instance.profissao|default_if_none:'' }}" 
-            placeholder="Digite a profissão">
-        </div>
-        
-        <!-- Estado civil -->
-        <div class="col-span-4">
-          <label for="{{ form.estado_civil.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Estado civil</label>
-          <select 
-            name="estado_civil" 
-            class="w-full px-4 py-3 text-sm border {% if form.estado_civil.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white" 
-            id="{{ form.estado_civil.id_for_label }}">
-            <option value="" {% if not form.instance.estado_civil %}selected{% endif %}>Selecione o estado civil</option>
-            <option value="SOLTEIRO" {% if form.instance.estado_civil == 'SOLTEIRO' %}selected{% endif %}>Solteiro(a)</option>
-            <option value="CASADO" {% if form.instance.estado_civil == 'CASADO' %}selected{% endif %}>Casado(a)</option>
-            <option value="DIVORCIADO" {% if form.instance.estado_civil == 'DIVORCIADO' %}selected{% endif %}>Divorciado(a)</option>
-            <option value="VIUVO" {% if form.instance.estado_civil == 'VIUVO' %}selected{% endif %}>Viúvo(a)</option>
-            <option value="UNIAO_ESTAVEL" {% if form.instance.estado_civil == 'UNIAO_ESTAVEL' %}selected{% endif %}>União Estável</option>
-          </select>
-          {% if form.estado_civil.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.estado_civil.errors.0 }}</p>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== ENDEREÇO ========== -->
-  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
-    <div class="px-8 py-6 border-b border-gray-100">
-      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Endereço</h2>
-    </div>
-    <div class="p-8">
-      <div class="grid grid-cols-12 gap-6">
-        <!-- CEP -->
-        <div class="col-span-3">
-          <label for="cep" class="block text-sm font-medium text-gray-700 mb-2">CEP</label>
-          <input 
-            name="cep" 
-            class="w-full px-4 py-3 text-sm border {% if form.cep.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="cep" 
-            placeholder="00000-000" 
-            maxlength="9" 
-            inputmode="numeric" 
-            value="{{ form.instance.cep|default_if_none:'' }}">
-          {% if form.cep.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.cep.errors.0 }}</p>
-          {% endif %}
-        </div>
-        
-        <!-- Endereço -->
-        <div class="col-span-5">
-          <label for="{{ form.endereco.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Endereço</label>
-          <input 
-            name="endereco" 
-            class="w-full px-4 py-3 text-sm border {% if form.endereco.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.endereco.id_for_label }}" 
-            value="{{ form.instance.endereco|default_if_none:'' }}" 
-            placeholder="Digite o endereço">
-          {% if form.endereco.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.endereco.errors.0 }}</p>
-          {% endif %}
-        </div>
-        
-        <!-- Número -->
-        <div class="col-span-2">
-          <label for="{{ form.numero.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Nº</label>
-          <input 
-            name="numero" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.numero.id_for_label }}" 
-            value="{{ form.instance.numero|default_if_none:'' }}" 
-            placeholder="123">
-        </div>
-        
-        <!-- Complemento -->
-        <div class="col-span-2">
-          <label for="{{ form.complemento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Complemento</label>
-          <input 
-            name="complemento" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.complemento.id_for_label }}" 
-            value="{{ form.instance.complemento|default_if_none:'' }}" 
-            placeholder="Apto 101">
-        </div>
-
-        <!-- Bairro -->
-        <div class="col-span-4">
-          <label for="{{ form.bairro.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Bairro</label>
-          <input 
-            name="bairro" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.bairro.id_for_label }}" 
-            value="{{ form.instance.bairro|default_if_none:'' }}" 
-            placeholder="Digite o bairro">
-        </div>
-        
-        <!-- Cidade -->
-        <div class="col-span-6">
-          <label for="{{ form.cidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
-          <input 
-            name="cidade" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.cidade.id_for_label }}" 
-            value="{{ form.instance.cidade|default_if_none:'' }}" 
-            placeholder="Digite a cidade">
-        </div>
-        
-        <!-- UF -->
-        <div class="col-span-2">
-          <label for="{{ form.uf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">UF</label>
-          <select 
-            name="uf" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white" 
-            id="{{ form.uf.id_for_label }}">
-            <option value="" {% if not form.instance.uf %}selected{% endif %}>Selecione o estado</option>
-            <option value="AC" {% if form.instance.uf == 'AC' %}selected{% endif %}>AC</option>
-            <option value="AL" {% if form.instance.uf == 'AL' %}selected{% endif %}>AL</option>
-            <option value="AP" {% if form.instance.uf == 'AP' %}selected{% endif %}>AP</option>
-            <option value="AM" {% if form.instance.uf == 'AM' %}selected{% endif %}>AM</option>
-            <option value="BA" {% if form.instance.uf == 'BA' %}selected{% endif %}>BA</option>
-            <option value="CE" {% if form.instance.uf == 'CE' %}selected{% endif %}>CE</option>
-            <option value="DF" {% if form.instance.uf == 'DF' %}selected{% endif %}>DF</option>
-            <option value="ES" {% if form.instance.uf == 'ES' %}selected{% endif %}>ES</option>
-            <option value="GO" {% if form.instance.uf == 'GO' %}selected{% endif %}>GO</option>
-            <option value="MA" {% if form.instance.uf == 'MA' %}selected{% endif %}>MA</option>
-            <option value="MT" {% if form.instance.uf == 'MT' %}selected{% endif %}>MT</option>
-            <option value="MS" {% if form.instance.uf == 'MS' %}selected{% endif %}>MS</option>
-            <option value="MG" {% if form.instance.uf == 'MG' %}selected{% endif %}>MG</option>
-            <option value="PA" {% if form.instance.uf == 'PA' %}selected{% endif %}>PA</option>
-            <option value="PB" {% if form.instance.uf == 'PB' %}selected{% endif %}>PB</option>
-            <option value="PR" {% if form.instance.uf == 'PR' %}selected{% endif %}>PR</option>
-            <option value="PE" {% if form.instance.uf == 'PE' %}selected{% endif %}>PE</option>
-            <option value="PI" {% if form.instance.uf == 'PI' %}selected{% endif %}>PI</option>
-            <option value="RJ" {% if form.instance.uf == 'RJ' %}selected{% endif %}>RJ</option>
-            <option value="RN" {% if form.instance.uf == 'RN' %}selected{% endif %}>RN</option>
-            <option value="RS" {% if form.instance.uf == 'RS' %}selected{% endif %}>RS</option>
-            <option value="RO" {% if form.instance.uf == 'RO' %}selected{% endif %}>RO</option>
-            <option value="RR" {% if form.instance.uf == 'RR' %}selected{% endif %}>RR</option>
-            <option value="SC" {% if form.instance.uf == 'SC' %}selected{% endif %}>SC</option>
-            <option value="SP" {% if form.instance.uf == 'SP' %}selected{% endif %}>SP</option>
-            <option value="SE" {% if form.instance.uf == 'SE' %}selected{% endif %}>SE</option>
-            <option value="TO" {% if form.instance.uf == 'TO' %}selected{% endif %}>TO</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== DADOS BANCÁRIOS ========== -->
-  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
-    <div class="px-8 py-6 border-b border-gray-100">
-      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Dados Bancários</h2>
-    </div>
-    <div class="p-8">
-      <div class="grid grid-cols-12 gap-6">
-        <!-- Banco -->
-        <div class="col-span-5">
-          <label for="{{ form.banco.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Banco</label>
-          <select 
-            name="banco" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white" 
-            id="{{ form.banco.id_for_label }}">
-            <option value="" {% if not form.instance.banco %}selected{% endif %}>Selecione o banco</option>
-
-            <!-- Bancos Principais -->
-            <option value="001" {% if form.instance.banco == '001' %}selected{% endif %}>001 - Banco do Brasil</option>
-            <option value="104" {% if form.instance.banco == '104' %}selected{% endif %}>104 - Caixa Econômica Federal</option>
-            <option value="237" {% if form.instance.banco == '237' %}selected{% endif %}>237 - Bradesco</option>
-            <option value="341" {% if form.instance.banco == '341' %}selected{% endif %}>341 - Itaú</option>
-            <option value="033" {% if form.instance.banco == '033' %}selected{% endif %}>033 - Santander</option>
-
-            <!-- Bancos Digitais -->
-            <option value="260" {% if form.instance.banco == '260' %}selected{% endif %}>260 - Nu Pagamentos (Nubank)</option>
-            <option value="077" {% if form.instance.banco == '077' %}selected{% endif %}>077 - Banco Inter</option>
-            <option value="336" {% if form.instance.banco == '336' %}selected{% endif %}>336 - C6 Bank</option>
-            <option value="364" {% if form.instance.banco == '364' %}selected{% endif %}>364 - Gerencianet Pagamentos</option>
-            <option value="323" {% if form.instance.banco == '323' %}selected{% endif %}>323 - Mercado Pago</option>
-            <option value="380" {% if form.instance.banco == '380' %}selected{% endif %}>380 - PicPay</option>
-            <option value="637" {% if form.instance.banco == '637' %}selected{% endif %}>637 - Banco Sofisa</option>
-            <option value="654" {% if form.instance.banco == '654' %}selected{% endif %}>654 - Banco A.J.Renner</option>
-            <option value="655" {% if form.instance.banco == '655' %}selected{% endif %}>655 - Neon Pagamentos</option>
-            <option value="237" {% if form.instance.banco == '237' %}selected{% endif %}>237 - Next (Bradesco)</option>
-            <option value="290" {% if form.instance.banco == '290' %}selected{% endif %}>290 - PagSeguro</option>
-
-            <!-- Bancos Regionais -->
-            <option value="041" {% if form.instance.banco == '041' %}selected{% endif %}>041 - Banrisul</option>
-            <option value="085" {% if form.instance.banco == '085' %}selected{% endif %}>085 - Ailos</option>
-            <option value="748" {% if form.instance.banco == '748' %}selected{% endif %}>748 - Sicredi</option>
-            <option value="004" {% if form.instance.banco == '004' %}selected{% endif %}>004 - Banco do Nordeste</option>
-            <option value="047" {% if form.instance.banco == '047' %}selected{% endif %}>047 - Banco do Estado de Sergipe</option>
-
-            <!-- Bancos de Investimento -->
-            <option value="208" {% if form.instance.banco == '208' %}selected{% endif %}>208 - BTG Pactual</option>
-            <option value="348" {% if form.instance.banco == '348' %}selected{% endif %}>348 - XP Investimentos</option>
-            <option value="269" {% if form.instance.banco == '269' %}selected{% endif %}>269 - HSBC Brasil</option>
-            <option value="623" {% if form.instance.banco == '623' %}selected{% endif %}>623 - Banco Pan</option>
-            <option value="212" {% if form.instance.banco == '212' %}selected{% endif %}>212 - Banco Original</option>
-            <option value="318" {% if form.instance.banco == '318' %}selected{% endif %}>318 - Banco BMG</option>
-
-            <!-- Cooperativas -->
-            <option value="136" {% if form.instance.banco == '136' %}selected{% endif %}>136 - Unicred</option>
-            <option value="097" {% if form.instance.banco == '097' %}selected{% endif %}>097 - CrediSIS</option>
-
-            <!-- Outros -->
-            <option value="422" {% if form.instance.banco == '422' %}selected{% endif %}>422 - Banco Safra</option>
-            <option value="655" {% if form.instance.banco == '655' %}selected{% endif %}>655 - Banco Votorantim</option>
-          </select>
-        </div>
-        
-        <!-- Agência -->
-        <div class="col-span-2">
-          <label for="agencia" class="block text-sm font-medium text-gray-700 mb-2">Agência</label>
-          <input 
-            name="agencia" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="agencia" 
-            placeholder="0001-9" 
-            maxlength="6" 
-            value="{{ form.instance.agencia|default_if_none:'' }}">
-        </div>
-        
-        <!-- Conta -->
-        <div class="col-span-3">
-          <label for="conta" class="block text-sm font-medium text-gray-700 mb-2">Conta</label>
-          <input 
-            name="conta" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="conta" 
-            placeholder="123456-7" 
-            maxlength="12" 
-            value="{{ form.instance.conta|default_if_none:'' }}">
-        </div>
-        
-        <!-- Tipo de Conta -->
-        <div class="col-span-2">
-          <label for="{{ form.tipo_conta.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Conta</label>
-          <select 
-            name="tipo_conta" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white" 
-            id="{{ form.tipo_conta.id_for_label }}">
-            <option value="" {% if not form.instance.tipo_conta %}selected{% endif %}>Selecione o tipo</option>
-            <option value="CC" {% if form.instance.tipo_conta == 'CC' %}selected{% endif %}>Conta Corrente</option>
-            <option value="PP" {% if form.instance.tipo_conta == 'PP' %}selected{% endif %}>Conta Poupança</option>
-          </select>
-        </div>
-
-        <!-- Tipo de Chave PIX -->
-        <div class="col-span-3">
-          <label for="{{ form.tipo_chave_pix.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 required-field">Tipo de Chave PIX</label>
-          <select
-            name="tipo_chave_pix"
-            class="w-full px-4 py-3 text-sm border {% if form.tipo_chave_pix.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white"
-            id="{{ form.tipo_chave_pix.id_for_label }}"
-            required>
-            <option value="" {% if not form.instance.tipo_chave_pix %}selected{% endif %}>Selecione o tipo</option>
-            <option value="CPF" {% if form.instance.tipo_chave_pix == 'CPF' %}selected{% endif %}>CPF</option>
-            <option value="CNPJ" {% if form.instance.tipo_chave_pix == 'CNPJ' %}selected{% endif %}>CNPJ</option>
-            <option value="EMAIL" {% if form.instance.tipo_chave_pix == 'EMAIL' %}selected{% endif %}>E-mail</option>
-            <option value="TELEFONE" {% if form.instance.tipo_chave_pix == 'TELEFONE' %}selected{% endif %}>Telefone</option>
-            <option value="ALEATORIA" {% if form.instance.tipo_chave_pix == 'ALEATORIA' %}selected{% endif %}>Chave Aleatória</option>
-          </select>
-          {% if form.tipo_chave_pix.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.tipo_chave_pix.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <!-- Chave Pix -->
-        <div class="col-span-9">
-          <label for="{{ form.chave_pix.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 required-field">Chave PIX</label>
-          <input
-            name="chave_pix"
-            class="w-full px-4 py-3 text-sm border {% if form.chave_pix.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300"
-            id="{{ form.chave_pix.id_for_label }}"
-            value="{{ form.instance.chave_pix|default_if_none:'' }}"
-            placeholder="Digite a chave PIX conforme o tipo selecionado"
-            required>
-          {% if form.chave_pix.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.chave_pix.errors.0 }}</p>
-          {% endif %}
-          <p class="text-xs text-gray-500 mt-2">💡 Selecione o tipo e digite a chave PIX principal do associado para futuros pagamentos.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== CONTATO E VÍNCULO PÚBLICO ========== -->
-  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
-    <div class="px-8 py-6 border-b border-gray-100">
-      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Contato e Vínculo Público</h2>
-    </div>
-    <div class="p-8">
-      <div class="grid grid-cols-12 gap-6">
-        <!-- Matrícula do Servidor Público -->
-        <div class="col-span-3">
-          <label for="{{ form.matricula_servidor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Matrícula do Servidor Público</label>
-          <input 
-            name="matricula_servidor" 
-            class="w-full px-4 py-3 text-sm border {% if form.matricula_servidor.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.matricula_servidor.id_for_label }}" 
-            value="{{ form.instance.matricula_servidor|default_if_none:'' }}" 
-            placeholder="999999-9"
-            maxlength="8"
-            data-mask="matricula">
-          {% if form.matricula_servidor.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.matricula_servidor.errors.0 }}</p>
-          {% endif %}
-        </div>
-        
-        <!-- Celular -->
-        <div class="col-span-3">
-          <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Celular</label>
-          <input 
-            name="celular" 
-            class="w-full px-4 py-3 text-sm border {% if form.celular.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.celular.id_for_label }}" 
-            value="{{ form.instance.celular|default_if_none:'' }}" 
-            placeholder="(11) 99999-9999" 
-            maxlength="15" 
-            inputmode="tel">
-          {% if form.celular.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.celular.errors.0 }}</p>
-          {% endif %}
-        </div>
-        
-        <!-- E-mail -->
-        <div class="col-span-5">
-          <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">E-mail</label>
-          <input 
-            name="email" 
-            type="email" 
-            class="w-full px-4 py-3 text-sm border {% if form.email.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.email.id_for_label }}" 
-            value="{{ form.instance.email|default_if_none:'' }}" 
-            placeholder="Digite o e-mail">
-          {% if form.email.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
-          {% endif %}
-        </div>
-        
-        <!-- Órgão Público -->
-        <div class="col-span-4">
-          <label for="{{ form.orgao_publico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Órgão Público</label>
-          <input 
-            name="orgao_publico" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.orgao_publico.id_for_label }}" 
-            value="{{ form.instance.orgao_publico|default_if_none:'' }}" 
-            placeholder="Digite o órgão público">
-        </div>
-
-        <!-- Situação do Servidor -->
-        <div class="col-span-4">
-          <label for="{{ form.situacao_servidor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Situação do Servidor</label>
-          <select 
-            name="situacao_servidor" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white" 
-            id="{{ form.situacao_servidor.id_for_label }}">
-            <option value="" {% if not form.instance.situacao_servidor %}selected{% endif %}>Selecione a situação</option>
-            <option value="EFETIVO" {% if form.instance.situacao_servidor == 'EFETIVO' %}selected{% endif %}>Efetivo</option>
-            <option value="COMISSIONADO" {% if form.instance.situacao_servidor == 'COMISSIONADO' %}selected{% endif %}>Comissionado</option>
-            <option value="APOSENTADO" {% if form.instance.situacao_servidor == 'APOSENTADO' %}selected{% endif %}>Aposentado</option>
-            <option value="OUTRO" {% if form.instance.situacao_servidor == 'OUTRO' %}selected{% endif %}>Outro</option>
-          </select>
-        </div>
-        
-
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== MARGEM (cálculos automáticos) ========== -->
-  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
-    <div class="px-8 py-6 border-b border-gray-100">
-      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Dados para cálculo de margem (pré-validação)</h2>
-    </div>
-    <div class="p-8">
-      <div class="grid grid-cols-12 gap-6">
-        <!-- Valor Bruto Total -->
-        <div class="col-span-3">
-          <label for="{{ form.valor_bruto_total.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Valor Bruto Total</label>
-          <input 
-            name="valor_bruto_total" 
-            class="w-full px-4 py-3 text-sm border {% if form.valor_bruto_total.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.valor_bruto_total.id_for_label }}" 
-            value="{{ form.instance.valor_bruto_total|default_if_none:'' }}" 
-            placeholder="R$ 0,00" 
-            inputmode="decimal"
-            data-money="brl">
-          {% if form.valor_bruto_total.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.valor_bruto_total.errors.0 }}</p>
-          {% endif %}
-        </div>
-        
-        <!-- Valor Líquido -->
-        <div class="col-span-3">
-          <label for="{{ form.valor_liquido.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Valor Líquido (contra-cheque)</label>
-          <input 
-            name="valor_liquido" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.valor_liquido.id_for_label }}" 
-            value="{{ form.instance.valor_liquido|default_if_none:'' }}" 
-            placeholder="R$ 0,00" 
-            inputmode="decimal"
-            data-money="brl">
-        </div>
-        
-        <!-- Prazo de Antecipação -->
-        <div class="col-span-2">
-          <label for="{{ form.prazo_antecipacao_meses.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Prazo de Antecipação (meses)</label>
-          <input 
-            name="prazo_antecipacao_meses" 
-            type="number" 
-            min="1" 
-            max="120" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.prazo_antecipacao_meses.id_for_label }}" 
-            value="{{ form.instance.prazo_antecipacao_meses|default_if_none:'' }}" 
-            placeholder="12">
-        </div>
-        
-        <!-- 30% do Bruto (calculado) -->
-        <div class="col-span-2">
-          <label for="trinta_bruto" class="block text-sm font-medium text-gray-700 mb-2">30% do Bruto</label>
-          <input 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
-            id="trinta_bruto" 
-            placeholder="R$ 0,00" 
-            readonly>
-        </div>
-        
-        <!-- Margem (calculada) -->
-        <div class="col-span-2">
-          <label for="margem_calc" class="block text-sm font-medium text-gray-700 mb-2">Margem (Liq − 30%)</label>
-          <input 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
-            id="margem_calc" 
-            placeholder="R$ 0,00" 
-            readonly>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== DETALHES DO CONTRATO (cálculos automáticos) ========== -->
-  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
-    <div class="px-8 py-6 border-b border-gray-100">
-      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Detalhes do Contrato</h2>
-    </div>
-    <div class="p-8">
-      <div class="grid grid-cols-12 gap-6">
-        <!-- Contribuição Associativa -->
-        <div class="col-span-3">
-          <label for="{{ form.mensalidade_associativa.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Contribuição Associativa (R$)</label>
-          <input 
-            name="mensalidade_associativa" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.mensalidade_associativa.id_for_label }}" 
-            value="{{ form.instance.mensalidade_associativa|default_if_none:'' }}" 
-            placeholder="R$ 0,00" 
-            inputmode="decimal"
-            data-money="brl">
-        </div>
-        
-        <!-- Taxa de Antecipação -->
-        <div class="col-span-2">
-          <label for="taxa_antecipacao_percent" class="block text-sm font-medium text-gray-700 mb-2">Taxa de Antecipação (%)</label>
-          <input 
-            name="taxa_antecipacao_percent" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
-            id="taxa_antecipacao_percent" 
-            value="30,00" 
-            readonly>
-        </div>
-        
-        <!-- Repasse ao Associado -->
-        <div class="col-span-3">
-          <label for="disponivel" class="block text-sm font-medium text-gray-700 mb-2">Repasse ao Associado (R$)</label>
-          <input 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
-            id="disponivel" 
-            placeholder="R$ 0,00" 
-            readonly>
-        </div>
-        
-        <!-- Total das 3 Cotas -->
-        <div class="col-span-4">
-          <label for="valor_total_ant" class="block text-sm font-medium text-gray-700 mb-2">Total das 3 Cotas (R$)</label>
-          <input 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
-            id="valor_total_ant" 
-            placeholder="R$ 0,00" 
-            readonly>
-        </div>
-
-        <!-- Data da Aprovação -->
-        <div class="col-span-3">
-          <label for="{{ form.data_aprovacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Data da Aprovação</label>
-          <input 
-            name="data_aprovacao" 
-            type="date" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.data_aprovacao.id_for_label }}" 
-            value="{{ form.instance.data_aprovacao|date:'Y-m-d'|default_if_none:'' }}">
-        </div>
-        
-        <!-- Data da primeira contribuição -->
-        <div class="col-span-3">
-          <label for="{{ form.data_primeira_mensalidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Data da primeira contribuição</label>
-          <input 
-            name="data_primeira_mensalidade" 
-            type="date" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.data_primeira_mensalidade.id_for_label }}" 
-            value="{{ form.instance.data_primeira_mensalidade|date:'Y-m-d'|default_if_none:'' }}">
-        </div>
-        
-        <!-- Mês de Averbação -->
-        <div class="col-span-3">
-          <label for="{{ form.mes_averbacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Mês de Averbação (AAAA-MM)</label>
-          <input 
-            name="mes_averbacao" 
-            type="month" 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300" 
-            id="{{ form.mes_averbacao.id_for_label }}" 
-            value="{{ form.instance.mes_averbacao|default_if_none:'' }}">
-        </div>
-        
-        <!-- Doação do Associado -->
-        <div class="col-span-3">
-          <label for="doacao" class="block text-sm font-medium text-gray-700 mb-2">Doação do Associado (R$)</label>
-          <input 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
-            id="doacao" 
-            placeholder="R$ 0,00" 
-            readonly>
-        </div>
-        
-        <!-- Auxílio do Agente -->
-        <div class="col-span-3">
-          <label for="auxilio_agente" class="block text-sm font-medium text-gray-700 mb-2">Auxílio do Agente (10%)</label>
-          <input 
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" 
-            id="auxilio_agente" 
-            placeholder="R$ 0,00" 
-            readonly>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ========== DOCUMENTOS ========== -->
-  <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
-    <div class="px-8 py-6 border-b border-gray-100">
-      <h2 class="text-xl font-semibold text-gray-800 tracking-tight group-title">Documentos</h2>
-      <p class="text-sm text-gray-600 mt-1">Suporte a imagens e PDF até 10MB</p>
-    </div>
-    <div class="p-8">
-      <div class="grid grid-cols-12 gap-6">
-        <!-- Tipo de Documento -->
-        <div class="col-span-4">
-          <label for="tipo_doc" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Documento</label>
-          <select
-            id="tipo_doc"
-            name="tipo"
-            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white">
-            <option value="DOC_FRENTE">📄 Documento (frente)</option>
-            <option value="DOC_VERSO">📄 Documento (verso)</option>
-            <option value="COMP_ENDERECO">🏠 Comprovante de endereço</option>
-            <option value="COMP_RENDA">💰 Comprovante de renda</option>
-            <option value="CONTRACHEQUE_ATUAL">📊 Contracheque atual</option>
-            <option value="TERMO_ADESAO">📋 Termo de Adesão</option>
-            <option value="TERMO_ANTECIPACAO">📝 Termo de Antecipação</option>
-          </select>
-        </div>
-        
-        <!-- Upload de Arquivo -->
-        <div class="col-span-6">
-          <label for="arquivo_doc" class="block text-sm font-medium text-gray-700 mb-2">Arquivo</label>
-          <div class="relative">
-            <input
-              id="arquivo_doc"
-              name="arquivo_doc"
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp"
-              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white
-                     file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium
-                     file:bg-gradient-to-r file:from-red-50 file:to-red-100 file:text-red-700
-                     hover:file:from-red-100 hover:file:to-red-200 file:transition-all file:duration-200"
-              onchange="validateFileSize(this)">
-            <div class="text-xs text-gray-500 mt-1 flex items-center">
-              <svg class="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
-              </svg>
-              Formatos aceitos: PDF, JPG, PNG, GIF, BMP, WebP (máx. 10MB)
-            </div>
-          </div>
-        </div>
-        
-        <!-- Botão Adicionar -->
-        <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-2">&nbsp;</label>
-          <button
-            type="button"
-            class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-xl font-medium shadow-sm hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center"
-            hx-post="{% url 'documentos:draft-upload' %}"
-            hx-encoding="multipart/form-data"
-            hx-include="#tipo_doc,#arquivo_doc"
-            hx-target="#draft-list">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Anexar
-          </button>
-        </div>
-      </div>
-      
-      <!-- Documentos Existentes (apenas na edição) -->
-      {% if is_edit and existing_docs %}
-      <div class="mt-6">
-        <h4 class="text-md font-medium text-gray-800 mb-3">Documentos Já Enviados</h4>
-        <div class="space-y-2">
-          {% for doc in existing_docs %}
-          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-            <div class="flex items-center">
-              <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-              <div>
-                <p class="text-sm font-medium text-gray-900">{{ doc.tipo|default:"Documento" }}</p>
-                <p class="text-xs text-gray-500">Enviado em {{ doc.created_at|date:"d/m/Y H:i" }}</p>
-              </div>
-            </div>
-            <a href="{% url 'documentos:serve' %}?doc_id={{ doc.id }}" target="_blank" class="text-red-600 hover:text-red-500 text-sm">
-              Ver
-            </a>
-          </div>
-          {% endfor %}
-        </div>
-        <hr class="my-6">
-      </div>
-      {% endif %}
-      
-      <!-- Lista de Documentos (Rascunhos) -->
-      <div id="draft-list" class="mt-8">
-        {% include "documentos/_draft_list.html" with docs=docs %}
-      </div>
-    </div>
-  </div>
-  
-  <!-- Script para validação de tamanho de arquivo -->
-  <script>
-    function validateFileSize(input) {
-      const maxSize = 10 * 1024 * 1024; // 10MB em bytes
-      const file = input.files[0];
-      
-      if (file && file.size > maxSize) {
-        alert('O arquivo selecionado é muito grande. O tamanho máximo permitido é 10MB.');
-        input.value = '';
-        return false;
-      }
-      
-      return true;
-    }
-  </script>
-
-  <div class="flex justify-end space-x-3">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-100">{% if is_edit %}Editar Cadastro{% else %}Novo Cadastro{% endif %}</h1>
     <a href="{% url 'cadastros:agente-list' %}" 
        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-        Cancelar
+      Voltar
     </a>
-    <button type="submit" 
-            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-        Enviar Cadastro
-    </button>
   </div>
+
+  <form method="post" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+    {% if is_edit %}
+      <input type="hidden" name="edit_id" value="{{ cadastro.id }}">
+    {% endif %}
+
+    <!-- Campo tipo_pessoa fixado como PF -->
+    <select name="tipo_pessoa" style="display:none;">
+      <option value="PF" selected>Pessoa Física</option>
+    </select>
+
+    <!-- ========== DADOS CADASTRAIS ========== -->
+    <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+      <div class="px-8 py-6 border-b border-gray-100">
+        <h2 class="text-xl font-semibold tracking-tight group-title">Dados Cadastrais</h2>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-4">
+            <label for="cpf" class="block text-sm font-medium text-gray-700 mb-2">CPF</label>
+            <input name="cpf" id="cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00"
+              value="{{ form.instance.cpf|default_if_none:'' }}"
+              class="w-full px-4 py-3 text-sm border {% if form.cpf.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            {% if form.cpf.errors %}<p class="mt-1 text-sm text-red-600">{{ form.cpf.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="col-span-8">
+            <label for="{{ form.nome_completo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Nome completo</label>
+            <input type="text" name="nome_completo" maxlength="180" id="{{ form.nome_completo.id_for_label }}"
+              value="{{ form.instance.nome_completo|default_if_none:'' }}" placeholder="Digite o nome completo"
+              class="w-full px-4 py-3 text-sm border {% if form.nome_completo.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            {% if form.nome_completo.errors %}<p class="mt-1 text-sm text-red-600">{{ form.nome_completo.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="col-span-3">
+            <label for="{{ form.data_nascimento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Data de nascimento</label>
+            <input type="date" name="data_nascimento" id="{{ form.data_nascimento.id_for_label }}"
+              value="{{ form.instance.data_nascimento|date:'Y-m-d'|default_if_none:'' }}"
+              class="w-full px-4 py-3 text-sm border {% if form.data_nascimento.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            {% if form.data_nascimento.errors %}<p class="mt-1 text-sm text-red-600">{{ form.data_nascimento.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="col-span-5">
+            <label for="{{ form.profissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Profissão</label>
+            <input type="text" name="profissao" maxlength="120" id="{{ form.profissao.id_for_label }}"
+              value="{{ form.instance.profissao|default_if_none:'' }}" placeholder="Digite a profissão"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-4">
+            <label for="{{ form.estado_civil.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Estado civil</label>
+            <select name="estado_civil" id="{{ form.estado_civil.id_for_label }}"
+              class="w-full px-4 py-3 text-sm border {% if form.estado_civil.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white">
+              <option value="" {% if not form.instance.estado_civil %}selected{% endif %}>Selecione o estado civil</option>
+              <option value="SOLTEIRO" {% if form.instance.estado_civil == 'SOLTEIRO' %}selected{% endif %}>Solteiro(a)</option>
+              <option value="CASADO" {% if form.instance.estado_civil == 'CASADO' %}selected{% endif %}>Casado(a)</option>
+              <option value="DIVORCIADO" {% if form.instance.estado_civil == 'DIVORCIADO' %}selected{% endif %}>Divorciado(a)</option>
+              <option value="VIUVO" {% if form.instance.estado_civil == 'VIUVO' %}selected{% endif %}>Viúvo(a)</option>
+              <option value="UNIAO_ESTAVEL" {% if form.instance.estado_civil == 'UNIAO_ESTAVEL' %}selected{% endif %}>União Estável</option>
+            </select>
+            {% if form.estado_civil.errors %}<p class="mt-1 text-sm text-red-600">{{ form.estado_civil.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== ENDEREÇO ========== -->
+    <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+      <div class="px-8 py-6 border-b border-gray-100">
+        <h2 class="text-xl font-semibold tracking-tight group-title">Endereço</h2>
+      </div>
+      <div class="p-8">
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-3">
+            <label for="cep" class="block text-sm font-medium text-gray-700 mb-2">CEP</label>
+            <input name="cep" id="cep" placeholder="00000-000" maxlength="9" inputmode="numeric"
+              value="{{ form.instance.cep|default_if_none:'' }}"
+              class="w-full px-4 py-3 text-sm border {% if form.cep.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            {% if form.cep.errors %}<p class="mt-1 text-sm text-red-600">{{ form.cep.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="col-span-5">
+            <label for="{{ form.endereco.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Endereço</label>
+            <input name="endereco" id="{{ form.endereco.id_for_label }}"
+              value="{{ form.instance.endereco|default_if_none:'' }}" placeholder="Digite o endereço"
+              class="w-full px-4 py-3 text-sm border {% if form.endereco.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            {% if form.endereco.errors %}<p class="mt-1 text-sm text-red-600">{{ form.endereco.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="col-span-2">
+            <label for="{{ form.numero.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Nº</label>
+            <input name="numero" id="{{ form.numero.id_for_label }}" value="{{ form.instance.numero|default_if_none:'' }}" placeholder="123"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-2">
+            <label for="{{ form.complemento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Complemento</label>
+            <input name="complemento" id="{{ form.complemento.id_for_label }}" value="{{ form.instance.complemento|default_if_none:'' }}" placeholder="Apto 101"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-4">
+            <label for="{{ form.bairro.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Bairro</label>
+            <input name="bairro" id="{{ form.bairro.id_for_label }}" value="{{ form.instance.bairro|default_if_none:'' }}" placeholder="Digite o bairro"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-6">
+            <label for="{{ form.cidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
+            <input name="cidade" id="{{ form.cidade.id_for_label }}" value="{{ form.instance.cidade|default_if_none:'' }}" placeholder="Digite a cidade"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-2">
+            <label for="{{ form.uf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">UF</label>
+            <select name="uf" id="{{ form.uf.id_for_label }}"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white">
+              <option value="" {% if not form.instance.uf %}selected{% endif %}>Selecione o estado</option>
+              <option value="AC" {% if form.instance.uf == 'AC' %}selected{% endif %}>AC</option>
+              <option value="AL" {% if form.instance.uf == 'AL' %}selected{% endif %}>AL</option>
+              <option value="AP" {% if form.instance.uf == 'AP' %}selected{% endif %}>AP</option>
+              <option value="AM" {% if form.instance.uf == 'AM' %}selected{% endif %}>AM</option>
+              <option value="BA" {% if form.instance.uf == 'BA' %}selected{% endif %}>BA</option>
+              <option value="CE" {% if form.instance.uf == 'CE' %}selected{% endif %}>CE</option>
+              <option value="DF" {% if form.instance.uf == 'DF' %}selected{% endif %}>DF</option>
+              <option value="ES" {% if form.instance.uf == 'ES' %}selected{% endif %}>ES</option>
+              <option value="GO" {% if form.instance.uf == 'GO' %}selected{% endif %}>GO</option>
+              <option value="MA" {% if form.instance.uf == 'MA' %}selected{% endif %}>MA</option>
+              <option value="MT" {% if form.instance.uf == 'MT' %}selected{% endif %}>MT</option>
+              <option value="MS" {% if form.instance.uf == 'MS' %}selected{% endif %}>MS</option>
+              <option value="MG" {% if form.instance.uf == 'MG' %}selected{% endif %}>MG</option>
+              <option value="PA" {% if form.instance.uf == 'PA' %}selected{% endif %}>PA</option>
+              <option value="PB" {% if form.instance.uf == 'PB' %}selected{% endif %}>PB</option>
+              <option value="PR" {% if form.instance.uf == 'PR' %}selected{% endif %}>PR</option>
+              <option value="PE" {% if form.instance.uf == 'PE' %}selected{% endif %}>PE</option>
+              <option value="PI" {% if form.instance.uf == 'PI' %}selected{% endif %}>PI</option>
+              <option value="RJ" {% if form.instance.uf == 'RJ' %}selected{% endif %}>RJ</option>
+              <option value="RN" {% if form.instance.uf == 'RN' %}selected{% endif %}>RN</option>
+              <option value="RS" {% if form.instance.uf == 'RS' %}selected{% endif %}>RS</option>
+              <option value="RO" {% if form.instance.uf == 'RO' %}selected{% endif %}>RO</option>
+              <option value="RR" {% if form.instance.uf == 'RR' %}selected{% endif %}>RR</option>
+              <option value="SC" {% if form.instance.uf == 'SC' %}selected{% endif %}>SC</option>
+              <option value="SP" {% if form.instance.uf == 'SP' %}selected{% endif %}>SP</option>
+              <option value="SE" {% if form.instance.uf == 'SE' %}selected{% endif %}>SE</option>
+              <option value="TO" {% if form.instance.uf == 'TO' %}selected{% endif %}>TO</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== DADOS BANCÁRIOS ========== -->
+    <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+      <div class="px-8 py-6 border-b border-gray-100">
+        <h2 class="text-xl font-semibold tracking-tight group-title">Dados Bancários</h2>
+      </div>
+      <div class="p-8">
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-5">
+            <label for="{{ form.banco.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Banco</label>
+            <select name="banco" id="{{ form.banco.id_for_label }}"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white">
+              <option value="" {% if not form.instance.banco %}selected{% endif %}>Selecione o banco</option>
+              <option value="001" {% if form.instance.banco == '001' %}selected{% endif %}>001 - Banco do Brasil</option>
+              <option value="104" {% if form.instance.banco == '104' %}selected{% endif %}>104 - Caixa Econômica Federal</option>
+              <option value="237" {% if form.instance.banco == '237' %}selected{% endif %}>237 - Bradesco</option>
+              <option value="341" {% if form.instance.banco == '341' %}selected{% endif %}>341 - Itaú</option>
+              <option value="033" {% if form.instance.banco == '033' %}selected{% endif %}>033 - Santander</option>
+              <option value="260" {% if form.instance.banco == '260' %}selected{% endif %}>260 - Nu Pagamentos (Nubank)</option>
+              <option value="077" {% if form.instance.banco == '077' %}selected{% endif %}>077 - Banco Inter</option>
+              <option value="336" {% if form.instance.banco == '336' %}selected{% endif %}>336 - C6 Bank</option>
+              <option value="364" {% if form.instance.banco == '364' %}selected{% endif %}>364 - Gerencianet Pagamentos</option>
+              <option value="323" {% if form.instance.banco == '323' %}selected{% endif %}>323 - Mercado Pago</option>
+              <option value="380" {% if form.instance.banco == '380' %}selected{% endif %}>380 - PicPay</option>
+              <option value="637" {% if form.instance.banco == '637' %}selected{% endif %}>637 - Banco Sofisa</option>
+              <option value="654" {% if form.instance.banco == '654' %}selected{% endif %}>654 - Banco A.J.Renner</option>
+              <option value="655" {% if form.instance.banco == '655' %}selected{% endif %}>655 - Neon Pagamentos</option>
+              <option value="237" {% if form.instance.banco == '237' %}selected{% endif %}>237 - Next (Bradesco)</option>
+              <option value="290" {% if form.instance.banco == '290' %}selected{% endif %}>290 - PagSeguro</option>
+              <option value="041" {% if form.instance.banco == '041' %}selected{% endif %}>041 - Banrisul</option>
+              <option value="085" {% if form.instance.banco == '085' %}selected{% endif %}>085 - Ailos</option>
+              <option value="748" {% if form.instance.banco == '748' %}selected{% endif %}>748 - Sicredi</option>
+              <option value="004" {% if form.instance.banco == '004' %}selected{% endif %}>004 - Banco do Nordeste</option>
+              <option value="047" {% if form.instance.banco == '047' %}selected{% endif %}>047 - Banco do Estado de Sergipe</option>
+              <option value="208" {% if form.instance.banco == '208' %}selected{% endif %}>208 - BTG Pactual</option>
+              <option value="348" {% if form.instance.banco == '348' %}selected{% endif %}>348 - XP Investimentos</option>
+              <option value="269" {% if form.instance.banco == '269' %}selected{% endif %}>269 - HSBC Brasil</option>
+              <option value="623" {% if form.instance.banco == '623' %}selected{% endif %}>623 - Banco Pan</option>
+              <option value="212" {% if form.instance.banco == '212' %}selected{% endif %}>212 - Banco Original</option>
+              <option value="318" {% if form.instance.banco == '318' %}selected{% endif %}>318 - Banco BMG</option>
+              <option value="136" {% if form.instance.banco == '136' %}selected{% endif %}>136 - Unicred</option>
+              <option value="097" {% if form.instance.banco == '097' %}selected{% endif %}>097 - CrediSIS</option>
+              <option value="422" {% if form.instance.banco == '422' %}selected{% endif %}>422 - Banco Safra</option>
+              <option value="655" {% if form.instance.banco == '655' %}selected{% endif %}>655 - Banco Votorantim</option>
+            </select>
+          </div>
+
+          <div class="col-span-2">
+            <label for="agencia" class="block text-sm font-medium text-gray-700 mb-2">Agência</label>
+            <input name="agencia" id="agencia" placeholder="0001-9" maxlength="6"
+              value="{{ form.instance.agencia|default_if_none:'' }}"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-3">
+            <label for="conta" class="block text-sm font-medium text-gray-700 mb-2">Conta</label>
+            <input name="conta" id="conta" placeholder="123456-7" maxlength="12"
+              value="{{ form.instance.conta|default_if_none:'' }}"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-2">
+            <label for="{{ form.tipo_conta.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Conta</label>
+            <select name="tipo_conta" id="{{ form.tipo_conta.id_for_label }}"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white">
+              <option value="" {% if not form.instance.tipo_conta %}selected{% endif %}>Selecione o tipo</option>
+              <option value="CC" {% if form.instance.tipo_conta == 'CC' %}selected{% endif %}>Conta Corrente</option>
+              <option value="PP" {% if form.instance.tipo_conta == 'PP' %}selected{% endif %}>Conta Poupança</option>
+            </select>
+          </div>
+
+          <div class="col-span-3">
+            <label for="{{ form.tipo_chave_pix.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 required-field">Tipo de Chave PIX</label>
+            <select name="tipo_chave_pix" id="{{ form.tipo_chave_pix.id_for_label }}" required
+              class="w-full px-4 py-3 text-sm border {% if form.tipo_chave_pix.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white">
+              <option value="" {% if not form.instance.tipo_chave_pix %}selected{% endif %}>Selecione o tipo</option>
+              <option value="CPF" {% if form.instance.tipo_chave_pix == 'CPF' %}selected{% endif %}>CPF</option>
+              <option value="CNPJ" {% if form.instance.tipo_chave_pix == 'CNPJ' %}selected{% endif %}>CNPJ</option>
+              <option value="EMAIL" {% if form.instance.tipo_chave_pix == 'EMAIL' %}selected{% endif %}>E-mail</option>
+              <option value="TELEFONE" {% if form.instance.tipo_chave_pix == 'TELEFONE' %}selected{% endif %}>Telefone</option>
+              <option value="ALEATORIA" {% if form.instance.tipo_chave_pix == 'ALEATORIA' %}selected{% endif %}>Chave Aleatória</option>
+            </select>
+            {% if form.tipo_chave_pix.errors %}<p class="mt-1 text-sm text-red-600">{{ form.tipo_chave_pix.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="col-span-9">
+            <label for="{{ form.chave_pix.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 required-field">Chave PIX</label>
+            <input name="chave_pix" id="{{ form.chave_pix.id_for_label }}"
+              value="{{ form.instance.chave_pix|default_if_none:'' }}" placeholder="Digite a chave PIX conforme o tipo selecionado" required
+              class="w-full px-4 py-3 text-sm border {% if form.chave_pix.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            {% if form.chave_pix.errors %}<p class="mt-1 text-sm text-red-600">{{ form.chave_pix.errors.0 }}</p>{% endif %}
+            <p class="text-xs text-gray-500 mt-2">💡 Selecione o tipo e digite a chave PIX principal do associado para futuros pagamentos.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== CONTATO E VÍNCULO PÚBLICO ========== -->
+    <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+      <div class="px-8 py-6 border-b border-gray-100">
+        <h2 class="text-xl font-semibold tracking-tight group-title">Contato e Vínculo Público</h2>
+      </div>
+      <div class="p-8">
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-3">
+            <label for="{{ form.matricula_servidor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Matrícula do Servidor Público</label>
+            <input name="matricula_servidor" id="{{ form.matricula_servidor.id_for_label }}"
+              value="{{ form.instance.matricula_servidor|default_if_none:'' }}" placeholder="999999-9" maxlength="8" data-mask="matricula"
+              class="w-full px-4 py-3 text-sm border {% if form.matricula_servidor.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            {% if form.matricula_servidor.errors %}<p class="mt-1 text-sm text-red-600">{{ form.matricula_servidor.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="col-span-3">
+            <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Celular</label>
+            <input name="celular" id="{{ form.celular.id_for_label }}" value="{{ form.instance.celular|default_if_none:'' }}"
+              placeholder="(11) 99999-9999" maxlength="15" inputmode="tel"
+              class="w-full px-4 py-3 text-sm border {% if form.celular.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            {% if form.celular.errors %}<p class="mt-1 text-sm text-red-600">{{ form.celular.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="col-span-5">
+            <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">E-mail</label>
+            <input name="email" type="email" id="{{ form.email.id_for_label }}"
+              value="{{ form.instance.email|default_if_none:'' }}" placeholder="Digite o e-mail"
+              class="w-full px-4 py-3 text-sm border {% if form.email.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            {% if form.email.errors %}<p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="col-span-4">
+            <label for="{{ form.orgao_publico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Órgão Público</label>
+            <input name="orgao_publico" id="{{ form.orgao_publico.id_for_label }}"
+              value="{{ form.instance.orgao_publico|default_if_none:'' }}" placeholder="Digite o órgão público"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-4">
+            <label for="{{ form.situacao_servidor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Situação do Servidor</label>
+            <select name="situacao_servidor" id="{{ form.situacao_servidor.id_for_label }}"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white">
+              <option value="" {% if not form.instance.situacao_servidor %}selected{% endif %}>Selecione a situação</option>
+              <option value="EFETIVO" {% if form.instance.situacao_servidor == 'EFETIVO' %}selected{% endif %}>Efetivo</option>
+              <option value="COMISSIONADO" {% if form.instance.situacao_servidor == 'COMISSIONADO' %}selected{% endif %}>Comissionado</option>
+              <option value="APOSENTADO" {% if form.instance.situacao_servidor == 'APOSENTADO' %}selected{% endif %}>Aposentado</option>
+              <option value="OUTRO" {% if form.instance.situacao_servidor == 'OUTRO' %}selected{% endif %}>Outro</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MARGEM (cálculos automáticos) ========== -->
+    <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+      <div class="px-8 py-6 border-b border-gray-100">
+        <h2 class="text-xl font-semibold tracking-tight group-title">Dados para cálculo de margem (pré-validação)</h2>
+      </div>
+      <div class="p-8">
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-3">
+            <label for="{{ form.valor_bruto_total.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Valor Bruto Total</label>
+            <input name="valor_bruto_total" id="{{ form.valor_bruto_total.id_for_label }}" placeholder="R$ 0,00"
+              value="{{ form.instance.valor_bruto_total|default_if_none:'' }}" inputmode="decimal" data-money="brl"
+              class="w-full px-4 py-3 text-sm border {% if form.valor_bruto_total.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            {% if form.valor_bruto_total.errors %}<p class="mt-1 text-sm text-red-600">{{ form.valor_bruto_total.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="col-span-3">
+            <label for="{{ form.valor_liquido.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Valor Líquido (contra-cheque)</label>
+            <input name="valor_liquido" id="{{ form.valor_liquido.id_for_label }}" placeholder="R$ 0,00"
+              value="{{ form.instance.valor_liquido|default_if_none:'' }}" inputmode="decimal" data-money="brl"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-2">
+            <label for="{{ form.prazo_antecipacao_meses.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Prazo de Antecipação (meses)</label>
+            <input name="prazo_antecipacao_meses" type="number" min="1" max="120" placeholder="12"
+              id="{{ form.prazo_antecipacao_meses.id_for_label }}"
+              value="{{ form.instance.prazo_antecipacao_meses|default_if_none:'' }}"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-2">
+            <label for="trinta_bruto" class="block text-sm font-medium text-gray-700 mb-2">30% do Bruto</label>
+            <input id="trinta_bruto" placeholder="R$ 0,00"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" readonly>
+          </div>
+
+          <div class="col-span-2">
+            <label for="margem_calc" class="block text-sm font-medium text-gray-700 mb-2">Margem (Liq − 30%)</label>
+            <input id="margem_calc" placeholder="R$ 0,00"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== DETALHES DO CONTRATO ========== -->
+    <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+      <div class="px-8 py-6 border-b border-gray-100">
+        <h2 class="text-xl font-semibold tracking-tight group-title">Detalhes do Contrato</h2>
+      </div>
+      <div class="p-8">
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-3">
+            <label for="{{ form.mensalidade_associativa.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Contribuição Associativa (R$)</label>
+            <input name="mensalidade_associativa" id="{{ form.mensalidade_associativa.id_for_label }}" placeholder="R$ 0,00"
+              value="{{ form.instance.mensalidade_associativa|default_if_none:'' }}" inputmode="decimal" data-money="brl"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-2">
+            <label for="taxa_antecipacao_percent" class="block text-sm font-medium text-gray-700 mb-2">Taxa de Antecipação (%)</label>
+            <input id="taxa_antecipacao_percent" value="30,00" readonly
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600">
+          </div>
+
+          <div class="col-span-3">
+            <label for="disponivel" class="block text-sm font-medium text-gray-700 mb-2">Repasse ao Associado (R$)</label>
+            <input id="disponivel" placeholder="R$ 0,00" readonly
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600">
+          </div>
+
+          <div class="col-span-4">
+            <label for="valor_total_ant" class="block text-sm font-medium text-gray-700 mb-2">Total das 3 Cotas (R$)</label>
+            <input id="valor_total_ant" placeholder="R$ 0,00" readonly
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600">
+          </div>
+
+          <div class="col-span-3">
+            <label for="{{ form.data_aprovacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Data da Aprovação</label>
+            <input type="date" name="data_aprovacao" id="{{ form.data_aprovacao.id_for_label }}"
+              value="{{ form.instance.data_aprovacao|date:'Y-m-d'|default_if_none:'' }}"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-3">
+            <label for="{{ form.data_primeira_mensalidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Data da primeira contribuição</label>
+            <input type="date" name="data_primeira_mensalidade" id="{{ form.data_primeira_mensalidade.id_for_label }}"
+              value="{{ form.instance.data_primeira_mensalidade|date:'Y-m-d'|default_if_none:'' }}"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-3">
+            <label for="{{ form.mes_averbacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Mês de Averbação (AAAA-MM)</label>
+            <input type="month" name="mes_averbacao" id="{{ form.mes_averbacao.id_for_label }}"
+              value="{{ form.instance.mes_averbacao|default_if_none:'' }}"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+          </div>
+
+          <div class="col-span-3">
+            <label for="doacao" class="block text-sm font-medium text-gray-700 mb-2">Doação do Associado (R$)</label>
+            <input id="doacao" placeholder="R$ 0,00" readonly
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600">
+          </div>
+
+          <div class="col-span-3">
+            <label for="auxilio_agente" class="block text-sm font-medium text-gray-700 mb-2">Auxílio do Agente (10%)</label>
+            <input id="auxilio_agente" placeholder="R$ 0,00" readonly
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== DOCUMENTOS ========== -->
+    <div class="bg-white shadow-lg rounded-2xl border border-gray-100 group-container">
+      <div class="px-8 py-6 border-b border-gray-100">
+        <h2 class="text-xl font-semibold tracking-tight group-title">Documentos</h2>
+        <p class="text-sm text-gray-600 mt-1">Suporte a imagens e PDF até 10MB</p>
+      </div>
+      <div class="p-8">
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-4">
+            <label for="tipo_doc" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Documento</label>
+            <select id="tipo_doc" name="tipo"
+              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white">
+              <option value="DOC_FRENTE">📄 Documento (frente)</option>
+              <option value="DOC_VERSO">📄 Documento (verso)</option>
+              <option value="COMP_ENDERECO">🏠 Comprovante de endereço</option>
+              <option value="COMP_RENDA">💰 Comprovante de renda</option>
+              <option value="CONTRACHEQUE_ATUAL">📊 Contracheque atual</option>
+              <option value="TERMO_ADESAO">📋 Termo de Adesão</option>
+              <option value="TERMO_ANTECIPACAO">📝 Termo de Antecipação</option>
+            </select>
+          </div>
+
+          <div class="col-span-6">
+            <label for="arquivo_doc" class="block text-sm font-medium text-gray-700 mb-2">Arquivo</label>
+            <div class="relative">
+              <input id="arquivo_doc" name="arquivo_doc" type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp"
+                class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white
+                       file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium
+                       file:bg-gradient-to-r file:from-red-50 file:to-red-100 file:text-red-700
+                       hover:file:from-red-100 hover:file:to-red-200 file:transition-all file:duration-200"
+                onchange="validateFileSize(this)">
+              <div class="text-xs text-gray-500 mt-1 flex items-center">
+                <svg class="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
+                </svg>
+                Formatos aceitos: PDF, JPG, PNG, GIF, BMP, WebP (máx. 10MB)
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">&nbsp;</label>
+            <button type="button"
+              class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-xl font-medium shadow-sm hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center"
+              hx-post="{% url 'documentos:draft-upload' %}"
+              hx-encoding="multipart/form-data"
+              hx-include="#tipo_doc,#arquivo_doc"
+              hx-target="#draft-list">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Anexar
+            </button>
+          </div>
+        </div>
+
+        {% if is_edit and existing_docs %}
+        <div class="mt-6">
+          <h4 class="text-md font-medium text-gray-800 mb-3">Documentos Já Enviados</h4>
+          <div class="space-y-2">
+            {% for doc in existing_docs %}
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+              <div class="flex items-center">
+                <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">{{ doc.tipo|default:"Documento" }}</p>
+                  <p class="text-xs text-gray-500">Enviado em {{ doc.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+              </div>
+              <a href="{% url 'documentos:serve' %}?doc_id={{ doc.id }}" target="_blank" class="text-red-600 hover:text-red-500 text-sm">Ver</a>
+            </div>
+            {% endfor %}
+          </div>
+          <hr class="my-6">
+        </div>
+        {% endif %}
+
+        <div id="draft-list" class="mt-8">
+          {% include "documentos/_draft_list.html" with docs=docs %}
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function validateFileSize(input){
+        const maxSize = 10 * 1024 * 1024;
+        const file = input.files[0];
+        if (file && file.size > maxSize){
+          alert('O arquivo selecionado é muito grande. O tamanho máximo permitido é 10MB.');
+          input.value = '';
+          return false;
+        }
+        return true;
+      }
+    </script>
+
+    <div class="flex justify-end space-x-3">
+      <a href="{% url 'cadastros:agente-list' %}"
+         class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+        Cancelar
+      </a>
+      <button type="submit"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+        Enviar Cadastro
+      </button>
+    </div>
+  </form>
 </div>
-</form>
 
 <!-- ======= NORMALIZAÇÃO NA SUBMISSÃO ======= -->
 <script>
-window.addEventListener('load', function() {
-    console.log('FORM: Script de normalização carregado');
-    
-    const form = document.querySelector('form');
-    const btn = document.querySelector('button[type="submit"]');
-    
-    if (form && btn) {
-        form.addEventListener('submit', function(e) {
-            console.log('FORM: Normalizando dados antes da submissão...');
-            
-            // Normalizar CPF: remover pontos e hífens
-            const cpfField = document.getElementById('cpf');
-            if (cpfField && cpfField.value) {
-                const cpfLimpo = cpfField.value.replace(/\D+/g, '');
-                cpfField.value = cpfLimpo;
-                console.log('CPF normalizado:', cpfLimpo);
-            }
-            
-            // Normalizar CEP: remover hífen
-            const cepField = document.getElementById('cep');
-            if (cepField && cepField.value) {
-                const cepLimpo = cepField.value.replace(/\D+/g, '');
-                cepField.value = cepLimpo;
-                console.log('CEP normalizado:', cepLimpo);
-            }
-            
-            // Normalização de valores monetários removida - agora é feita pelo módulo brl-money.ts
-            
-            // Visual de loading
-            btn.disabled = true;
-            btn.innerHTML = 'Enviando...';
-            
-            console.log('FORM: Dados normalizados, submetendo...');
-            // Não faz preventDefault(), deixa submissão continuar
-        });
-        
-        console.log('FORM: Normalização configurada');
-    }
+window.addEventListener('load', function(){
+  const form = document.querySelector('form');
+  const btn  = document.querySelector('button[type="submit"]');
+  if (!form || !btn) return;
+
+  form.addEventListener('submit', function(){
+    const cpfField = document.getElementById('cpf');
+    if (cpfField && cpfField.value) cpfField.value = cpfField.value.replace(/\D+/g,'');
+
+    const cepField = document.getElementById('cep');
+    if (cepField && cepField.value) cepField.value = cepField.value.replace(/\D+/g,'');
+
+    btn.disabled = true; btn.innerHTML = 'Enviando...';
+  });
 });
 </script>
 
-<!-- ======= Scripts de máscara, CEP e cálculos ======= -->
+<!-- ======= Máscaras & Cálculos ======= -->
 <script>
 function onlyDigits(s){ return (s||"").replace(/\D+/g,""); }
-
 function maskCPF(v){ v = onlyDigits(v).slice(0,11);
-  return v.replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2")
-          .replace(/(\d{3})(\d{1,2})$/,"$1-$2"); }
-
+  return v.replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d{1,2})$/,"$1-$2"); }
 function maskCNPJ(v){ v = onlyDigits(v).slice(0,14);
-  return v.replace(/^(\d{2})(\d)/,"$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/,"$1.$2.$3")
-          .replace(/\.(\d{3})(\d)/,".$1/$2").replace(/(\d{4})(\d)/,"$1-$2"); }
-
+  return v.replace(/^(\d{2})(\d)/,"$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/,"$1.$2.$3").replace(/\.(\d{3})(\d)/,".$1/$2").replace(/(\d{4})(\d)/,"$1-$2"); }
 function maskCEP(v){ v = onlyDigits(v).slice(0,8); return v.replace(/(\d{5})(\d)/,"$1-$2"); }
+function maskMatricula(v){ v = onlyDigits(v).slice(0,7); return v.length<=6?v:v.replace(/(\d{6})(\d)/,"$1-$2"); }
 
-function maskMatricula(v){ 
-  v = onlyDigits(v).slice(0,7); // Máximo 7 dígitos
-  if(v.length <= 6) return v;
-  return v.replace(/(\d{6})(\d)/,"$1-$2"); // 6 dígitos + hífen + último dígito
-}
-
-// Função de recálculo usando a nova API unificada
 function recalc(){
-  // Aguarda a API estar disponível
-  if (!window.ABASE || !window.ABASE.MoneyMask) {
-    setTimeout(recalc, 100);
-    return;
-  }
-
+  if (!window.ABASE || !window.ABASE.MoneyMask){ setTimeout(recalc,100); return; }
   const parse = window.ABASE.MoneyMask.parse;
   const format = window.ABASE.MoneyMask.formatBRL;
 
-  const bruto = parse(document.querySelector('[name="valor_bruto_total"]').value);
-  const liquido = parse(document.querySelector('[name="valor_liquido"]').value);
+  const bruto  = parse(document.querySelector('[name="valor_bruto_total"]').value);
+  const liquido= parse(document.querySelector('[name="valor_liquido"]').value);
   const mensal = parse(document.querySelector('[name="mensalidade_associativa"]').value);
 
   const trinta = +(bruto * 0.30).toFixed(2);
   const margem = +(liquido - trinta).toFixed(2);
-  const total = +(mensal * 3).toFixed(2);
+  const total  = +(mensal * 3).toFixed(2);
   const doacao = +(total * 0.30).toFixed(2);
-  const disp = +(total * 0.70).toFixed(2);
-  const auxilioAgente = +(disp * 0.10).toFixed(2);
+  const disp   = +(total * 0.70).toFixed(2);
+  const aux    = +(disp * 0.10).toFixed(2);
 
-  document.getElementById('trinta_bruto').value = format(trinta);
-  document.getElementById('margem_calc').value = format(margem);
-  document.getElementById('valor_total_ant').value = format(total);
-  document.getElementById('doacao').value = format(doacao);
-  document.getElementById('disponivel').value = format(disp);
-  document.getElementById('auxilio_agente').value = format(auxilioAgente);
+  document.getElementById('trinta_bruto').value   = format(trinta);
+  document.getElementById('margem_calc').value    = format(margem);
+  document.getElementById('valor_total_ant').value= format(total);
+  document.getElementById('doacao').value         = format(doacao);
+  document.getElementById('disponivel').value     = format(disp);
+  document.getElementById('auxilio_agente').value = format(aux);
 }
 
 const cpf = document.getElementById('cpf');
-const cnpj = document.getElementById('cnpj');
-if(cpf){ cpf.addEventListener('input',()=>cpf.value=maskCPF(cpf.value)); }
-if(cnpj){ cnpj.addEventListener('input',()=>cnpj.value=maskCNPJ(cnpj.value)); }
-
-// ViaCEP - gerenciado pelo script viacep-integration.js
+const cnpj= document.getElementById('cnpj');
+if(cpf){ cpf.addEventListener('input', ()=> cpf.value = maskCPF(cpf.value)); }
+if(cnpj){ cnpj.addEventListener('input',()=> cnpj.value= maskCNPJ(cnpj.value)); }
 
 const matricula = document.querySelector('[name="matricula_servidor"]');
-if(matricula){
-  matricula.addEventListener('input', ()=> matricula.value = maskMatricula(matricula.value));
-}
+if(matricula){ matricula.addEventListener('input', ()=> matricula.value = maskMatricula(matricula.value)); }
 
-// Adicionar eventos de recálculo aos campos monetários
-document.addEventListener('DOMContentLoaded', function() {
-  // Recálculo inicial
-  setTimeout(recalc, 200); // Aguarda inicialização das máscaras
-
-  // Escutar eventos de mudança monetária
-  const moneyFields = document.querySelectorAll('input[data-money="brl"]');
-  moneyFields.forEach(field => {
-    field.addEventListener('money-changed', recalc);
-    // Fallback para blur caso o evento personalizado não funcione
-    field.addEventListener('blur', recalc);
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(recalc, 200);
+  document.querySelectorAll('input[data-money="brl"]').forEach(f=>{
+    f.addEventListener('money-changed', recalc);
+    f.addEventListener('blur', recalc);
   });
 });
-
-
 </script>
 {% endblock %}

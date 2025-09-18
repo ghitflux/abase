@@ -18,8 +18,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from core import views_ds
 
 urlpatterns = [
+    path('design-system/', views_ds.design_system, name='design_system'),
     path('admin/', admin.site.urls),
     path('accounts/', include(('apps.accounts.urls', 'accounts'), namespace='accounts')),
     path('cadastros/', include('apps.cadastros.urls')),

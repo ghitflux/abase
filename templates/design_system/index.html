@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}Design System Preview{% endblock %}
+
+{% block content %}
+<div class="container-xl" style="margin-top:1rem">
+  <h1 class="section-title">Design System Preview</h1>
+  <div class="row" style="margin-top:1rem">
+    <div class="col-3 col-lg-12"><div class="kpi"><div>KPI</div><div><strong>123</strong></div></div></div>
+    <div class="col-3 col-lg-12"><div class="kpi"><div>KPI</div><div><strong>456</strong></div></div></div>
+    <div class="col-3 col-lg-12"><div class="kpi"><div>KPI</div><div><strong>789</strong></div></div></div>
+    <div class="col-3 col-lg-12"><div class="kpi"><div>KPI</div><div><strong>999</strong></div></div></div>
+  </div>
+
+  <div class="card" style="padding:1rem;margin-top:1rem">
+    <div class="section-title">Buttons</div>
+    <p><button class="btn">Default</button> <button class="btn btn-accent">Acento</button> <button class="btn btn-ghost">Ghost</button></p>
+  </div>
+
+  <div class="card" style="padding:1rem;margin-top:1rem">
+    <div class="section-title">Inputs & Selects</div>
+    <div class="row">
+      <div class="col-6 col-lg-12">
+        <input class="input" placeholder="Digite algo aqui..." style="margin-bottom:0.5rem">
+        <select class="select">
+          <option>Selecione uma opção</option>
+          <option>Opção 1</option>
+          <option>Opção 2</option>
+          <option>Opção 3</option>
+        </select>
+      </div>
+      <div class="col-6 col-lg-12">
+        <textarea class="input" placeholder="Área de texto..." rows="3"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:1rem;margin-top:1rem">
+    <div class="section-title">Form Controls</div>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+        <label class="checkbox">
+          <input type="checkbox" checked>
+          <span>Checkbox marcado</span>
+        </label>
+        <label class="checkbox">
+          <input type="checkbox">
+          <span>Checkbox desmarcado</span>
+        </label>
+      </div>
+
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+        <label class="radio">
+          <input type="radio" name="radio1" checked>
+          <span>Radio selecionado</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="radio1">
+          <span>Radio não selecionado</span>
+        </label>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:1rem">
+        <span>Toggle Switch:</span>
+        <label class="toggle">
+          <input type="checkbox" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div>
+        <div style="margin-bottom:0.5rem">Progress Bar (75%)</div>
+        <div class="progress">
+          <div class="progress-bar" style="width:75%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:1rem;margin-top:1rem">
+    <div class="section-title">Badges (Status)</div>
+    <p>
+      <span class="badge badge--aprovado">Aprovado</span>
+      <span class="badge badge--efetivado">Efetivado</span>
+      <span class="badge badge--analise">Em Análise</span>
+      <span class="badge badge--pendente">Pendente</span>
+      <span class="badge badge--correcao">Correção</span>
+      <span class="badge badge--correcao-feita">Correção Realizada</span>
+      <span class="badge badge--pago">Pago</span>
+      <span class="badge badge--atraso">Em Atraso</span>
+      <span class="badge badge--cancelado">Cancelado</span>
+    </p>
+  </div>
+
+  <div class="card" style="padding:1rem;margin-top:1rem">
+    <div class="section-title">Chips (Papéis)</div>
+    <p>
+      <span class="chip chip--agente">Agente</span>
+      <span class="chip chip--analista">Analista</span>
+      <span class="chip chip--tesouraria">Tesouraria</span>
+    </p>
+  </div>
+
+  <div class="card" style="padding:1rem;margin-top:1rem">
+    <div class="section-title">Typography & Weights</div>
+    <p>Texto normal (400) com <a href="#">link de exemplo</a></p>
+    <p class="text-muted">Texto secundário em cinza</p>
+    <p><span class="name-strong">Nome importante</span> - <span class="value-strong">Valor destacado</span></p>
+    <p><span class="fw-400">Weight 400</span> <span class="fw-500">Weight 500</span> <span class="fw-600">Weight 600</span> <span class="fw-700">Weight 700</span></p>
+  </div>
+
+  <div class="card" style="padding:1rem;margin-top:1rem">
+    <div class="section-title">Table Dark</div>
+    <table class="table table--dark">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Papel</th>
+          <th>Status</th>
+          <th>Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="name-strong">João Silva</span></td>
+          <td><span class="chip chip--agente">Agente</span></td>
+          <td><span class="badge badge--aprovado">Aprovado</span></td>
+          <td><span class="value-strong">R$ 1.500,00</span></td>
+        </tr>
+        <tr>
+          <td><span class="name-strong">Maria Santos</span></td>
+          <td><span class="chip chip--analista">Analista</span></td>
+          <td><span class="badge badge--pendente">Pendente</span></td>
+          <td><span class="value-strong">R$ 2.300,00</span></td>
+        </tr>
+        <tr>
+          <td><span class="name-strong">Carlos Lima</span></td>
+          <td><span class="chip chip--tesouraria">Tesouraria</span></td>
+          <td><span class="badge badge--pago">Pago</span></td>
+          <td><span class="value-strong">R$ 3.100,00</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
