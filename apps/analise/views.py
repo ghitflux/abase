@@ -23,13 +23,16 @@ User = get_user_model()
 # Mapeamento de status (permite variações que você já usa)
 STATUS_MAP = {
     "pendentes": [
-        "PENDENTE", "ENVIADO_PARA_CORRECAO", "AGUARDANDO_CORRECAO"
+        "PENDENTE", "AGUARDANDO_CORRECAO"
     ],
     "em_analise": [
         "EM_ANALISE"
     ],
     "em_correcao": [
-        "CORRECAO_REALIZADA", "CORRECAO_FEITA", "CORRECAO"
+        "ENVIADO_PARA_CORRECAO"  # Processos enviados para correção pelo analista
+    ],
+    "correcao_realizada": [
+        "CORRECAO_REALIZADA", "CORRECAO_FEITA", "CORRECAO"  # Corrigidos pelo agente
     ],
     "efetivados": [
         "APROVADO", "EFETIVADO"
@@ -102,10 +105,12 @@ def _base_queryset(request):
     # Aplicar filtro por status dos filtros rápidos
     if status:
         if status == "pendente":
-            qs = qs.filter(_status_q(["PENDENTE", "ENVIADO_PARA_CORRECAO", "AGUARDANDO_CORRECAO"]))
+            qs = qs.filter(_status_q(["PENDENTE", "AGUARDANDO_CORRECAO"]))
         elif status == "em_analise":
             qs = qs.filter(_status_q(["EM_ANALISE"]))
         elif status == "em_correcao":
+            qs = qs.filter(_status_q(["ENVIADO_PARA_CORRECAO"]))  # Processos enviados para correção
+        elif status == "correcao_realizada":
             qs = qs.filter(_status_q(["CORRECAO_REALIZADA", "CORRECAO_FEITA", "CORRECAO"]))
         elif status == "aprovado":
             qs = qs.filter(_status_q(["APROVADO", "EFETIVADO"]))
@@ -124,15 +129,24 @@ def analise_redirect(request):
 @analista_required
 def esteira(request):
     """
-    Renderiza a Esteira com 5 blocos, cada um paginado em 10 (HTMX carrega fragmentos).
+    Renderiza a Esteira com blocos paginados.
+    Se for requisição HTMX, retorna apenas os blocos filtrados.
     """
-    # Dados iniciais (primeira página de cada bloco) — render estático
+    # Dados iniciais
     qs = _base_queryset(request)
 
     context = {
         "users": User.objects.all().order_by("first_name","last_name","username"),
         "count_total": qs.count(),
     }
+
+    # Se for requisição HTMX do formulário de filtros, renderizar apenas os blocos
+    is_htmx = request.headers.get('HX-Request') == 'true'
+    has_filters = request.GET.get('analista') or request.GET.get('agente') or request.GET.get('search')
+
+    if is_htmx and has_filters:
+        return render(request, "analise/partials/_blocks_container.html", context)
+
     return render(request, "analise/esteira.html", context)
 
 @login_required
@@ -152,7 +166,7 @@ def esteira_block(request):
 
     qs = _base_queryset(request).filter(_status_q(STATUS_MAP[block]))
 
-    paginator = Paginator(qs.order_by("-id"), 10)
+    paginator = Paginator(qs.order_by("-id"), 5)
     page_obj = paginator.get_page(page)
 
     return render(request, "analise/partials/_esteira_block.html", {
@@ -385,10 +399,14 @@ def enviar_para_correcao(request, processo_id):
         return redirect('analise:detalhe_processo', processo_id=processo_id)
 
     with transaction.atomic():
+        # Salvar status anterior para histórico
+        status_anterior = processo.status
+
         # Atualizar processo
         processo.status = StatusAnalise.ENVIADO_PARA_CORRECAO
         processo.data_conclusao = timezone.now()
         processo.feedback_agente = feedback
+        # NÃO remover o analista_responsavel - ele deve continuar responsável
         processo.save()
 
         # Atualizar status do cadastro
@@ -400,7 +418,7 @@ def enviar_para_correcao(request, processo_id):
             processo=processo,
             usuario=request.user,
             acao='Processo enviado para correção',
-            status_anterior=processo.status,
+            status_anterior=status_anterior,
             status_novo=StatusAnalise.ENVIADO_PARA_CORRECAO,
             observacoes=f'Feedback: {feedback}'
         )

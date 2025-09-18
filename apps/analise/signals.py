@@ -40,26 +40,8 @@ def criar_processo_analise(sender, instance, created, **kwargs):
             )
         )
 
-    # CORREÇÃO: Detecção automática de atualizações após rejeição
-    elif not created:  # Somente para atualizações, não criações
-        try:
-            processo = AnaliseProcesso.objects.get(cadastro=instance)
-            # Se o processo está enviado para correção e o cadastro foi atualizado
-            if (processo.status == StatusAnalise.ENVIADO_PARA_CORRECAO and
-                processo.data_conclusao and
-                hasattr(instance, 'updated_at') and
-                instance.updated_at > processo.data_conclusao):
-
-                # Usar transaction.on_commit() para garantir visibilidade
-                transaction.on_commit(
-                    lambda: devolver_para_analista_correcao_feita(
-                        cadastro=instance,
-                        ator=instance.agente_responsavel
-                    )
-                )
-
-        except AnaliseProcesso.DoesNotExist:
-            pass  # Não há processo para este cadastro
+    # REMOVIDO: A detecção automática de atualizações estava causando mudança prematura de status
+    # O status só deve mudar para CORRECAO_REALIZADA quando o agente explicitamente reenviar via RESUBMITTED
 
 
 @receiver(pre_save, sender=Cadastro)

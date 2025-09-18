@@ -1,0 +1,86 @@
+<!-- Container de Blocos (usado para recarregar via HTMX) -->
+<div class="space-y-6">
+  <!-- Bloco Pendentes -->
+  {% if not request.GET.status or request.GET.status == 'pendente' %}
+  <div id="block-pendentes"
+       hx-get="{% url 'analise:esteira_block' %}?block=pendentes&{{ request.GET.urlencode }}"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="flex items-center justify-center h-20">
+        <div class="text-gray-500">Carregando Pendentes...</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Bloco Em Análise -->
+  {% if not request.GET.status or request.GET.status == 'em_analise' %}
+  <div id="block-em_analise"
+       hx-get="{% url 'analise:esteira_block' %}?block=em_analise&{{ request.GET.urlencode }}"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="flex items-center justify-center h-20">
+        <div class="text-gray-500">Carregando Em Análise...</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Bloco Em Correção -->
+  {% if not request.GET.status or request.GET.status == 'em_correcao' %}
+  <div id="block-em_correcao"
+       hx-get="{% url 'analise:esteira_block' %}?block=em_correcao&{{ request.GET.urlencode }}"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="flex items-center justify-center h-20">
+        <div class="text-gray-500">Carregando Em Correção...</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Bloco Correção Realizada -->
+  {% if not request.GET.status or request.GET.status == 'correcao_realizada' %}
+  <div id="block-correcao_realizada"
+       hx-get="{% url 'analise:esteira_block' %}?block=correcao_realizada&{{ request.GET.urlencode }}"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="flex items-center justify-center h-20">
+        <div class="text-gray-500">Carregando Correção Realizada...</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Bloco Efetivados -->
+  {% if not request.GET.status or request.GET.status == 'aprovado' %}
+  <div id="block-efetivados"
+       hx-get="{% url 'analise:esteira_block' %}?block=efetivados&{{ request.GET.urlencode }}"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="flex items-center justify-center h-20">
+        <div class="text-gray-500">Carregando Efetivados...</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Bloco Cancelados -->
+  {% if not request.GET.status or request.GET.status == 'cancelado' %}
+  <div id="block-cancelados"
+       hx-get="{% url 'analise:esteira_block' %}?block=cancelados&{{ request.GET.urlencode }}"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="flex items-center justify-center h-20">
+        <div class="text-gray-500">Carregando Cancelados...</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
