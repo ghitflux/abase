@@ -48,7 +48,7 @@ apps/
 
 ## 📊 Estado Atual
 
-### ✅ Implementado (Passos 1-4)
+### ✅ Implementado (Passos 1-5)
 1. **Estrutura Base Django**
    - Apps principais criadas
    - Modelos básicos definidos
@@ -70,14 +70,22 @@ apps/
    - Navegação básica
    - Sistema de mensagens
 
-### 🚧 Em Implementação (Passo 5)
-**Design System shadcn-like + Funcionalidades Avançadas**
-- Tokens de cor e tema dark (#682D44)
-- Componentes shadcn-like para Django
+5. **Sistema de Design e UI Moderna (NOVO)**
+   - **Design System Completo**: Arquivo `ds.css` com componentes reutilizáveis
+   - **Tokens de Cor**: Tema dark com cor primária #682D44
+   - **Componentes shadcn-like**: Botões, badges, tabelas, formulários
+   - **Template Tags UI**: Filtros para status e roles (`apps/common/templatetags/ui.py`)
+   - **Dashboard Modernizado**: Tabelas convertidas para o design system
+   - **Formulários Aprimorados**: Layout otimizado dos campos de endereço
+   - **Filtros de Moeda**: Sistema de formatação monetária personalizado
+
+### 🚧 Em Implementação (Passo 6)
+**Funcionalidades Avançadas e Integrações**
 - Uploads privados
 - Mini dashboards com KPIs
 - Importador de arquivos TXT
 - Modais e diálogos interativos
+- Sistema de notificações
 
 ### 📋 Roadmap (Passo 6+)
 - Testes automatizados
@@ -197,6 +205,16 @@ abasenew/
 
 ---
 
-**Última atualização:** 11/09/2025  
-**Versão:** 1.0.0-dev  
+**Última atualização:** 15/01/2025  
+**Versão:** 1.1.0-dev  
 **Responsável:** Equipe ABASE
+
+## 🆕 Changelog Recente
+
+### v1.1.0-dev (15/01/2025)
+- ✅ **Sistema de Design Completo**: Implementação do design system com componentes reutilizáveis
+- ✅ **Dashboard Modernizado**: Conversão das tabelas para usar classes do design system
+- ✅ **Formulários Aprimorados**: Melhoria no layout dos campos de endereço
+- ✅ **Template Tags UI**: Filtros personalizados para status e formatação
+- ✅ **Filtros de Moeda**: Sistema de formatação monetária brasileira
+- ✅ **Navegação Otimizada**: Melhorias na estrutura de navegação e sidebar
