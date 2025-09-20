@@ -9,6 +9,16 @@
   --thead:#0f172a;
   --shadow:0 12px 32px rgba(0,0,0,.45);
 }
+
+/* Force Design System Priority Over Tailwind */
+.container-xl { max-width: 1280px !important; margin: 0 auto !important; padding: 0 1rem !important; }
+.card { background: var(--surface) !important; border: 1px solid var(--border) !important; border-radius: 16px !important; box-shadow: var(--shadow) !important; }
+.kpi { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 1rem !important; border-radius: 16px !important; background: linear-gradient(180deg,#121a2f,#0b1220) !important; border: 1px solid var(--border) !important; }
+.row { display: grid !important; gap: 1rem !important; grid-template-columns: repeat(12,minmax(0,1fr)) !important; }
+.col-12 { grid-column: span 12 !important; }
+.col-6 { grid-column: span 6 !important; }
+.col-4 { grid-column: span 4 !important; }
+.col-3 { grid-column: span 3 !important; }
 :root{ color-scheme:dark }
 html,body{height:100%}
 body{background:var(--bg);color:var(--text);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}

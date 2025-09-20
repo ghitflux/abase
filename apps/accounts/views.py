@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Count, Sum
+from decimal import Decimal
+
+from django.db.models import Count, Sum, Q
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
@@ -81,9 +83,25 @@ def dashboard(request):
     
     saldo_atual = entradas - saidas
     
-    # Retorno estimado (mensalidades não liquidadas)
-    retorno_estimado = Mensalidade.objects.filter(
-        status='PENDENTE'
+    # Retorno estimado (mensalidades totais menos liquidadas)
+    mensalidades_totais = Mensalidade.objects.aggregate(
+        total=Sum('valor'),
+        liquidadas=Sum('valor', filter=Q(status='LIQUIDADA'))
+    )
+
+    total_mensalidades = mensalidades_totais.get('total') or Decimal('0')
+    total_liquidadas = mensalidades_totais.get('liquidadas') or Decimal('0')
+    retorno_estimado = total_mensalidades - total_liquidadas
+    if retorno_estimado < 0:
+        retorno_estimado = Decimal('0')
+    
+    # Taxas mensais pendentes de membros cadastrados
+    # Soma total de todas as parcelas de antecipação pendentes
+    from apps.cadastros.models import ParcelaAntecipacao
+    from apps.cadastros.choices import StatusParcela
+    
+    taxas_mensais_pendentes = ParcelaAntecipacao.objects.filter(
+        status=StatusParcela.PENDENTE
     ).aggregate(total=Sum('valor'))['total'] or 0
     
     # Associados ativos (com pelo menos uma movimentação nos últimos 90 dias)
@@ -200,6 +218,7 @@ def dashboard(request):
         'total_doacoes': doacoes,
         'saldo_atual': saldo_atual,
         'retorno_estimado': retorno_estimado,
+        'taxas_mensais_pendentes': taxas_mensais_pendentes,
         'tempo_aprovacao': tempo_aprovacao,
         
         # Dados para gráficos (convertidos para JSON)

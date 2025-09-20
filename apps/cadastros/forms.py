@@ -1,11 +1,10 @@
+from decimal import Decimal
+
 from django import forms
+
 from .models import Cadastro
-from apps.common.normalize import (
-    phone_clean, upper
-)
-from apps.common.validators import (
-    validate_pix
-)
+from apps.common.normalize import phone_clean, upper
+from apps.common.validators import validate_pix
 
 class CadastroForm(forms.ModelForm):
     """
@@ -13,6 +12,12 @@ class CadastroForm(forms.ModelForm):
     - Normaliza e valida CPF/CNPJ/CEP/PIX/UF/telefone.
     - Garante regras PF (CPF) e PJ (CNPJ).
     """
+
+    CONTRIBUTION_OPTIONS = [
+        Decimal("100"), Decimal("150"), Decimal("200"), Decimal("250"),
+        Decimal("300"), Decimal("350"), Decimal("400"), Decimal("450"), Decimal("500")
+    ]
+
     class Meta:
         model = Cadastro
         exclude = (
@@ -28,6 +33,55 @@ class CadastroForm(forms.ModelForm):
             "data_primeira_mensalidade": forms.DateInput(attrs={"type":"date", "class":"input"}),
             "data_envio": forms.DateInput(attrs={"type":"date", "class":"input"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        def format_choice(value: Decimal) -> tuple[str, str]:
+            display = f"R$ {value:,.2f}".replace(",", "@").replace(".", ",").replace("@", ".")
+            raw = f"{value.quantize(Decimal('1'))}" if value == value.to_integral_value() else f"{value}"
+            return raw, display
+
+        base_choices = [format_choice(amount) for amount in self.CONTRIBUTION_OPTIONS]
+
+        current_value = self.initial.get("mensalidade_associativa")
+        if current_value in (None, "") and self.instance and self.instance.pk:
+            current_value = self.instance.mensalidade_associativa
+
+        current_decimal = None
+        try:
+            current_decimal = Decimal(current_value)
+        except Exception:
+            current_decimal = None
+
+        if current_decimal is not None and current_decimal not in self.CONTRIBUTION_OPTIONS:
+            base_choices.append(format_choice(current_decimal))
+
+        choice_list = [("", "Selecione...")] + base_choices
+
+        initial = ""
+        if current_decimal is not None and current_decimal not in (Decimal("0"), Decimal("0.00")):
+            initial = format_choice(current_decimal)[0]
+
+        self.fields["mensalidade_associativa"] = forms.ChoiceField(
+            label="Contribuição Associativa (R$)",
+            choices=choice_list,
+            initial=initial,
+            required=True,
+            widget=forms.Select(attrs={
+                "class": "w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-900/60 text-gray-100 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300",
+            }),
+        )
+
+        if "prazo_antecipacao_meses" in self.fields:
+            prazo_field = self.fields["prazo_antecipacao_meses"]
+            prazo_field.initial = 3
+            prazo_field.disabled = True
+            prazo_field.widget.attrs.update({
+                "class": "w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-900/40 text-gray-200 cursor-not-allowed",
+                "readonly": "readonly",
+            })
+            self.initial["prazo_antecipacao_meses"] = 3
 
     def clean(self):
         cleaned = super().clean()
@@ -93,7 +147,7 @@ class CadastroForm(forms.ModelForm):
                 cleaned["valor_bruto_total"] = clean_money_field(cleaned["valor_bruto_total"])
             if cleaned.get("valor_liquido"):
                 cleaned["valor_liquido"] = clean_money_field(cleaned["valor_liquido"])
-            if cleaned.get("mensalidade_associativa"):
+            if cleaned.get("mensalidade_associativa") and not isinstance(cleaned["mensalidade_associativa"], Decimal):
                 cleaned["mensalidade_associativa"] = clean_money_field(cleaned["mensalidade_associativa"])
 
             # --- Regras PF/PJ ---
@@ -125,3 +179,15 @@ class CadastroForm(forms.ModelForm):
             self.add_error(None, f"Erro inesperado na validação: {e}")
 
         return cleaned
+
+    def clean_prazo_antecipacao_meses(self):
+        return 3
+
+    def clean_mensalidade_associativa(self):
+        value = self.cleaned_data.get("mensalidade_associativa")
+        if not value:
+            raise forms.ValidationError("Selecione uma contribuição válida.")
+        try:
+            return Decimal(value)
+        except Exception:
+            raise forms.ValidationError("Valor de contribuição inválido.")

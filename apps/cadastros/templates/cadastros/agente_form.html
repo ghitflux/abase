@@ -397,10 +397,7 @@
 
           <div class="col-span-2">
             <label for="{{ form.prazo_antecipacao_meses.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Prazo de Antecipação (meses)</label>
-            <input name="prazo_antecipacao_meses" type="number" min="1" max="120" placeholder="12"
-              id="{{ form.prazo_antecipacao_meses.id_for_label }}"
-              value="{{ form.instance.prazo_antecipacao_meses|default_if_none:'' }}"
-              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            {{ form.prazo_antecipacao_meses }}
           </div>
 
           <div class="col-span-2">
@@ -426,10 +423,10 @@
       <div class="p-8">
         <div class="grid grid-cols-12 gap-6">
           <div class="col-span-3">
-            <label for="{{ form.mensalidade_associativa.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Contribuição Associativa (R$)</label>
-            <input name="mensalidade_associativa" id="{{ form.mensalidade_associativa.id_for_label }}" placeholder="R$ 0,00"
-              value="{{ form.instance.mensalidade_associativa|default_if_none:'' }}" inputmode="decimal" data-money="brl"
-              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+            <label for="{{ form.mensalidade_associativa.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+              {{ form.mensalidade_associativa.label }}
+            </label>
+            {{ form.mensalidade_associativa }}
           </div>
 
           <div class="col-span-2">
@@ -591,8 +588,13 @@
         Cancelar
       </a>
       <button type="submit"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-        Enviar Cadastro
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 {% if correcao_lock_ativo %}opacity-50 cursor-not-allowed hover:bg-red-600{% endif %}"
+              {% if correcao_lock_ativo %}disabled aria-disabled="true"{% endif %}>
+        {% if correcao_lock_ativo %}
+          Bloqueado temporariamente
+        {% else %}
+          Enviar Cadastro
+        {% endif %}
       </button>
     </div>
   </form>
@@ -606,6 +608,7 @@ window.addEventListener('load', function(){
   if (!form || !btn) return;
 
   form.addEventListener('submit', function(){
+    if (btn.hasAttribute('disabled')) { return; }
     const cpfField = document.getElementById('cpf');
     if (cpfField && cpfField.value) cpfField.value = cpfField.value.replace(/\D+/g,'');
 
@@ -632,9 +635,13 @@ function recalc(){
   const parse = window.ABASE.MoneyMask.parse;
   const format = window.ABASE.MoneyMask.formatBRL;
 
-  const bruto  = parse(document.querySelector('[name="valor_bruto_total"]').value);
-  const liquido= parse(document.querySelector('[name="valor_liquido"]').value);
-  const mensal = parse(document.querySelector('[name="mensalidade_associativa"]').value);
+  const brutoField   = document.querySelector('[name="valor_bruto_total"]');
+  const liquidoField = document.querySelector('[name="valor_liquido"]');
+  const mensalField  = document.querySelector('[name="mensalidade_associativa"]');
+
+  const bruto  = brutoField ? parse(brutoField.value || '0') : 0;
+  const liquido= liquidoField ? parse(liquidoField.value || '0') : 0;
+  const mensal = mensalField ? parse(mensalField.value || '0') : 0;
 
   const trinta = +(bruto * 0.30).toFixed(2);
   const margem = +(liquido - trinta).toFixed(2);
@@ -665,6 +672,10 @@ document.addEventListener('DOMContentLoaded', function(){
     f.addEventListener('money-changed', recalc);
     f.addEventListener('blur', recalc);
   });
+  const contribSelect = document.querySelector('select[name="mensalidade_associativa"]');
+  if (contribSelect){
+    contribSelect.addEventListener('change', recalc);
+  }
 });
 </script>
 {% endblock %}

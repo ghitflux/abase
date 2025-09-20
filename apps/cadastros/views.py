@@ -1,12 +1,15 @@
 from decimal import Decimal
+from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
+from django.utils import timezone
 
 from apps.accounts.decorators import group_required
+from apps.analise.models import HistoricoAnalise, StatusAnalise
 from apps.documentos.models import Documento, DocumentoRascunho
 from apps.documentos.views import ensure_draft_token
 
@@ -34,6 +37,28 @@ def _pode_renovar(cadastro: Cadastro) -> bool:
 
     ok = {"LIQUIDADA", "LIQUIDADO", "PAGA", "PAGO", "QUITADA"}
     return all(((getattr(p, "status", "") or "").upper() in ok) for p in primeiras_tres)
+
+
+def _correcao_lock_info(cadastro: Cadastro) -> tuple[int, timedelta | None]:
+    """Retorna (total_devoluções, data_limite) para controle de reenvio."""
+    if not cadastro or not hasattr(cadastro, "analise_processo"):
+        return 0, None
+
+    processo = getattr(cadastro, "analise_processo", None)
+    if not processo:
+        return 0, None
+
+    eventos = HistoricoAnalise.objects.filter(
+        processo=processo,
+        status_novo=StatusAnalise.ENVIADO_PARA_CORRECAO
+    ).order_by('-data_acao')
+
+    total = eventos.count()
+    if total >= 5 and eventos:
+        lock_until = eventos.first().data_acao + timedelta(hours=3)
+        return total, lock_until
+
+    return total, None
 
 
 # -----------------------------
@@ -123,6 +148,13 @@ def agente_create(request):
             agente_responsavel=request.user
         )
 
+    correcao_count = 0
+    correcao_lock_until = None
+    if cadastro:
+        correcao_count, correcao_lock_until = _correcao_lock_info(cadastro)
+
+    lock_active = bool(correcao_lock_until and timezone.now() < correcao_lock_until)
+
     if request.method == "GET":
         if cadastro:
             # Edição
@@ -138,16 +170,46 @@ def agente_create(request):
             existing_docs = []
 
         docs = DocumentoRascunho.objects.filter(user=request.user, draft_token=draft_token)
-        return render(request, "cadastros/agente_form.html", {
+        if lock_active:
+            lock_ts = timezone.localtime(correcao_lock_until).strftime('%d/%m/%Y %H:%M')
+            messages.warning(
+                request,
+                f"Este processo atingiu o limite de correções e ficará bloqueado até {lock_ts}."
+            )
+
+        context = {
             "form": form,
             "draft_token": draft_token,
             "docs": docs,
             "existing_docs": existing_docs,
             "cadastro": cadastro,
             "is_edit": bool(cadastro),
-        })
+            "correcao_lock_until": correcao_lock_until,
+            "correcao_devolucoes": correcao_count,
+            "correcao_lock_ativo": lock_active,
+        }
+        return render(request, "cadastros/agente_form.html", context)
 
     # POST
+    if cadastro and lock_active and cadastro.status == StatusCadastro.PENDING_AGENT:
+        lock_ts = timezone.localtime(correcao_lock_until).strftime('%d/%m/%Y %H:%M')
+        messages.error(
+            request,
+            f"Correções bloqueadas até {lock_ts}. Aguarde o prazo para reenviar o processo."
+        )
+        context = {
+            "form": CadastroForm(request.POST, instance=cadastro) if cadastro else CadastroForm(request.POST),
+            "draft_token": draft_token,
+            "docs": DocumentoRascunho.objects.filter(user=request.user, draft_token=draft_token),
+            "existing_docs": cadastro.documentos.all() if cadastro else [],
+            "cadastro": cadastro,
+            "is_edit": bool(cadastro),
+            "correcao_lock_until": correcao_lock_until,
+            "correcao_devolucoes": correcao_count,
+            "correcao_lock_ativo": lock_active,
+        }
+        return render(request, "cadastros/agente_form.html", context, status=403)
+
     if cadastro:
         form = CadastroForm(request.POST, instance=cadastro)
         existing_docs = cadastro.documentos.all()
@@ -159,14 +221,18 @@ def agente_create(request):
 
     if not form.is_valid():
         messages.error(request, 'Erro na validação do formulário. Verifique os campos destacados.')
-        return render(request, "cadastros/agente_form.html", {
+        context = {
             "form": form,
             "draft_token": draft_token,
             "docs": docs,
             "existing_docs": existing_docs,
             "cadastro": cadastro,
             "is_edit": bool(cadastro),
-        }, status=400)
+            "correcao_lock_until": correcao_lock_until,
+            "correcao_devolucoes": correcao_count,
+            "correcao_lock_ativo": lock_active,
+        }
+        return render(request, "cadastros/agente_form.html", context, status=400)
 
     try:
         cad: Cadastro = form.save(commit=False)
@@ -189,14 +255,18 @@ def agente_create(request):
 
     except Exception as e:
         messages.error(request, f'Erro ao salvar cadastro: {e}')
-        return render(request, "cadastros/agente_form.html", {
+        context = {
             "form": form,
             "draft_token": draft_token,
             "docs": docs,
             "existing_docs": existing_docs,
             "cadastro": cadastro,
             "is_edit": bool(cadastro),
-        }, status=500)
+            "correcao_lock_until": correcao_lock_until,
+            "correcao_devolucoes": correcao_count,
+            "correcao_lock_ativo": lock_active,
+        }
+        return render(request, "cadastros/agente_form.html", context, status=500)
 
     # cria 3 parcelas padrão (apenas para novos)
     try:

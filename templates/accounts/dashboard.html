@@ -1,536 +1,770 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard • ABASE{% endblock %}
+{% block title %}Dashboard - ABASE{% endblock %}
 
 {% block page_title %}Dashboard{% endblock %}
 
+{% block extra_css %}
+<style>
+  .dashboard-shell {
+    min-height: calc(100vh - 4rem);
+    padding-bottom: 2rem;
+  }
+
+  .dashboard-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .dashboard-header {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .dashboard-header__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .dashboard-header__meta h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--heading);
+  }
+
+  .dashboard-header__meta p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .dashboard-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.25rem;
+    align-items: flex-end;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .dashboard-filters__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(122, 19, 64, 0.16);
+    border: 1px solid rgba(122, 19, 64, 0.32);
+    color: var(--accent-200);
+  }
+
+  .dashboard-filters__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 170px;
+  }
+
+  .dashboard-filters__label {
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .dashboard-filters__separator {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+
+  .dashboard-kpis {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .dashboard-kpi {
+    position: relative;
+    padding: 1.25rem 1.35rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    background: linear-gradient(160deg, rgba(17, 24, 39, 0.88), rgba(11, 18, 32, 0.98));
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    box-shadow: var(--shadow);
+  }
+
+  .dashboard-kpi--secondary {
+    background: linear-gradient(155deg, rgba(23, 31, 46, 0.92), rgba(12, 19, 31, 0.94));
+    border-color: rgba(71, 85, 105, 0.28);
+  }
+
+  .dashboard-kpi__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .dashboard-kpi__title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+  }
+
+  .dashboard-kpi__value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--heading);
+  }
+
+  .dashboard-kpi__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .dashboard-kpi__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    color: var(--accent-200);
+    flex-shrink: 0;
+  }
+
+  .dashboard-grid-2 {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 1024px) {
+    .dashboard-grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .section-card__header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-card__icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(22, 163, 74, 0.15);
+    border: 1px solid rgba(22, 163, 74, 0.28);
+    color: #4ade80;
+  }
+
+  .section-card__icon--violet {
+    background: rgba(167, 139, 250, 0.16);
+    border-color: rgba(167, 139, 250, 0.3);
+    color: #c4b5fd;
+  }
+
+  .section-card__support {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .info-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .info-stat {
+    padding: 0.85rem 1rem;
+    border-radius: 0.9rem;
+    background: rgba(13, 20, 33, 0.85);
+    border: 1px solid rgba(71, 85, 105, 0.25);
+    text-align: center;
+  }
+
+  .info-stat dt {
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+
+  .info-stat dd {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--heading);
+  }
+
+  .section-card__footer {
+    margin-top: 1.5rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .section-card__footer strong {
+    color: var(--warn);
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .dashboard-chart-grid {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 1280px) {
+    .dashboard-chart-grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+  }
+
+  .chart-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .chart-card__canvas {
+    position: relative;
+    height: 260px;
+  }
+
+  .chart-card--tall .chart-card__canvas {
+    height: 320px;
+  }
+
+  .dashboard-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--heading);
+    margin: 0;
+  }
+
+  .dashboard-section-subtitle {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .dashboard-quick-actions {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  .quick-action {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1rem 1.1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+    background: rgba(16, 23, 38, 0.82);
+    transition: all 0.18s ease;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .quick-action:hover {
+    border-color: rgba(122, 19, 64, 0.45);
+    background: rgba(122, 19, 64, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .quick-action__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(122, 19, 64, 0.18);
+    border: 1px solid rgba(122, 19, 64, 0.3);
+    color: var(--accent-200);
+    flex-shrink: 0;
+  }
+
+  .quick-action__title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--heading);
+  }
+
+  .quick-action__subtitle {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.1rem;
+  }
+
+  .dashboard-empty {
+    opacity: 0.55;
+  }
+
+  .card--padded {
+    padding: 1.5rem;
+  }
+
+  .dashboard-card-header {
+    margin-bottom: 1.25rem;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="p-6">
-  <!-- Header com filtro de data -->
-  <div class="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between">
-    <div>
-      <h1 class="text-3xl font-bold text-foreground">Dashboard Principal</h1>
-      <p class="mt-2 text-base text-muted-foreground">Visão geral do sistema ABASE - Associação Beneficente dos Servidores Públicos</p>
-    </div>
-    
-    <!-- Filtro de Data -->
-    <div class="mt-6 lg:mt-0">
-      <form method="GET" class="flex items-center space-x-2">
-        <div class="flex items-center space-x-3 bg-card border border-border rounded-xl p-3 shadow-sm">
-          <svg class="h-5 w-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+<div class="dashboard-shell">
+  <div class="container-xl dashboard-stack">
+    <header class="card dashboard-header">
+      <div class="dashboard-header__meta">
+        <h1>Dashboard Principal</h1>
+        <p>Visão geral do ecossistema ABASE</p>
+      </div>
+
+      <form method="get" class="dashboard-filters">
+        <div class="dashboard-filters__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 7V3" />
+            <path d="M16 7V3" />
+            <path d="M4 9h16" />
+            <rect x="4" y="5" width="16" height="16" rx="2" />
           </svg>
-          <input type="date" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}" 
-                 class="border-0 bg-transparent text-sm focus:ring-0 focus:outline-none">
-          <span class="text-muted-foreground">até</span>
-          <input type="date" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}" 
-                 class="border-0 bg-transparent text-sm focus:ring-0 focus:outline-none">
-          <button type="submit" class="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm hover:bg-primary/90 transition-colors">
-            Filtrar
-          </button>
         </div>
+
+        <div class="dashboard-filters__field">
+          <span class="dashboard-filters__label">Início</span>
+          <input type="date" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}" class="input" />
+        </div>
+
+        <span class="dashboard-filters__separator">→</span>
+
+        <div class="dashboard-filters__field">
+          <span class="dashboard-filters__label">Fim</span>
+          <input type="date" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}" class="input" />
+        </div>
+
+        <button type="submit" class="btn btn-accent">
+          <svg style="width: 1rem; height: 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 4h18" />
+            <path d="M4 8h16" />
+            <path d="M6 12h12" />
+            <path d="M10 16h8" />
+            <path d="M12 20h6" />
+          </svg>
+          Aplicar
+        </button>
       </form>
-    </div>
-  </div>
+    </header>
 
-  <!-- KPIs Cards - Organizados horizontalmente em uma linha -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-    <!-- Total de Usuários -->
-    <div class="bg-card overflow-hidden shadow-lg rounded-xl border border-border hover:shadow-xl transition-shadow duration-300">
-      <div class="p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
-              <svg class="h-7 w-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-.5a2.121 2.121 0 11-3 3 2.121 2.121 0 013-3z" />
-              </svg>
-            </div>
-          </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-muted-foreground truncate">Total de Usuários</dt>
-              <dd class="text-2xl font-bold text-foreground">{{ total_users|default:0 }}</dd>
-            </dl>
-          </div>
+    <section class="dashboard-kpis">
+      <article class="dashboard-kpi">
+        <div class="dashboard-kpi__body">
+          <span class="dashboard-kpi__title">Total de usuários</span>
+          <p class="dashboard-kpi__value">{{ total_users|default:0 }}</p>
         </div>
-      </div>
-    </div>
-    
-    <!-- Associados Cadastrados -->
-    <div class="bg-card overflow-hidden shadow-lg rounded-xl border border-border hover:shadow-xl transition-shadow duration-300">
-      <div class="p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <svg class="h-7 w-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-          </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-muted-foreground truncate">Associados Cadastrados</dt>
-              <dd class="flex items-center">
-                <span class="text-2xl font-bold text-foreground">{{ total_associados|default:0 }}</span>
-                {% if variacao_associados %}
-                  <span class="ml-2 text-xs {% if variacao_associados > 0 %}text-green-600{% else %}text-red-600{% endif %}">
-                    {% if variacao_associados > 0 %}+{% endif %}{{ variacao_associados|floatformat:1 }}%
-                  </span>
-                {% endif %}
-              </dd>
-            </dl>
-          </div>
+        <div class="dashboard-kpi__icon" style="background: rgba(96, 165, 250, 0.18); border-color: rgba(96, 165, 250, 0.32); color: #93c5fd;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
+            <path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2" />
+          </svg>
         </div>
-      </div>
-    </div>
+      </article>
 
-    <!-- Fundo Associação -->
-    <div class="bg-card overflow-hidden shadow-lg rounded-xl border border-border hover:shadow-xl transition-shadow duration-300">
-      <div class="p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <svg class="h-7 w-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
-            </div>
-          </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-muted-foreground truncate">Fundo Associação</dt>
-              <dd class="text-2xl font-bold text-foreground">R$ {{ saldo_atual|floatformat:2|default:"0,00" }}</dd>
-            </dl>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Retorno Estimado - DESTACADO -->
-    <div class="bg-gradient-to-br from-purple-500 to-purple-600 overflow-hidden shadow-xl rounded-xl border-2 border-purple-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-      <div class="p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <svg class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-          </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-white/90 truncate">Retorno Estimado</dt>
-              <dd class="text-2xl font-bold text-white">R$ {{ retorno_estimado|floatformat:2|default:"0,00" }}</dd>
-            </dl>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Layout Principal em Grid 2x4 -->
-  <div class="space-y-8">
-    
-    <!-- Primeira Linha: Tesouraria & Doações | Perfil dos Associados -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Tesouraria & Doações -->
-      <div class="bg-card shadow-lg rounded-xl border border-border">
-        <div class="px-6 py-5 border-b border-border bg-gradient-to-r from-green-50 to-green-100 rounded-t-xl">
-          <h3 class="text-xl font-semibold text-foreground flex items-center">
-            <svg class="h-6 w-6 text-green-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-            </svg>
-            Tesouraria & Doações
-          </h3>
-        </div>
-        <div class="p-6 space-y-5">
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-medium text-muted-foreground">Total Entradas</span>
-            <span class="text-lg font-bold text-green-600">R$ {{ total_entradas|floatformat:2 }}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-medium text-muted-foreground">Total Saídas</span>
-            <span class="text-lg font-bold text-red-600">R$ {{ total_saidas|floatformat:2 }}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-medium text-muted-foreground">Total Doações</span>
-            <span class="text-lg font-bold text-blue-600">R$ {{ total_doacoes|floatformat:2 }}</span>
-          </div>
-          <div class="pt-4 border-t border-border">
-            <div class="flex justify-between items-center">
-              <span class="text-base font-semibold text-foreground">Fundo Final</span>
-              <span class="text-xl font-bold {% if saldo_atual >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
-                R$ {{ saldo_atual|floatformat:2 }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Perfil dos Associados -->
-      <div class="bg-card shadow-lg rounded-xl border border-border">
-        <div class="px-6 py-5 border-b border-border bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-xl">
-          <h3 class="text-xl font-semibold text-foreground flex items-center">
-            <svg class="h-6 w-6 text-blue-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            Perfil dos Associados
-          </h3>
-        </div>
-        <div class="p-6 space-y-5">
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-medium text-muted-foreground">Total Cadastrados</span>
-            <span class="text-lg font-bold text-foreground">{{ total_associados }}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-medium text-muted-foreground">Ativos</span>
-            <span class="text-lg font-bold text-green-600">{{ associados_ativos }}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-medium text-muted-foreground">No Período</span>
-            <span class="text-lg font-bold text-blue-600">{{ associados_periodo }}</span>
-          </div>
-          {% if tempo_aprovacao %}
-          <div class="pt-4 border-t border-border">
-            <div class="flex justify-between items-center">
-              <span class="text-sm font-medium text-muted-foreground">Tempo Médio Aprovação</span>
-              <span class="text-lg font-bold text-foreground">{{ tempo_aprovacao.days }} dias</span>
-            </div>
-          </div>
+      <article class="dashboard-kpi">
+        <div class="dashboard-kpi__body">
+          <span class="dashboard-kpi__title">Associados cadastrados</span>
+          <p class="dashboard-kpi__value">{{ total_associados|default:0 }}</p>
+          {% if variacao_associados %}
+            <span class="dashboard-kpi__meta" style="color: {% if variacao_associados > 0 %}var(--success){% else %}var(--danger){% endif %};">
+              {% if variacao_associados > 0 %}
+                <svg style="width: 0.75rem; height: 0.75rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 10l7-7 7 7" />
+                </svg>
+                +{{ variacao_associados|floatformat:1 }}%
+              {% else %}
+                <svg style="width: 0.75rem; height: 0.75rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 14l-7 7-7-7" />
+                </svg>
+                {{ variacao_associados|floatformat:1 }}%
+              {% endif %}
+            </span>
           {% endif %}
         </div>
-      </div>
-    </div>
+        <div class="dashboard-kpi__icon" style="background: rgba(122, 19, 64, 0.2); border-color: rgba(122, 19, 64, 0.32); color: #f4d6e3;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857" />
+            <path d="M17 20H7" />
+            <path d="M7 20v-2a3 3 0 0 1 5.356-1.857" />
+            <path d="M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+        </div>
+      </article>
 
-    <!-- Segunda Linha: Status dos Processos | Cadastros por Dia -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Status dos Processos -->
-      <div class="bg-card shadow-lg rounded-xl border border-border">
-        <div class="px-6 py-5 border-b border-border bg-gradient-to-r from-purple-50 to-purple-100 rounded-t-xl">
-          <h3 class="text-xl font-semibold text-foreground flex items-center">
-            <svg class="h-6 w-6 text-purple-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Status dos Processos
-          </h3>
+      <article class="dashboard-kpi">
+        <div class="dashboard-kpi__body">
+          <span class="dashboard-kpi__title">Fundo atual</span>
+          <p class="dashboard-kpi__value">R$ {{ saldo_atual|floatformat:2|default:"0,00" }}</p>
         </div>
-        <div class="p-6">
-          <canvas id="statusChart" width="300" height="200"></canvas>
+        <div class="dashboard-kpi__icon" style="background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.28); color: #86efac;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2" />
+            <path d="M12 6v14" />
+          </svg>
         </div>
-      </div>
+      </article>
 
-      <!-- Cadastros por Dia -->
-      <div class="bg-card shadow-lg rounded-xl border border-border">
-        <div class="px-6 py-5 border-b border-border bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-t-xl">
-          <h3 class="text-xl font-semibold text-foreground flex items-center">
-            <svg class="h-6 w-6 text-indigo-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Cadastros por Dia
-          </h3>
-          <p class="text-sm text-muted-foreground mt-1">Tendência de novos cadastros no período</p>
+      <article class="dashboard-kpi">
+        <div class="dashboard-kpi__body">
+          <span class="dashboard-kpi__title">Retorno estimado</span>
+          <p class="dashboard-kpi__value">R$ {{ retorno_estimado|floatformat:2|default:"0,00" }}</p>
         </div>
-        <div class="p-6">
-          <canvas id="cadastrosChart" width="400" height="300"></canvas>
+        <div class="dashboard-kpi__icon" style="background: rgba(167, 139, 250, 0.18); border-color: rgba(167, 139, 250, 0.32); color: #c4b5fd;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10c2-2 5-2 7 0s5 2 7 0 5-2 7 0" />
+            <path d="M3 16c2-2 5-2 7 0s5 2 7 0 5-2 7 0" />
+          </svg>
         </div>
-      </div>
-    </div>
+      </article>
+    </section>
 
-    <!-- Terceira Linha: Aprovações por Dia | Cargos dos Associados -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Aprovações por Dia -->
-      <div class="bg-card shadow-lg rounded-xl border border-border">
-        <div class="px-6 py-5 border-b border-border bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-t-xl">
-          <h3 class="text-xl font-semibold text-foreground flex items-center">
-            <svg class="h-6 w-6 text-emerald-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Aprovações por Dia
-          </h3>
-          <p class="text-sm text-muted-foreground mt-1">Comparativo de aprovações e taxa de aprovação</p>
+    <section class="dashboard-kpis">
+      <article class="dashboard-kpi dashboard-kpi--secondary">
+        <div class="dashboard-kpi__body">
+          <span class="dashboard-kpi__title">Taxas mensais pendentes</span>
+          <p class="dashboard-kpi__value">R$ {{ taxas_mensais_pendentes|floatformat:2|default:"0,00" }}</p>
+          <span class="dashboard-kpi__meta" style="color: var(--muted);">Pendências financeiras aguardando quitação</span>
         </div>
-        <div class="p-6">
-          <canvas id="aprovacoesChart" width="400" height="300"></canvas>
+        <div class="dashboard-kpi__icon" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.28); color: #fca5a5;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
         </div>
-      </div>
+      </article>
 
-      <!-- Cargos dos Associados -->
-      <div class="bg-card shadow-lg rounded-xl border border-border">
-        <div class="px-6 py-5 border-b border-border bg-gradient-to-r from-cyan-50 to-cyan-100 rounded-t-xl">
-          <h3 class="text-xl font-semibold text-foreground flex items-center">
-            <svg class="h-6 w-6 text-cyan-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6z" />
-            </svg>
-            Cargos dos Associados
-          </h3>
-          <p class="text-sm text-muted-foreground mt-1">Distribuição por tipo de cargo</p>
+      <article class="dashboard-kpi dashboard-kpi--secondary">
+        <div class="dashboard-kpi__body">
+          <span class="dashboard-kpi__title">Entradas no período</span>
+          <p class="dashboard-kpi__value">R$ {{ total_entradas|floatformat:2|default:"0,00" }}</p>
         </div>
-        <div class="p-6">
-          <canvas id="cargosChart" width="400" height="300"></canvas>
+        <div class="dashboard-kpi__icon" style="background: rgba(34, 197, 94, 0.16); border-color: rgba(34, 197, 94, 0.3); color: #4ade80;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
         </div>
-      </div>
-    </div>
+      </article>
 
-    <!-- Quarta Linha: Liquidações por Mês | Progresso até aprovação e efetivação -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Liquidações por Mês -->
-      <div class="bg-card shadow-lg rounded-xl border border-border">
-        <div class="px-6 py-5 border-b border-border bg-gradient-to-r from-orange-50 to-orange-100 rounded-t-xl">
-          <h3 class="text-xl font-semibold text-foreground flex items-center">
-            <svg class="h-6 w-6 text-orange-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-            </svg>
-            Liquidações por Mês
-          </h3>
-          <p class="text-sm text-muted-foreground mt-1">Volume de solicitações liquidadas</p>
+      <article class="dashboard-kpi dashboard-kpi--secondary">
+        <div class="dashboard-kpi__body">
+          <span class="dashboard-kpi__title">Saídas no período</span>
+          <p class="dashboard-kpi__value">R$ {{ total_saidas|floatformat:2|default:"0,00" }}</p>
         </div>
-        <div class="p-6">
-          <canvas id="liquidacoesChart" width="400" height="300"></canvas>
+        <div class="dashboard-kpi__icon" style="background: rgba(239, 68, 68, 0.16); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5" />
+            <path d="M12 19V5" />
+          </svg>
         </div>
-      </div>
+      </article>
 
-      <!-- Progresso até aprovação e efetivação -->
-      <div class="bg-card shadow-lg rounded-xl border border-border">
-        <div class="px-6 py-5 border-b border-border bg-gradient-to-r from-rose-50 to-rose-100 rounded-t-xl">
-          <h3 class="text-xl font-semibold text-foreground flex items-center">
-            <svg class="h-6 w-6 text-rose-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Progresso até Aprovação e Efetivação
-          </h3>
-          <p class="text-sm text-muted-foreground mt-1">Etapas do processo de cadastro</p>
+      <article class="dashboard-kpi dashboard-kpi--secondary">
+        <div class="dashboard-kpi__body">
+          <span class="dashboard-kpi__title">Associados ativos (90d)</span>
+          <p class="dashboard-kpi__value">{{ associados_ativos|default:0 }}</p>
+          <span class="dashboard-kpi__meta" style="color: var(--muted);">Novos no período: {{ associados_periodo|default:0 }}</span>
         </div>
-        <div class="p-6">
-          <canvas id="progressoChart" width="400" height="300"></canvas>
+        <div class="dashboard-kpi__icon" style="background: rgba(96, 165, 250, 0.18); border-color: rgba(96, 165, 250, 0.32); color: #bfdbfe;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
         </div>
-      </div>
-    </div>
-  </div>
+      </article>
+    </section>
 
-  <!-- Quick Actions - Mantidas no final -->
-  <div class="bg-card shadow-lg rounded-xl mt-10 mb-8 border border-border">
-    <div class="px-6 py-5 border-b border-border bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-xl">
-      <h2 class="text-xl font-semibold text-foreground">Ações Rápidas</h2>
-      <p class="mt-1 text-sm text-muted-foreground">Acesso rápido às funcionalidades principais</p>
-    </div>
-    <div class="p-8">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <a href="{% url 'cadastros:agente-create' %}" class="group flex items-center p-6 border border-border rounded-xl hover:bg-accent hover:border-primary transition-all duration-200 hover:shadow-lg">
-          <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-            <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+    <section class="dashboard-grid-2">
+      <article class="card">
+        <div class="section-card__header">
+          <div class="section-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2" />
+              <path d="M12 6v14" />
             </svg>
           </div>
-          <div class="ml-4 text-left">
-            <p class="font-semibold text-foreground group-hover:text-primary transition-colors">Novo Cadastro</p>
-            <p class="text-sm text-muted-foreground">Cadastrar novo associado</p>
+          <div>
+            <h2 class="dashboard-section-title">Tesouraria e Doações</h2>
+            <p class="section-card__support">Movimentação financeira consolidada</p>
+          </div>
+        </div>
+
+        <dl class="info-grid">
+          <div class="info-stat">
+            <dt>Total de entradas</dt>
+            <dd>R$ {{ total_entradas|floatformat:2|default:"0,00" }}</dd>
+          </div>
+          <div class="info-stat">
+            <dt>Total de saídas</dt>
+            <dd>R$ {{ total_saidas|floatformat:2|default:"0,00" }}</dd>
+          </div>
+          <div class="info-stat">
+            <dt>Doações registradas</dt>
+            <dd>R$ {{ total_doacoes|floatformat:2|default:"0,00" }}</dd>
+          </div>
+        </dl>
+
+        <div class="section-card__footer">
+          <span>Saldo consolidado no período</span>
+          <strong>R$ {{ saldo_atual|floatformat:2|default:"0,00" }}</strong>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="section-card__header">
+          <div class="section-card__icon section-card__icon--violet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="dashboard-section-title">Associados em destaque</h2>
+            <p class="section-card__support">Atividade recente por status</p>
+          </div>
+        </div>
+
+        <dl class="info-grid">
+          <div class="info-stat">
+            <dt>Associados ativos</dt>
+            <dd>{{ associados_ativos|default:0 }}</dd>
+          </div>
+          <div class="info-stat">
+            <dt>Novos no período</dt>
+            <dd>{{ associados_periodo|default:0 }}</dd>
+          </div>
+          <div class="info-stat">
+            <dt>Tempo médio aprovação</dt>
+            <dd>
+              {% if tempo_aprovacao %}
+                {{ tempo_aprovacao.days }} dias
+              {% else %}
+                —
+              {% endif %}
+            </dd>
+          </div>
+        </dl>
+      </article>
+    </section>
+
+    <section class="dashboard-chart-grid">
+      <article class="card chart-card xl:col-span-4">
+        <header>
+          <h3 class="dashboard-section-title">Status dos Processos</h3>
+          <p class="dashboard-section-subtitle">Distribuição atual por situação</p>
+        </header>
+        <div class="chart-card__canvas">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </article>
+
+      <article class="card chart-card xl:col-span-4">
+        <header>
+          <h3 class="dashboard-section-title">Cadastros por Dia</h3>
+          <p class="dashboard-section-subtitle">Volume de solicitações recebidas</p>
+        </header>
+        <div class="chart-card__canvas">
+          <canvas id="cadastrosChart"></canvas>
+        </div>
+      </article>
+
+      <article class="card chart-card xl:col-span-4">
+        <header>
+          <h3 class="dashboard-section-title">Aprovações por Dia</h3>
+          <p class="dashboard-section-subtitle">Tendência de aprovações concluídas</p>
+        </header>
+        <div class="chart-card__canvas">
+          <canvas id="aprovacoesChart"></canvas>
+        </div>
+      </article>
+
+      <article class="card chart-card xl:col-span-4">
+        <header>
+          <h3 class="dashboard-section-title">Cargos dos Associados</h3>
+          <p class="dashboard-section-subtitle">Top cargos/profissões cadastrados</p>
+        </header>
+        <div class="chart-card__canvas">
+          <canvas id="cargosChart"></canvas>
+        </div>
+      </article>
+
+      <article class="card chart-card xl:col-span-4">
+        <header>
+          <h3 class="dashboard-section-title">Liquidações por Mês</h3>
+          <p class="dashboard-section-subtitle">Histórico de mensalidades liquidadas</p>
+        </header>
+        <div class="chart-card__canvas">
+          <canvas id="liquidacoesChart"></canvas>
+        </div>
+      </article>
+
+      <article class="card chart-card chart-card--tall xl:col-span-4">
+        <header>
+          <h3 class="dashboard-section-title">Progresso de Aprovação</h3>
+          <p class="dashboard-section-subtitle">Etapas cumpridas até efetivação</p>
+        </header>
+        <div class="chart-card__canvas">
+          <canvas id="progressoChart"></canvas>
+        </div>
+      </article>
+    </section>
+
+    <section class="card card--padded">
+      <header class="dashboard-card-header">
+        <h2 class="dashboard-section-title">Ações rápidas</h2>
+        <p class="dashboard-section-subtitle">Acesso aos fluxos prioritários</p>
+      </header>
+
+      <div class="dashboard-quick-actions">
+        <a href="{% url 'cadastros:agente-create' %}" class="quick-action">
+          <div class="quick-action__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 9v6" />
+              <path d="M15 12h6" />
+              <path d="M12 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
+              <path d="M3 20v-1a5 5 0 0 1 5-5h1" />
+            </svg>
+          </div>
+          <div>
+            <div class="quick-action__title">Novo cadastro</div>
+            <div class="quick-action__subtitle">Registrar associado</div>
           </div>
         </a>
-        
-        <a href="{% url 'tesouraria:nova_movimentacao' %}" class="group flex items-center p-6 border border-border rounded-xl hover:bg-accent hover:border-green-500 transition-all duration-200 hover:shadow-lg">
-          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-200 transition-colors">
-            <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+
+        <a href="{% url 'tesouraria:nova_movimentacao' %}" class="quick-action">
+          <div class="quick-action__icon" style="background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.3); color: #86efac;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
             </svg>
           </div>
-          <div class="ml-4 text-left">
-            <p class="font-semibold text-foreground group-hover:text-green-600 transition-colors">Nova Movimentação</p>
-            <p class="text-sm text-muted-foreground">Registrar movimentação financeira</p>
+          <div>
+            <div class="quick-action__title">Nova movimentação</div>
+            <div class="quick-action__subtitle">Lançar receita ou despesa</div>
           </div>
         </a>
-        
-        <a href="{% url 'relatorios:dashboard-diretoria' %}" class="group flex items-center p-6 border border-border rounded-xl hover:bg-accent hover:border-purple-500 transition-all duration-200 hover:shadow-lg">
-          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-            <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+
+        <a href="{% url 'relatorios:dashboard-diretoria' %}" class="quick-action">
+          <div class="quick-action__icon" style="background: rgba(96, 165, 250, 0.18); border-color: rgba(96, 165, 250, 0.32); color: #93c5fd;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12h18" />
+              <path d="M3 16h12" />
+              <path d="M3 8h18" />
             </svg>
           </div>
-          <div class="ml-4 text-left">
-            <p class="font-semibold text-foreground group-hover:text-purple-600 transition-colors">Relatórios</p>
-            <p class="text-sm text-muted-foreground">Visualizar dashboard executivo</p>
+          <div>
+            <div class="quick-action__title">Relatório executivo</div>
+            <div class="quick-action__subtitle">Dashboard para diretoria</div>
           </div>
         </a>
       </div>
-    </div>
+    </section>
   </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-// Dados dos gráficos vindos do backend
 const statusData = {{ status_processos|safe }};
 const cadastrosData = {{ cadastros_por_dia|safe }};
 const aprovacoesData = {{ aprovacoes_por_dia|safe }};
 const cargosData = {{ cargos_associados|safe }};
 const liquidacoesData = {{ liquidadas_por_mes|safe }};
+const progressoData = {{ progresso_aprovacao|safe }};
 
-// Configuração de cores
-const colors = {
-  primary: '#3b82f6',
-  success: '#10b981',
-  warning: '#f59e0b',
+const palette = {
+  text: '#e5e7eb',
+  muted: '#94a3b8',
+  grid: 'rgba(45, 55, 72, 0.35)',
+  accent: '#7a1340',
+  success: '#16a34a',
+  info: '#60a5fa',
+  warn: '#f59e0b',
   danger: '#ef4444',
-  info: '#06b6d4',
-  purple: '#8b5cf6'
+  violet: '#a78bfa',
+  neutral: '#94a3b8'
 };
 
-// Gráfico de Status dos Processos (Pizza)
-if (statusData && statusData.length > 0) {
-  const ctx1 = document.getElementById('statusChart').getContext('2d');
-  new Chart(ctx1, {
-    type: 'pie',
+Chart.defaults.color = palette.text;
+Chart.defaults.font.family = 'Ubuntu, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+Chart.defaults.borderColor = palette.grid;
+Chart.defaults.plugins.legend.labels.color = palette.muted;
+Chart.defaults.plugins.legend.labels.boxWidth = 12;
+Chart.defaults.plugins.legend.labels.boxHeight = 12;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+
+function axisConfig(label) {
+  return {
+    ticks: { color: palette.muted, font: { size: 12 } },
+    grid: { color: palette.grid, drawBorder: false },
+    title: label ? { display: true, text: label, color: palette.muted } : undefined
+  };
+}
+
+function buildDataset({ label, data, color, type = 'bar', fill = false, yAxisID }) {
+  return {
+    label,
+    data,
+    type,
+    borderColor: color,
+    backgroundColor: type === 'line' ? color + '33' : color + '33',
+    tension: type === 'line' ? 0.35 : undefined,
+    fill,
+    borderWidth: type === 'line' ? 2 : 1,
+    yAxisID
+  };
+}
+
+if (statusData && statusData.length) {
+  const ctx = document.getElementById('statusChart');
+  new Chart(ctx, {
+    type: 'doughnut',
     data: {
       labels: statusData.map(item => item.status),
       datasets: [{
         data: statusData.map(item => item.total),
-        backgroundColor: [
-          colors.primary,
-          colors.success,
-          colors.warning,
-          colors.danger,
-          colors.info,
-          colors.purple
-        ]
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'bottom'
-        }
-      }
-    }
-  });
-}
-
-// Gráfico de Cadastros por Dia (Barras com linha)
-if (cadastrosData && cadastrosData.length > 0) {
-  const ctx2 = document.getElementById('cadastrosChart').getContext('2d');
-  new Chart(ctx2, {
-    type: 'bar',
-    data: {
-      labels: cadastrosData.map(item => new Date(item.dia).toLocaleDateString('pt-BR')),
-      datasets: [{
-        label: 'Cadastros',
-        data: cadastrosData.map(item => item.total),
-        backgroundColor: colors.primary + '80',
-        borderColor: colors.primary,
+        backgroundColor: [palette.accent, palette.success, palette.info, palette.warn, palette.violet, palette.danger],
+        borderColor: 'rgba(15, 23, 42, 0.6)',
         borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-}
-
-// Gráfico de Aprovações por Dia (Linha)
-if (aprovacoesData && aprovacoesData.length > 0) {
-  const ctx3 = document.getElementById('aprovacoesChart').getContext('2d');
-  new Chart(ctx3, {
-    type: 'line',
-    data: {
-      labels: aprovacoesData.map(item => new Date(item.dia).toLocaleDateString('pt-BR')),
-      datasets: [{
-        label: 'Aprovações',
-        data: aprovacoesData.map(item => item.total),
-        borderColor: colors.success,
-        backgroundColor: colors.success + '20',
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-}
-
-// Gráfico de Cargos (Barras Horizontais)
-if (cargosData && cargosData.length > 0) {
-  const ctx4 = document.getElementById('cargosChart').getContext('2d');
-  new Chart(ctx4, {
-    type: 'bar',
-    data: {
-      labels: cargosData.map(item => item.cargo_funcao),
-      datasets: [{
-        label: 'Quantidade',
-        data: cargosData.map(item => item.total),
-        backgroundColor: colors.info + '80',
-        borderColor: colors.info,
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      indexAxis: 'y',
-      scales: {
-        x: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-}
-
-// Gráfico de Liquidações por Mês (Ondas/Área)
-if (liquidacoesData && liquidacoesData.length > 0) {
-  const ctx5 = document.getElementById('liquidacoesChart').getContext('2d');
-  new Chart(ctx5, {
-    type: 'line',
-    data: {
-      labels: liquidacoesData.map(item => new Date(item.mes).toLocaleDateString('pt-BR', {month: 'short', year: 'numeric'})),
-      datasets: [{
-        label: 'Liquidações',
-        data: liquidacoesData.map(item => item.total),
-        borderColor: colors.purple,
-        backgroundColor: colors.purple + '30',
-        fill: true,
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-}
-
-// Gráfico de Progresso - Aprovação e Efetivação
-const progressoData = JSON.parse('{{ progresso_aprovacao|safe }}');
-if (progressoData && progressoData.length > 0) {
-  const progressoCtx = document.getElementById('progressoChart').getContext('2d');
-  new Chart(progressoCtx, {
-    type: 'bar',
-    data: {
-      labels: progressoData.map(item => item.etapa),
-      datasets: [{
-        label: 'Total',
-        data: progressoData.map(item => item.total),
-        backgroundColor: 'rgba(59, 130, 246, 0.8)',
-        borderColor: 'rgb(59, 130, 246)',
-        borderWidth: 1
-      }, {
-        label: 'Percentual (%)',
-        data: progressoData.map(item => item.percentual),
-        type: 'line',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        borderColor: 'rgb(239, 68, 68)',
-        borderWidth: 2,
-        fill: false,
-        yAxisID: 'y1'
       }]
     },
     options: {
@@ -538,35 +772,112 @@ if (progressoData && progressoData.length > 0) {
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          position: 'top',
-        },
-        title: {
-          display: true,
-          text: 'Progresso do Processo de Aprovação'
-        }
-      },
-      scales: {
-        y: {
-          type: 'linear',
-          display: true,
-          position: 'left',
-          title: {
-            display: true,
-            text: 'Quantidade'
+          position: 'bottom',
+          labels: {
+            padding: 16,
+            font: { size: 12 }
           }
-        },
+        }
+      }
+    }
+  });
+}
+
+if (cadastrosData && cadastrosData.length) {
+  const ctx = document.getElementById('cadastrosChart');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: cadastrosData.map(item => new Date(item.dia).toLocaleDateString('pt-BR')),
+      datasets: [buildDataset({ label: 'Cadastros', data: cadastrosData.map(item => item.total), color: palette.info })]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: axisConfig(),
+        y: axisConfig('Total')
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+if (aprovacoesData && aprovacoesData.length) {
+  const ctx = document.getElementById('aprovacoesChart');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: aprovacoesData.map(item => new Date(item.dia).toLocaleDateString('pt-BR')),
+      datasets: [buildDataset({ label: 'Aprovações', data: aprovacoesData.map(item => item.total), color: palette.success, type: 'line', fill: true })]
+    },
+    options: {
+      maintainAspectRatio: false,
+      scales: {
+        x: axisConfig(),
+        y: axisConfig('Total')
+      }
+    }
+  });
+}
+
+if (cargosData && cargosData.length) {
+  const ctx = document.getElementById('cargosChart');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: cargosData.map(item => item.cargo_funcao),
+      datasets: [buildDataset({ label: 'Quantidade', data: cargosData.map(item => item.total), color: palette.violet })]
+    },
+    options: {
+      indexAxis: 'y',
+      maintainAspectRatio: false,
+      scales: {
+        x: axisConfig('Total'),
+        y: axisConfig()
+      }
+    }
+  });
+}
+
+if (liquidacoesData && liquidacoesData.length) {
+  const ctx = document.getElementById('liquidacoesChart');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: liquidacoesData.map(item => new Date(item.mes).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })),
+      datasets: [buildDataset({ label: 'Liquidações', data: liquidacoesData.map(item => item.total), color: palette.warn, type: 'line', fill: true })]
+    },
+    options: {
+      maintainAspectRatio: false,
+      scales: {
+        x: axisConfig(),
+        y: axisConfig('Total')
+      }
+    }
+  });
+}
+
+if (progressoData && progressoData.length) {
+  const ctx = document.getElementById('progressoChart');
+  new Chart(ctx, {
+    data: {
+      labels: progressoData.map(item => item.etapa),
+      datasets: [
+        buildDataset({ label: 'Total', data: progressoData.map(item => item.total), color: palette.accent, type: 'bar' }),
+        buildDataset({ label: 'Percentual (%)', data: progressoData.map(item => item.percentual), color: palette.danger, type: 'line', yAxisID: 'y1' })
+      ]
+    },
+    options: {
+      maintainAspectRatio: false,
+      scales: {
+        x: axisConfig(),
+        y: axisConfig('Quantidade'),
         y1: {
-          type: 'linear',
-          display: true,
+          ...axisConfig('Percentual'),
           position: 'right',
-          title: {
-            display: true,
-            text: 'Percentual (%)'
-          },
-          grid: {
-            drawOnChartArea: false,
-          },
-          max: 100
+          max: 100,
+          grid: { drawOnChartArea: false }
         }
       }
     }
