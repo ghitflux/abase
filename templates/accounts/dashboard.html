@@ -6,722 +6,518 @@
 
 {% block extra_css %}
 <style>
-  .dashboard-shell {
-    min-height: calc(100vh - 4rem);
-    padding-bottom: 2rem;
-  }
-
-  .dashboard-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .dashboard-header {
-    padding: 1.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .dashboard-header__meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-
-  .dashboard-header__meta h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--heading);
-  }
-
-  .dashboard-header__meta p {
-    margin: 0;
-    font-size: 0.95rem;
-    color: var(--muted);
-  }
-
-  .dashboard-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem 1.25rem;
-    align-items: flex-end;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-    padding: 1rem 1.25rem;
-  }
-
-  .dashboard-filters__icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 0.85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(122, 19, 64, 0.16);
-    border: 1px solid rgba(122, 19, 64, 0.32);
-    color: var(--accent-200);
-  }
-
-  .dashboard-filters__field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    min-width: 170px;
-  }
-
-  .dashboard-filters__label {
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .dashboard-filters__separator {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-bottom: 0.35rem;
-  }
-
-  .dashboard-kpis {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  }
-
-  .dashboard-kpi {
-    position: relative;
-    padding: 1.25rem 1.35rem;
-    border-radius: 1rem;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    background: linear-gradient(160deg, rgba(17, 24, 39, 0.88), rgba(11, 18, 32, 0.98));
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    box-shadow: var(--shadow);
-  }
-
-  .dashboard-kpi--secondary {
-    background: linear-gradient(155deg, rgba(23, 31, 46, 0.92), rgba(12, 19, 31, 0.94));
-    border-color: rgba(71, 85, 105, 0.28);
-  }
-
-  .dashboard-kpi__body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
-  }
-
-  .dashboard-kpi__title {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: 0.01em;
-  }
-
-  .dashboard-kpi__value {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--heading);
-  }
-
-  .dashboard-kpi__meta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
-
-  .dashboard-kpi__icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(15, 23, 42, 0.75);
-    border: 1px solid rgba(148, 163, 184, 0.22);
-    color: var(--accent-200);
-    flex-shrink: 0;
-  }
-
-  .dashboard-grid-2 {
-    display: grid;
-    gap: 1.25rem;
-  }
-
-  @media (min-width: 1024px) {
-    .dashboard-grid-2 {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  .section-card__header {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .section-card__icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(22, 163, 74, 0.15);
-    border: 1px solid rgba(22, 163, 74, 0.28);
-    color: #4ade80;
-  }
-
-  .section-card__icon--violet {
-    background: rgba(167, 139, 250, 0.16);
-    border-color: rgba(167, 139, 250, 0.3);
-    color: #c4b5fd;
-  }
-
-  .section-card__support {
-    font-size: 0.9rem;
-    color: var(--muted);
-  }
-
-  .info-grid {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  }
-
-  .info-stat {
-    padding: 0.85rem 1rem;
-    border-radius: 0.9rem;
-    background: rgba(13, 20, 33, 0.85);
-    border: 1px solid rgba(71, 85, 105, 0.25);
-    text-align: center;
-  }
-
-  .info-stat dt {
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.35rem;
-  }
-
-  .info-stat dd {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--heading);
-  }
-
-  .section-card__footer {
-    margin-top: 1.5rem;
-    padding-top: 1.1rem;
-    border-top: 1px solid rgba(148, 163, 184, 0.18);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: var(--muted);
-    font-size: 0.9rem;
-  }
-
-  .section-card__footer strong {
-    color: var(--warn);
-    font-size: 1.25rem;
-    font-weight: 700;
-  }
-
-  .dashboard-chart-grid {
-    display: grid;
-    gap: 1.25rem;
-  }
-
-  @media (min-width: 1280px) {
-    .dashboard-chart-grid {
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-    }
-  }
-
-  .chart-card {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-  }
-
-  .chart-card__canvas {
-    position: relative;
-    height: 260px;
-  }
-
-  .chart-card--tall .chart-card__canvas {
-    height: 320px;
-  }
-
-  .dashboard-section-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--heading);
-    margin: 0;
-  }
-
-  .dashboard-section-subtitle {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin: 0;
-  }
-
-  .dashboard-quick-actions {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  }
-
-  .quick-action {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    padding: 1rem 1.1rem;
-    border-radius: 1rem;
-    border: 1px solid var(--border);
-    background: rgba(16, 23, 38, 0.82);
-    transition: all 0.18s ease;
-    text-decoration: none;
-    color: var(--text);
-  }
-
-  .quick-action:hover {
-    border-color: rgba(122, 19, 64, 0.45);
-    background: rgba(122, 19, 64, 0.2);
-    transform: translateY(-1px);
-  }
-
-  .quick-action__icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 0.85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(122, 19, 64, 0.18);
-    border: 1px solid rgba(122, 19, 64, 0.3);
-    color: var(--accent-200);
-    flex-shrink: 0;
-  }
-
-  .quick-action__title {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--heading);
-  }
-
-  .quick-action__subtitle {
-    font-size: 0.78rem;
-    color: var(--muted);
-    margin-top: 0.1rem;
-  }
-
-  .dashboard-empty {
-    opacity: 0.55;
-  }
-
-  .card--padded {
-    padding: 1.5rem;
-  }
-
-  .dashboard-card-header {
-    margin-bottom: 1.25rem;
-  }
+/* Force Dashboard Styles - Critical Priority */
+.dashboard-override {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  font-family: var(--font-sans) !important;
+}
+.dashboard-override .container-xl {
+  max-width: 1280px !important;
+  margin: 0 auto !important;
+  padding: 1.5rem !important;
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.5rem !important;
+}
+.dashboard-override .card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--shadow) !important;
+}
+.dashboard-override .kpi {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 1rem !important;
+  border-radius: 16px !important;
+  background: linear-gradient(180deg,#121a2f,#0b1220) !important;
+  border: 1px solid var(--border) !important;
+}
+.dashboard-override .row {
+  display: grid !important;
+  gap: 1rem !important;
+  grid-template-columns: repeat(12,minmax(0,1fr)) !important;
+}
+.dashboard-override .col-3 { grid-column: span 3 !important; }
+.dashboard-override .col-4 { grid-column: span 4 !important; }
+.dashboard-override .col-6 { grid-column: span 6 !important; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-shell">
-  <div class="container-xl dashboard-stack">
-    <header class="card dashboard-header">
-      <div class="dashboard-header__meta">
-        <h1>Dashboard Principal</h1>
-        <p>Visão geral do ecossistema ABASE</p>
+<div class="dashboard-override">
+<div class="container-xl" style="padding: 1.5rem; min-height: 100vh; display: flex; flex-direction: column; gap: 1.5rem;">
+  <!-- Header Section -->
+  <header class="card" style="padding: 1.5rem;">
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div>
+        <h1 style="color: var(--heading); font-size: 2rem; font-weight: 700; margin: 0;">Dashboard Principal</h1>
+        <p style="color: var(--muted); font-size: 0.875rem; margin: 0.25rem 0 0 0;">Visão geral do ecossistema ABASE</p>
       </div>
 
-      <form method="get" class="dashboard-filters">
-        <div class="dashboard-filters__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 7V3" />
-            <path d="M16 7V3" />
-            <path d="M4 9h16" />
-            <rect x="4" y="5" width="16" height="16" rx="2" />
-          </svg>
+      <!-- Enhanced Filter Form -->
+      <form method="get" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 1rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: end;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg style="width: 1.25rem; height: 1.25rem; color: var(--accent);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 7V3"/>
+              <path d="M16 7V3"/>
+              <path d="M4 9h16"/>
+              <rect x="4" y="5" width="16" height="16" rx="2"/>
+            </svg>
+            <span style="color: var(--text); font-size: 0.875rem; font-weight: 500;">Período</span>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <label style="display: flex; flex-direction: column; gap: 0.25rem;">
+              <span style="color: var(--muted); font-size: 0.75rem;">Início</span>
+              <input
+                type="date"
+                name="data_inicio"
+                value="{{ data_inicio|date:'Y-m-d' }}"
+                class="input"
+                style="min-width: 140px;"
+              >
+            </label>
+
+            <span style="color: var(--muted); margin-top: 1.25rem;">→</span>
+
+            <label style="display: flex; flex-direction: column; gap: 0.25rem;">
+              <span style="color: var(--muted); font-size: 0.75rem;">Fim</span>
+              <input
+                type="date"
+                name="data_fim"
+                value="{{ data_fim|date:'Y-m-d' }}"
+                class="input"
+                style="min-width: 140px;"
+              >
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-accent" style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg style="width: 1rem; height: 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 4h18"/>
+              <path d="M4 8h16"/>
+              <path d="M6 12h12"/>
+              <path d="M10 16h8"/>
+              <path d="M12 20h6"/>
+            </svg>
+            Aplicar
+          </button>
         </div>
-
-        <div class="dashboard-filters__field">
-          <span class="dashboard-filters__label">Início</span>
-          <input type="date" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}" class="input" />
-        </div>
-
-        <span class="dashboard-filters__separator">→</span>
-
-        <div class="dashboard-filters__field">
-          <span class="dashboard-filters__label">Fim</span>
-          <input type="date" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}" class="input" />
-        </div>
-
-        <button type="submit" class="btn btn-accent">
-          <svg style="width: 1rem; height: 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 4h18" />
-            <path d="M4 8h16" />
-            <path d="M6 12h12" />
-            <path d="M10 16h8" />
-            <path d="M12 20h6" />
-          </svg>
-          Aplicar
-        </button>
       </form>
-    </header>
+    </div>
+  </header>
 
-    <section class="dashboard-kpis">
-      <article class="dashboard-kpi">
-        <div class="dashboard-kpi__body">
-          <span class="dashboard-kpi__title">Total de usuários</span>
-          <p class="dashboard-kpi__value">{{ total_users|default:0 }}</p>
+  <!-- KPI Cards Grid -->
+  <section class="row">
+    <!-- Total Usuários -->
+    <article class="col-3">
+      <div class="kpi">
+        <div>
+          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Total de usuários</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">{{ total_users|default:0 }}</p>
         </div>
-        <div class="dashboard-kpi__icon" style="background: rgba(96, 165, 250, 0.18); border-color: rgba(96, 165, 250, 0.32); color: #93c5fd;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
-            <path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2" />
+        <div style="background: rgba(96, 165, 250, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(96, 165, 250, 0.2);">
+          <svg style="width: 1.5rem; height: 1.5rem; color: #93c5fd;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/>
+            <path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2"/>
           </svg>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <article class="dashboard-kpi">
-        <div class="dashboard-kpi__body">
-          <span class="dashboard-kpi__title">Associados cadastrados</span>
-          <p class="dashboard-kpi__value">{{ total_associados|default:0 }}</p>
+    <!-- Associados Cadastrados -->
+    <article class="col-3">
+      <div class="kpi">
+        <div>
+          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Associados cadastrados</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">{{ total_associados|default:0 }}</p>
           {% if variacao_associados %}
-            <span class="dashboard-kpi__meta" style="color: {% if variacao_associados > 0 %}var(--success){% else %}var(--danger){% endif %};">
-              {% if variacao_associados > 0 %}
-                <svg style="width: 0.75rem; height: 0.75rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M5 10l7-7 7 7" />
-                </svg>
-                +{{ variacao_associados|floatformat:1 }}%
-              {% else %}
-                <svg style="width: 0.75rem; height: 0.75rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M19 14l-7 7-7-7" />
-                </svg>
-                {{ variacao_associados|floatformat:1 }}%
-              {% endif %}
-            </span>
+          <span style="display: inline-flex; align-items: center; gap: 0.25rem; margin-top: 0.5rem; font-size: 0.75rem; font-weight: 500; {% if variacao_associados > 0 %}color: var(--success);{% else %}color: var(--danger);{% endif %}">
+            {% if variacao_associados > 0 %}
+              <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+              </svg>
+              +{{ variacao_associados|floatformat:1 }}%
+            {% else %}
+              <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+              </svg>
+              {{ variacao_associados|floatformat:1 }}%
+            {% endif %}
+          </span>
           {% endif %}
         </div>
-        <div class="dashboard-kpi__icon" style="background: rgba(122, 19, 64, 0.2); border-color: rgba(122, 19, 64, 0.32); color: #f4d6e3;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857" />
-            <path d="M17 20H7" />
-            <path d="M7 20v-2a3 3 0 0 1 5.356-1.857" />
-            <path d="M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+        <div style="background: rgba(122, 19, 64, 0.2); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(122, 19, 64, 0.3);">
+          <svg style="width: 1.5rem; height: 1.5rem; color: #f4d6e3;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0"/>
+            <path d="M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
           </svg>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <article class="dashboard-kpi">
-        <div class="dashboard-kpi__body">
-          <span class="dashboard-kpi__title">Fundo atual</span>
-          <p class="dashboard-kpi__value">R$ {{ saldo_atual|floatformat:2|default:"0,00" }}</p>
+    <!-- Fundo Atual -->
+    <article class="col-3">
+      <div class="kpi">
+        <div>
+          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Fundo atual</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">R$ {{ saldo_atual|floatformat:2|default:"0,00" }}</p>
         </div>
-        <div class="dashboard-kpi__icon" style="background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.28); color: #86efac;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2" />
-            <path d="M12 6v14" />
+        <div style="background: rgba(22, 163, 74, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(22, 163, 74, 0.2);">
+          <svg style="width: 1.5rem; height: 1.5rem; color: #86efac;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"/>
+            <path d="M12 6v14"/>
           </svg>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <article class="dashboard-kpi">
-        <div class="dashboard-kpi__body">
-          <span class="dashboard-kpi__title">Retorno estimado</span>
-          <p class="dashboard-kpi__value">R$ {{ retorno_estimado|floatformat:2|default:"0,00" }}</p>
+    <!-- Retorno Estimado -->
+    <article class="col-3">
+      <div class="kpi">
+        <div>
+          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Retorno estimado</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">R$ {{ retorno_estimado|floatformat:2|default:"0,00" }}</p>
         </div>
-        <div class="dashboard-kpi__icon" style="background: rgba(167, 139, 250, 0.18); border-color: rgba(167, 139, 250, 0.32); color: #c4b5fd;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 10c2-2 5-2 7 0s5 2 7 0 5-2 7 0" />
-            <path d="M3 16c2-2 5-2 7 0s5 2 7 0 5-2 7 0" />
+        <div style="background: rgba(167, 139, 250, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(167, 139, 250, 0.2);">
+          <svg style="width: 1.5rem; height: 1.5rem; color: #c4b5fd;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
+            <path d="M3 16c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
           </svg>
         </div>
-      </article>
-    </section>
+      </div>
+    </article>
+  </section>
 
-    <section class="dashboard-kpis">
-      <article class="dashboard-kpi dashboard-kpi--secondary">
-        <div class="dashboard-kpi__body">
-          <span class="dashboard-kpi__title">Taxas mensais pendentes</span>
-          <p class="dashboard-kpi__value">R$ {{ taxas_mensais_pendentes|floatformat:2|default:"0,00" }}</p>
-          <span class="dashboard-kpi__meta" style="color: var(--muted);">Pendências financeiras aguardando quitação</span>
+  <!-- Second Row of KPI Cards -->
+  <section class="row">
+    <!-- Taxas Mensais Pendentes -->
+    <article class="col-3">
+      <div class="kpi">
+        <div>
+          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Taxas mensais pendentes</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">R$ {{ taxas_mensais_pendentes|floatformat:2|default:"0,00" }}</p>
+          <p style="color: var(--muted); font-size: 0.75rem; margin-top: 0.25rem;">Valor líquido de pagamentos pendentes</p>
         </div>
-        <div class="dashboard-kpi__icon" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.28); color: #fca5a5;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v20" />
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        <div style="background: rgba(239, 68, 68, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(239, 68, 68, 0.2);">
+          <svg style="width: 1.5rem; height: 1.5rem; color: #fca5a5;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <article class="dashboard-kpi dashboard-kpi--secondary">
-        <div class="dashboard-kpi__body">
-          <span class="dashboard-kpi__title">Entradas no período</span>
-          <p class="dashboard-kpi__value">R$ {{ total_entradas|floatformat:2|default:"0,00" }}</p>
+    <!-- Placeholder for future KPIs -->
+    <article class="col-3">
+      <div class="kpi" style="opacity: 0.6;">
+        <div>
+          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Disponível</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">—</p>
         </div>
-        <div class="dashboard-kpi__icon" style="background: rgba(34, 197, 94, 0.16); border-color: rgba(34, 197, 94, 0.3); color: #4ade80;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 5v14" />
-            <path d="M5 12h14" />
+        <div style="background: rgba(156, 163, 175, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(156, 163, 175, 0.2);">
+          <svg style="width: 1.5rem; height: 1.5rem; color: #d1d5db;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
           </svg>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <article class="dashboard-kpi dashboard-kpi--secondary">
-        <div class="dashboard-kpi__body">
-          <span class="dashboard-kpi__title">Saídas no período</span>
-          <p class="dashboard-kpi__value">R$ {{ total_saidas|floatformat:2|default:"0,00" }}</p>
+    <article class="col-3">
+      <div class="kpi" style="opacity: 0.6;">
+        <div>
+          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Disponível</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">—</p>
         </div>
-        <div class="dashboard-kpi__icon" style="background: rgba(239, 68, 68, 0.16); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5" />
-            <path d="M12 19V5" />
+        <div style="background: rgba(156, 163, 175, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(156, 163, 175, 0.2);">
+          <svg style="width: 1.5rem; height: 1.5rem; color: #d1d5db;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
           </svg>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <article class="dashboard-kpi dashboard-kpi--secondary">
-        <div class="dashboard-kpi__body">
-          <span class="dashboard-kpi__title">Associados ativos (90d)</span>
-          <p class="dashboard-kpi__value">{{ associados_ativos|default:0 }}</p>
-          <span class="dashboard-kpi__meta" style="color: var(--muted);">Novos no período: {{ associados_periodo|default:0 }}</span>
+    <article class="col-3">
+      <div class="kpi" style="opacity: 0.6;">
+        <div>
+          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Disponível</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">—</p>
         </div>
-        <div class="dashboard-kpi__icon" style="background: rgba(96, 165, 250, 0.18); border-color: rgba(96, 165, 250, 0.32); color: #bfdbfe;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
+        <div style="background: rgba(156, 163, 175, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(156, 163, 175, 0.2);">
+          <svg style="width: 1.5rem; height: 1.5rem; color: #d1d5db;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
           </svg>
         </div>
-      </article>
-    </section>
+      </div>
+    </article>
+  </section>
 
-    <section class="dashboard-grid-2">
-      <article class="card">
-        <div class="section-card__header">
-          <div class="section-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2" />
-              <path d="M12 6v14" />
-            </svg>
+  <!-- Information Cards -->
+  <section class="row">
+    <!-- Tesouraria e Doações -->
+    <article class="col-6">
+      <div class="card" style="padding: 1.5rem;">
+        <header style="margin-bottom: 1.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="background: rgba(22, 163, 74, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(22, 163, 74, 0.2);">
+              <svg style="width: 1.25rem; height: 1.25rem; color: #86efac;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"/>
+                <path d="M12 6v14"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="section-title">Tesouraria e Doações</h2>
+              <p style="color: var(--muted); font-size: 0.875rem;">Movimentação financeira consolidada</p>
+            </div>
           </div>
-          <div>
-            <h2 class="dashboard-section-title">Tesouraria e Doações</h2>
-            <p class="section-card__support">Movimentação financeira consolidada</p>
-          </div>
-        </div>
-
-        <dl class="info-grid">
-          <div class="info-stat">
-            <dt>Total de entradas</dt>
-            <dd>R$ {{ total_entradas|floatformat:2|default:"0,00" }}</dd>
-          </div>
-          <div class="info-stat">
-            <dt>Total de saídas</dt>
-            <dd>R$ {{ total_saidas|floatformat:2|default:"0,00" }}</dd>
-          </div>
-          <div class="info-stat">
-            <dt>Doações registradas</dt>
-            <dd>R$ {{ total_doacoes|floatformat:2|default:"0,00" }}</dd>
-          </div>
-        </dl>
-
-        <div class="section-card__footer">
-          <span>Saldo consolidado no período</span>
-          <strong>R$ {{ saldo_atual|floatformat:2|default:"0,00" }}</strong>
-        </div>
-      </article>
-
-      <article class="card">
-        <div class="section-card__header">
-          <div class="section-card__icon section-card__icon--violet">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-          </div>
-          <div>
-            <h2 class="dashboard-section-title">Associados em destaque</h2>
-            <p class="section-card__support">Atividade recente por status</p>
-          </div>
-        </div>
-
-        <dl class="info-grid">
-          <div class="info-stat">
-            <dt>Associados ativos</dt>
-            <dd>{{ associados_ativos|default:0 }}</dd>
-          </div>
-          <div class="info-stat">
-            <dt>Novos no período</dt>
-            <dd>{{ associados_periodo|default:0 }}</dd>
-          </div>
-          <div class="info-stat">
-            <dt>Tempo médio aprovação</dt>
-            <dd>
-              {% if tempo_aprovacao %}
-                {{ tempo_aprovacao.days }} dias
-              {% else %}
-                —
-              {% endif %}
-            </dd>
-          </div>
-        </dl>
-      </article>
-    </section>
-
-    <section class="dashboard-chart-grid">
-      <article class="card chart-card xl:col-span-4">
-        <header>
-          <h3 class="dashboard-section-title">Status dos Processos</h3>
-          <p class="dashboard-section-subtitle">Distribuição atual por situação</p>
         </header>
-        <div class="chart-card__canvas">
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+          <div style="text-align: center;">
+            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Total de entradas</dt>
+            <dd style="color: var(--success); font-size: 1.125rem; font-weight: 600;">R$ {{ total_entradas|floatformat:2 }}</dd>
+          </div>
+          <div style="text-align: center;">
+            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Total de saídas</dt>
+            <dd style="color: var(--danger); font-size: 1.125rem; font-weight: 600;">R$ {{ total_saidas|floatformat:2 }}</dd>
+          </div>
+          <div style="text-align: center;">
+            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Total de doações</dt>
+            <dd style="color: var(--info); font-size: 1.125rem; font-weight: 600;">R$ {{ total_doacoes|floatformat:2 }}</dd>
+          </div>
+        </div>
+
+        <footer style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+          <span style="color: var(--muted); font-size: 0.875rem;">Fundo final</span>
+          <span style="color: {% if saldo_atual >= 0 %}var(--success){% else %}var(--danger){% endif %}; font-size: 1.25rem; font-weight: 700;">
+            R$ {{ saldo_atual|floatformat:2 }}
+          </span>
+        </footer>
+      </div>
+    </article>
+
+    <!-- Perfil dos Associados -->
+    <article class="col-6">
+      <div class="card" style="padding: 1.5rem;">
+        <header style="margin-bottom: 1.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="background: rgba(96, 165, 250, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(96, 165, 250, 0.2);">
+              <svg style="width: 1.25rem; height: 1.25rem; color: #93c5fd;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0"/>
+                <path d="M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="section-title">Perfil dos Associados</h2>
+              <p style="color: var(--muted); font-size: 0.875rem;">Atividade e tempo de aprovação</p>
+            </div>
+          </div>
+        </header>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+          <div style="text-align: center;">
+            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Total cadastrados</dt>
+            <dd style="color: var(--info); font-size: 1.125rem; font-weight: 600;">{{ total_associados|default:0 }}</dd>
+          </div>
+          <div style="text-align: center;">
+            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Associados ativos</dt>
+            <dd style="color: var(--success); font-size: 1.125rem; font-weight: 600;">{{ associados_ativos|default:0 }}</dd>
+          </div>
+          <div style="text-align: center;">
+            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Novos no período</dt>
+            <dd style="color: var(--violet); font-size: 1.125rem; font-weight: 600;">{{ associados_periodo|default:0 }}</dd>
+          </div>
+        </div>
+
+        {% if tempo_aprovacao %}
+        <footer style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+          <span style="color: var(--muted); font-size: 0.875rem;">Tempo médio de aprovação</span>
+          <span style="color: var(--warn); font-size: 1.25rem; font-weight: 700;">{{ tempo_aprovacao.days }} dias</span>
+        </footer>
+        {% endif %}
+      </div>
+    </article>
+  </section>
+
+  <!-- Charts Grid -->
+  <section class="row">
+    <!-- Status dos Processos -->
+    <article class="col-4">
+      <div class="card" style="padding: 1.5rem;">
+        <header style="margin-bottom: 1rem;">
+          <h2 class="section-title">Status dos Processos</h2>
+          <p style="color: var(--muted); font-size: 0.875rem;">Distribuição por situação</p>
+        </header>
+        <div style="height: 16rem; display: flex; align-items: center; justify-content: center;">
           <canvas id="statusChart"></canvas>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <article class="card chart-card xl:col-span-4">
-        <header>
-          <h3 class="dashboard-section-title">Cadastros por Dia</h3>
-          <p class="dashboard-section-subtitle">Volume de solicitações recebidas</p>
+    <!-- Cadastros por Dia -->
+    <article class="col-4">
+      <div class="card" style="padding: 1.5rem;">
+        <header style="margin-bottom: 1rem;">
+          <h2 class="section-title">Cadastros por Dia</h2>
+          <p style="color: var(--muted); font-size: 0.875rem;">Volume de solicitações recebidas</p>
         </header>
-        <div class="chart-card__canvas">
+        <div style="height: 16rem;">
           <canvas id="cadastrosChart"></canvas>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <article class="card chart-card xl:col-span-4">
-        <header>
-          <h3 class="dashboard-section-title">Aprovações por Dia</h3>
-          <p class="dashboard-section-subtitle">Tendência de aprovações concluídas</p>
+    <!-- Aprovações por Dia -->
+    <article class="col-4">
+      <div class="card" style="padding: 1.5rem;">
+        <header style="margin-bottom: 1rem;">
+          <h2 class="section-title">Aprovações por Dia</h2>
+          <p style="color: var(--muted); font-size: 0.875rem;">Tendência de aprovações</p>
         </header>
-        <div class="chart-card__canvas">
+        <div style="height: 16rem;">
           <canvas id="aprovacoesChart"></canvas>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <article class="card chart-card xl:col-span-4">
-        <header>
-          <h3 class="dashboard-section-title">Cargos dos Associados</h3>
-          <p class="dashboard-section-subtitle">Top cargos/profissões cadastrados</p>
+    <!-- Cargos dos Associados -->
+    <article class="col-4">
+      <div class="card" style="padding: 1.5rem;">
+        <header style="margin-bottom: 1rem;">
+          <h2 class="section-title">Cargos dos Associados</h2>
+          <p style="color: var(--muted); font-size: 0.875rem;">Distribuição por função</p>
         </header>
-        <div class="chart-card__canvas">
+        <div style="height: 16rem;">
           <canvas id="cargosChart"></canvas>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <article class="card chart-card xl:col-span-4">
-        <header>
-          <h3 class="dashboard-section-title">Liquidações por Mês</h3>
-          <p class="dashboard-section-subtitle">Histórico de mensalidades liquidadas</p>
+    <!-- Liquidações por Mês -->
+    <article class="col-4">
+      <div class="card" style="padding: 1.5rem;">
+        <header style="margin-bottom: 1rem;">
+          <h2 class="section-title">Liquidações por Mês</h2>
+          <p style="color: var(--muted); font-size: 0.875rem;">Resultados financeiros liquidados</p>
         </header>
-        <div class="chart-card__canvas">
+        <div style="height: 16rem;">
           <canvas id="liquidacoesChart"></canvas>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <article class="card chart-card chart-card--tall xl:col-span-4">
-        <header>
-          <h3 class="dashboard-section-title">Progresso de Aprovação</h3>
-          <p class="dashboard-section-subtitle">Etapas cumpridas até efetivação</p>
+    <!-- Progresso de Aprovação -->
+    <article class="col-4">
+      <div class="card" style="padding: 1.5rem;">
+        <header style="margin-bottom: 1rem;">
+          <h2 class="section-title">Progresso de Aprovação</h2>
+          <p style="color: var(--muted); font-size: 0.875rem;">Etapas do fluxo de cadastro</p>
         </header>
-        <div class="chart-card__canvas">
+        <div style="height: 20rem;">
           <canvas id="progressoChart"></canvas>
         </div>
-      </article>
-    </section>
+      </div>
+    </article>
+  </section>
 
-    <section class="card card--padded">
-      <header class="dashboard-card-header">
-        <h2 class="dashboard-section-title">Ações rápidas</h2>
-        <p class="dashboard-section-subtitle">Acesso aos fluxos prioritários</p>
+  <!-- Quick Actions -->
+  <section>
+    <div class="card" style="padding: 1.5rem;">
+      <header style="margin-bottom: 1.5rem;">
+        <h2 class="section-title">Ações Rápidas</h2>
+        <p style="color: var(--muted); font-size: 0.875rem;">Acesso direto às principais rotinas</p>
       </header>
 
-      <div class="dashboard-quick-actions">
-        <a href="{% url 'cadastros:agente-create' %}" class="quick-action">
-          <div class="quick-action__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 9v6" />
-              <path d="M15 12h6" />
-              <path d="M12 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
-              <path d="M3 20v-1a5 5 0 0 1 5-5h1" />
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        <a
+          href="{% url 'cadastros:agente-create' %}"
+          style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; text-decoration: none; transition: all 0.2s ease;"
+          onmouseover="this.style.borderColor='var(--accent)'; this.style.background='rgba(122, 19, 64, 0.05)';"
+          onmouseout="this.style.borderColor='var(--border)'; this.style.background='transparent';"
+        >
+          <div style="background: rgba(122, 19, 64, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(122, 19, 64, 0.2);">
+            <svg style="width: 1.25rem; height: 1.25rem; color: #f4d6e3;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 9v6"/>
+              <path d="M15 12h6"/>
+              <path d="M12 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/>
+              <path d="M3 20v-1a5 5 0 0 1 5-5h1"/>
             </svg>
           </div>
           <div>
-            <div class="quick-action__title">Novo cadastro</div>
-            <div class="quick-action__subtitle">Registrar associado</div>
+            <h3 style="color: var(--text); font-weight: 600; font-size: 0.875rem; margin: 0;">Novo Cadastro</h3>
+            <p style="color: var(--muted); font-size: 0.75rem; margin: 0;">Registrar associado</p>
           </div>
         </a>
 
-        <a href="{% url 'tesouraria:nova_movimentacao' %}" class="quick-action">
-          <div class="quick-action__icon" style="background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.3); color: #86efac;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 5v14" />
-              <path d="M5 12h14" />
+        <a
+          href="{% url 'tesouraria:nova_movimentacao' %}"
+          style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; text-decoration: none; transition: all 0.2s ease;"
+          onmouseover="this.style.borderColor='var(--success)'; this.style.background='rgba(22, 163, 74, 0.05)';"
+          onmouseout="this.style.borderColor='var(--border)'; this.style.background='transparent';"
+        >
+          <div style="background: rgba(22, 163, 74, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(22, 163, 74, 0.2);">
+            <svg style="width: 1.25rem; height: 1.25rem; color: #86efac;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14"/>
+              <path d="M5 12h14"/>
             </svg>
           </div>
           <div>
-            <div class="quick-action__title">Nova movimentação</div>
-            <div class="quick-action__subtitle">Lançar receita ou despesa</div>
+            <h3 style="color: var(--text); font-weight: 600; font-size: 0.875rem; margin: 0;">Nova Movimentação</h3>
+            <p style="color: var(--muted); font-size: 0.75rem; margin: 0;">Lançar receita ou despesa</p>
           </div>
         </a>
 
-        <a href="{% url 'relatorios:dashboard-diretoria' %}" class="quick-action">
-          <div class="quick-action__icon" style="background: rgba(96, 165, 250, 0.18); border-color: rgba(96, 165, 250, 0.32); color: #93c5fd;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 12h18" />
-              <path d="M3 16h12" />
-              <path d="M3 8h18" />
+        <a
+          href="{% url 'relatorios:dashboard-diretoria' %}"
+          style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; text-decoration: none; transition: all 0.2s ease;"
+          onmouseover="this.style.borderColor='var(--info)'; this.style.background='rgba(96, 165, 250, 0.05)';"
+          onmouseout="this.style.borderColor='var(--border)'; this.style.background='transparent';"
+        >
+          <div style="background: rgba(96, 165, 250, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(96, 165, 250, 0.2);">
+            <svg style="width: 1.25rem; height: 1.25rem; color: #93c5fd;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12h18"/>
+              <path d="M3 16h12"/>
+              <path d="M3 8h18"/>
             </svg>
           </div>
           <div>
-            <div class="quick-action__title">Relatório executivo</div>
-            <div class="quick-action__subtitle">Dashboard para diretoria</div>
+            <h3 style="color: var(--text); font-weight: 600; font-size: 0.875rem; margin: 0;">Relatório Executivo</h3>
+            <p style="color: var(--muted); font-size: 0.75rem; margin: 0;">Dashboard para diretoria</p>
           </div>
         </a>
       </div>
-    </section>
-  </div>
+    </div>
+  </section>
 </div>
-{% endblock %}
+</div>
 
-{% block extra_js %}
 <script>
 const statusData = {{ status_processos|safe }};
 const cadastrosData = {{ cadastros_por_dia|safe }};
 const aprovacoesData = {{ aprovacoes_por_dia|safe }};
 const cargosData = {{ cargos_associados|safe }};
 const liquidacoesData = {{ liquidadas_por_mes|safe }};
-const progressoData = {{ progresso_aprovacao|safe }};
+const progressoData = JSON.parse('{{ progresso_aprovacao|safe }}');
 
+// Cores do Design System
 const palette = {
-  text: '#e5e7eb',
-  muted: '#94a3b8',
-  grid: 'rgba(45, 55, 72, 0.35)',
-  accent: '#7a1340',
-  success: '#16a34a',
-  info: '#60a5fa',
-  warn: '#f59e0b',
-  danger: '#ef4444',
-  violet: '#a78bfa',
-  neutral: '#94a3b8'
+  text: '#e5e7eb',        // var(--text)
+  muted: '#94a3b8',       // var(--muted)
+  grid: 'rgba(32, 42, 58, 0.3)',  // var(--border) com opacidade
+  accent: '#7a1340',      // var(--accent)
+  success: '#16a34a',     // var(--success)
+  info: '#60a5fa',        // var(--info)
+  warn: '#f59e0b',        // var(--warn)
+  danger: '#ef4444',      // var(--danger)
+  violet: '#a78bfa',      // var(--violet)
+  neutral: '#94a3b8'      // var(--neutral)
 };
 
 Chart.defaults.color = palette.text;
@@ -734,8 +530,8 @@ Chart.defaults.plugins.legend.labels.usePointStyle = true;
 
 function axisConfig(label) {
   return {
-    ticks: { color: palette.muted, font: { size: 12 } },
-    grid: { color: palette.grid, drawBorder: false },
+    ticks: { color: palette.muted },
+    grid: { color: palette.grid },
     title: label ? { display: true, text: label, color: palette.muted } : undefined
   };
 }
@@ -746,7 +542,7 @@ function buildDataset({ label, data, color, type = 'bar', fill = false, yAxisID 
     data,
     type,
     borderColor: color,
-    backgroundColor: type === 'line' ? color + '33' : color + '33',
+    backgroundColor: type === 'line' ? color : color + '33',
     tension: type === 'line' ? 0.35 : undefined,
     fill,
     borderWidth: type === 'line' ? 2 : 1,
@@ -763,7 +559,7 @@ if (statusData && statusData.length) {
       datasets: [{
         data: statusData.map(item => item.total),
         backgroundColor: [palette.accent, palette.success, palette.info, palette.warn, palette.violet, palette.danger],
-        borderColor: 'rgba(15, 23, 42, 0.6)',
+        borderColor: [palette.accent, palette.success, palette.info, palette.warn, palette.violet, palette.danger],
         borderWidth: 1
       }]
     },
@@ -775,7 +571,9 @@ if (statusData && statusData.length) {
           position: 'bottom',
           labels: {
             padding: 16,
-            font: { size: 12 }
+            font: {
+              size: 12
+            }
           }
         }
       }
@@ -798,7 +596,11 @@ if (cadastrosData && cadastrosData.length) {
         x: axisConfig(),
         y: axisConfig('Total')
       },
-      plugins: { legend: { display: false } }
+      plugins: {
+        legend: {
+          display: false
+        }
+      }
     }
   });
 }
@@ -812,7 +614,6 @@ if (aprovacoesData && aprovacoesData.length) {
       datasets: [buildDataset({ label: 'Aprovações', data: aprovacoesData.map(item => item.total), color: palette.success, type: 'line', fill: true })]
     },
     options: {
-      maintainAspectRatio: false,
       scales: {
         x: axisConfig(),
         y: axisConfig('Total')
@@ -831,7 +632,6 @@ if (cargosData && cargosData.length) {
     },
     options: {
       indexAxis: 'y',
-      maintainAspectRatio: false,
       scales: {
         x: axisConfig('Total'),
         y: axisConfig()
@@ -849,7 +649,6 @@ if (liquidacoesData && liquidacoesData.length) {
       datasets: [buildDataset({ label: 'Liquidações', data: liquidacoesData.map(item => item.total), color: palette.warn, type: 'line', fill: true })]
     },
     options: {
-      maintainAspectRatio: false,
       scales: {
         x: axisConfig(),
         y: axisConfig('Total')
