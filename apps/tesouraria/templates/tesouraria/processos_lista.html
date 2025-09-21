@@ -6,12 +6,10 @@
 
 {% block content %}
 <!-- Modal de Detalhes -->
-<div id="processo-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" onclick="closeModal(event)">
-  <div class="flex items-center justify-center min-h-screen px-4 py-8">
-    <div class="max-w-4xl w-full" onclick="event.stopPropagation()">
-      <div id="modal-content">
-        <!-- Conteúdo do modal será carregado aqui -->
-      </div>
+<div id="processo-modal" class="fixed inset-0 bg-background hidden z-50" onclick="closeModal(event)">
+  <div class="h-full w-full flex flex-col" onclick="event.stopPropagation()">
+    <div id="modal-content" class="flex-1 overflow-y-auto">
+      <!-- Conteúdo do modal será carregado aqui -->
     </div>
   </div>
 </div>
