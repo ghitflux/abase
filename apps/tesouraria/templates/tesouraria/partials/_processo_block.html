@@ -68,7 +68,7 @@
           <td class="text-gray-300">{{ p.data_entrada|date:"d/m/Y H:i" }}</td>
           <td>
             <button onclick="openProcessoModal({{ p.id }})"
-                    class="font-medium text-green-400 hover:text-green-300 hover:underline transition-colors"
+                    class="btn btn-ghost"
                     title="Ver detalhes do processo">
               <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -101,35 +101,33 @@
       <div class="flex space-x-1">
         <!-- Botão Anterior -->
         {% if page_obj.has_previous %}
-          <button class="bg-gray-700 border border-gray-600 text-gray-200 hover:bg-gray-600 px-3 py-2 text-sm font-medium rounded-md transition-colors"
+          <button class="btn btn-ghost"
                   hx-get="{% url 'tesouraria:processo_block' %}?block={{ block }}&page={{ page_obj.previous_page_number }}{% if request.GET.agente %}&agente={{ request.GET.agente }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
                   hx-target="#block-{{ block }}"
                   hx-swap="outerHTML">
             ← Anterior
           </button>
         {% else %}
-          <button class="bg-gray-800 border border-gray-700 text-gray-500 px-3 py-2 text-sm font-medium rounded-md cursor-not-allowed"
-                  disabled>
+          <button class="btn btn-ghost" disabled>
             ← Anterior
           </button>
         {% endif %}
 
         <!-- Página atual -->
-        <span class="bg-[#692E44] text-white px-3 py-2 text-sm font-medium rounded-md">
+        <span class="btn btn-accent">
           {{ page_obj.number }}
         </span>
 
         <!-- Botão Próxima -->
         {% if page_obj.has_next %}
-          <button class="bg-gray-700 border border-gray-600 text-gray-200 hover:bg-gray-600 px-3 py-2 text-sm font-medium rounded-md transition-colors"
+          <button class="btn btn-ghost"
                   hx-get="{% url 'tesouraria:processo_block' %}?block={{ block }}&page={{ page_obj.next_page_number }}{% if request.GET.agente %}&agente={{ request.GET.agente }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
                   hx-target="#block-{{ block }}"
                   hx-swap="outerHTML">
             Próxima →
           </button>
         {% else %}
-          <button class="bg-gray-800 border border-gray-700 text-gray-500 px-3 py-2 text-sm font-medium rounded-md cursor-not-allowed"
-                  disabled>
+          <button class="btn btn-ghost" disabled>
             Próxima →
           </button>
         {% endif %}

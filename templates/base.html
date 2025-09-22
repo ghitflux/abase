@@ -47,12 +47,13 @@
 
   <!-- Libs -->
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="theme-dark" style="font-family: 'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;">
+  {% csrf_token %}
   <div class="flex min-h-screen">
     {% include "partials/sidebar.html" %}
     
@@ -87,7 +88,7 @@
             " x-cloak>
               <button @click="open = !open" class="relative p-2 rounded-lg hover:bg-accent theme-transition focus-ring">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 2a6 6 0 00-6 6c0 2.97 1.95 5.5 4.64 6.36.38.12.64.48.64.86v.78a2 2 0 004 0v-.78c0-.38.26-.74.64-.86A6.006 6.006 0 0016 8a6 6 0 00-6-6z" />
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                  </svg>
                 <span x-show="naoLidas > 0" x-text="naoLidas > 99 ? '99+' : naoLidas"
                       class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]"></span>
@@ -113,7 +114,11 @@
                             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
                             'Content-Type': 'application/json'
                           }
-                        }).then(()=>{ notificacoes.forEach(n=>n.lida=true); naoLidas=0; })
+                        }).then(()=>{ 
+                          // Limpa todas as notificações da lista imediatamente
+                          notificacoes = [];
+                          naoLidas = 0;
+                        })
                       "
                       class="text-xs text-primary hover:text-primary/80 theme-transition">
                       Marcar todas como lidas
@@ -137,18 +142,22 @@
                                  'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
                                  'Content-Type': 'application/json'
                                }
-                             }).then(()=>{ notificacao.lida=true; naoLidas=Math.max(0, naoLidas-1); });
+                             }).then(()=>{ 
+                               // Remove a notificação da lista imediatamente
+                               notificacoes = notificacoes.filter(n => n.id !== notificacao.id);
+                               naoLidas = Math.max(0, naoLidas - 1);
+                             });
                            }
                            if (notificacao.url_acao) window.location.href = notificacao.url_acao;
-                         ">
+                          ">
                       <div class="flex items-start space-x-3">
                         <div class="flex-shrink-0">
                           <div class="w-2 h-2 rounded-full mt-2" :class="notificacao.lida ? 'bg-gray-300' : 'bg-primary'"></div>
                         </div>
                         <div class="flex-1 min-w-0">
-                          <p class="text-sm font-medium text-popover-foreground" x-text="notificacao.titulo"></p>
-                          <p class="text-xs text-muted-foreground mt-1" x-text="notificacao.mensagem"></p>
-                          <p class="text-xs text-muted-foreground mt-1" x-text="notificacao.data_criacao"></p>
+                          <p class="text-sm font-medium" style="color: var(--accent-600);" x-text="notificacao.titulo"></p>
+                          <p class="text-xs mt-1" style="color: #4a5568;" x-text="notificacao.mensagem"></p>
+                          <p class="text-xs mt-1" style="color: #4a5568;" x-text="notificacao.data_criacao"></p>
                         </div>
                       </div>
                     </div>
@@ -213,8 +222,8 @@
             <p class="text-sm text-gray-500 mb-6" id="confirmation-message">Tem certeza que deseja realizar esta ação?</p>
           </div>
           <div class="flex gap-3">
-            <button type="button" class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 text-sm font-medium transition-colors" onclick="closeConfirmationModal()">Cancelar</button>
-            <button type="button" class="flex-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm font-medium transition-colors" id="confirmation-action" onclick="confirmAction()">Confirmar</button>
+            <button type="button" class="btn btn-ghost" onclick="closeConfirmationModal()">Cancelar</button>
+            <button type="button" class="btn btn-destructive" id="confirmation-action" onclick="confirmAction()">Confirmar</button>
           </div>
         </div>
       </div>

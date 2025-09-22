@@ -52,9 +52,9 @@ def logs_notificacoes(request):
 
 @login_required
 def listar_notificacoes(request):
-    """Lista as notificações do usuário logado."""
-    notificacoes = request.user.notificacoes.all()[:10]  # Últimas 10
-    nao_lidas = request.user.notificacoes.filter(lida=False).count()
+    """Lista apenas as notificações não lidas do usuário logado."""
+    notificacoes = request.user.notificacoes.filter(lida=False)[:10]  # Últimas 10 não lidas
+    nao_lidas = notificacoes.count()
     
     return JsonResponse({
         'notificacoes': [{

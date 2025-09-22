@@ -60,122 +60,26 @@ class ThemeManager {
 }
 
 /**
- * Sidebar Management System
- * Handles sidebar expansion/collapse with animations
+ * Menu Items Management System
+ * Handles menu item hover effects and animations
  */
-class SidebarManager {
+class MenuManager {
   constructor() {
-    this.isExpanded = this.getStoredState() !== false; // Default to expanded
-    this.sidebar = null;
-    this.toggleButton = null;
     this.init();
   }
 
   init() {
-    this.sidebar = document.querySelector('[data-sidebar]');
-    this.toggleButton = document.querySelector('[data-sidebar-toggle]');
-    
-    if (!this.sidebar) {
-      console.warn('Sidebar element not found - sidebar functionality disabled');
-      return;
-    }
-    
-    if (!this.toggleButton) {
-      console.warn('Sidebar toggle button not found');
-    }
-
-    // Apply initial state
-    this.applySidebarState();
-
-    // Initialize toggle button
-    if (this.toggleButton) {
-      this.toggleButton.addEventListener('click', () => this.toggle());
-    }
-
-    // Handle responsive behavior
-    this.handleResize();
-    window.addEventListener('resize', () => this.handleResize());
-
     // Initialize menu items with hover effects
     this.initializeMenuItems();
     
-    console.log('Sidebar initialized successfully');
-  }
-
-  getStoredState() {
-    try {
-      const stored = localStorage.getItem('sidebar-expanded');
-      return stored !== null ? JSON.parse(stored) : true;
-    } catch (e) {
-      return true;
-    }
-  }
-
-  setStoredState(expanded) {
-    try {
-      localStorage.setItem('sidebar-expanded', JSON.stringify(expanded));
-    } catch (e) {
-      console.warn('Could not save sidebar state to localStorage');
-    }
-  }
-
-  applySidebarState() {
-    if (!this.sidebar) return;
-
-    this.sidebar.setAttribute('data-expanded', this.isExpanded);
-    this.sidebar.classList.toggle('expanded', this.isExpanded);
-    this.sidebar.classList.toggle('collapsed', !this.isExpanded);
-
-    // Update toggle button
-    if (this.toggleButton) {
-      this.toggleButton.setAttribute('aria-expanded', this.isExpanded);
-      this.toggleButton.setAttribute('data-expanded', this.isExpanded);
-    }
-
-    // Let CSS handle the menu labels visibility - no direct style manipulation needed
-    // The CSS rules with [data-sidebar].collapsed [data-menu-label] will handle this
-  }
-
-  toggle() {
-    this.isExpanded = !this.isExpanded;
-    this.setStoredState(this.isExpanded);
-    this.applySidebarState();
-  }
-
-  expand() {
-    if (!this.isExpanded) {
-      this.toggle();
-    }
-  }
-
-  collapse() {
-    if (this.isExpanded) {
-      this.toggle();
-    }
-  }
-
-  handleResize() {
-    if (!this.sidebar) return;
-
-    const isMobile = window.innerWidth < 768;
-    
-    if (isMobile) {
-      this.sidebar.classList.add('mobile');
-      // On mobile, sidebar should be collapsed by default
-      if (this.isExpanded) {
-        this.sidebar.classList.add('mobile-overlay');
-      } else {
-        this.sidebar.classList.remove('mobile-overlay');
-      }
-    } else {
-      this.sidebar.classList.remove('mobile', 'mobile-overlay');
-    }
+    console.log('Menu manager initialized successfully');
   }
 
   initializeMenuItems() {
-    if (!this.sidebar) return;
+    const sidebar = document.querySelector('[data-sidebar]');
+    if (!sidebar) return;
 
-    const menuItems = this.sidebar.querySelectorAll('[data-menu-item]');
+    const menuItems = sidebar.querySelectorAll('[data-menu-item]');
     
     menuItems.forEach((item, index) => {
       // Add stagger animation delay
@@ -267,22 +171,22 @@ class SidebarManager {
 }
 
 // Initialize managers when DOM is ready
-let themeManager, sidebarManager;
+let themeManager, menuManager;
 
 function initializeThemeSystem() {
   // Prevent double initialization
-  if (window.themeManager || window.sidebarManager) {
+  if (window.themeManager || window.menuManager) {
     console.log('Theme system already initialized');
     return;
   }
   
   try {
     themeManager = new ThemeManager();
-    sidebarManager = new SidebarManager();
+    menuManager = new MenuManager();
     
     // Make managers globally available
     window.themeManager = themeManager;
-    window.sidebarManager = sidebarManager;
+    window.menuManager = menuManager;
     
     console.log('Theme system initialized successfully');
   } catch (error) {
@@ -299,7 +203,7 @@ if (document.readyState === 'loading') {
 
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { ThemeManager, SidebarManager };
+  module.exports = { ThemeManager, MenuManager };
 }
 
 } // End of redeclaration protection

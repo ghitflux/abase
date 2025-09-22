@@ -1,5 +1,5 @@
 <!-- Modal Header -->
-<div class="modal-shell">
+<div style="background: var(--surface) !important; color: var(--text) !important; border-radius: 1rem 1rem 0 0 !important; border: 1px solid var(--border) !important; border-bottom: none !important; position: sticky !important; top: 0 !important; z-index: 10 !important;">
   <div class="flex items-center justify-between gap-4 p-6 border-b border-border/60">
     <h2 class="text-2xl font-bold text-foreground">Processo da Tesouraria #{{ processo.id }}</h2>
     <button onclick="closeModal()" class="text-muted-foreground hover:text-foreground theme-transition">
@@ -11,7 +11,7 @@
 </div>
 
 <!-- Modal Body - Scrollable -->
-<div class="modal-scroll">
+<div style="background: var(--surface) !important; border: 1px solid var(--border) !important; border-top: none !important; border-radius: 0 0 1rem 1rem !important; max-height: 400px !important; overflow-y: auto !important; padding: 1.5rem !important; display: flex !important; flex-direction: column !important; gap: 1.5rem !important;">
   <!-- Status e Informações Gerais -->
   <div class="modal-section">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">

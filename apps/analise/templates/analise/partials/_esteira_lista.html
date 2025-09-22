@@ -74,7 +74,7 @@
           <div class="flex items-center space-x-3">
             <!-- Botão Ver Detalhes -->
             <a href="{% url 'analise:detalhe_processo' processo.id %}" 
-               class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+               class="btn btn-ghost"
                title="Ver detalhes do processo">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -85,7 +85,7 @@
             <!-- Botão Assumir -->
             {% if processo.status == 'pendente' and not processo.analista_responsavel %}
             <button onclick="assumirProcesso({{ processo.id }})" 
-                    class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 transition-colors"
+                    class="btn btn-accent"
                     title="Assumir processo">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -99,7 +99,7 @@
                       onsubmit="return confirm('Tem certeza que deseja validar a correção e aprovar este processo?')">
                   {% csrf_token %}
                   <button type="submit" 
-                          class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 transition-colors"
+                          class="btn btn-accent"
                           title="Validar correção e aprovar">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -112,7 +112,7 @@
                       onsubmit="return confirm('Tem certeza que deseja pendenciar este processo novamente?')">
                   {% csrf_token %}
                   <button type="submit" 
-                          class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 transition-colors"
+                          class="btn btn-ghost"
                           title="Pendenciar novamente">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -122,7 +122,7 @@
               </div>
             {% elif processo.status == 'correcao_feita' and not processo.analista_responsavel %}
             <button onclick="assumirProcesso({{ processo.id }})" 
-                    class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                    class="btn btn-accent"
                     title="Assumir processo corrigido">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>

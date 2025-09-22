@@ -489,59 +489,219 @@
         <h2 class="text-xl font-semibold tracking-tight group-title">Documentos</h2>
         <p class="text-sm text-gray-600 mt-1">Suporte a imagens e PDF até 10MB</p>
       </div>
-      <div class="p-8">
-        <div class="grid grid-cols-12 gap-6">
-          <div class="col-span-4">
-            <label for="tipo_doc" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Documento</label>
-            <select id="tipo_doc" name="tipo"
-              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white">
-              <option value="DOC_FRENTE">📄 Documento (frente)</option>
-              <option value="DOC_VERSO">📄 Documento (verso)</option>
-              <option value="COMP_ENDERECO">🏠 Comprovante de endereço</option>
-              <option value="COMP_RENDA">💰 Comprovante de renda</option>
-              <option value="CONTRACHEQUE_ATUAL">📊 Contracheque atual</option>
-              <option value="TERMO_ADESAO">📋 Termo de Adesão</option>
-              <option value="TERMO_ANTECIPACAO">📝 Termo de Antecipação</option>
-            </select>
-          </div>
-
-          <div class="col-span-6">
-            <label for="arquivo_doc" class="block text-sm font-medium text-gray-700 mb-2">Arquivo</label>
-            <div class="relative">
-              <input id="arquivo_doc" name="arquivo_doc" type="file"
+      <div class="p-8 space-y-8">
+        
+        <!-- Primeira linha: 3 colunas -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- 1. Documento Frente -->
+          <div class="space-y-3">
+            <label for="doc_frente" class="block text-sm font-semibold text-gray-800 mb-2">
+              📄 Documento Frente
+            </label>
+            <div class="relative group">
+              <input 
+                id="doc_frente" 
+                name="doc_frente" 
+                type="file"
                 accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp"
-                class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300 bg-white
-                       file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium
-                       file:bg-gradient-to-r file:from-red-50 file:to-red-100 file:text-red-700
-                       hover:file:from-red-100 hover:file:to-red-200 file:transition-all file:duration-200"
+                class="w-full px-4 py-3 text-sm border-2 rounded-xl shadow-sm transition-all duration-300 
+                       focus:border-red-500 focus:ring-4 focus:ring-red-500/10 focus:outline-none 
+                       hover:shadow-md bg-white group-hover:bg-gray-50"
+                style="border-color: #374151; hover:border-color: #4B5563;"
+                       file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                       file:bg-gradient-to-r file:from-red-500 file:to-red-600 file:text-white
+                       hover:file:from-red-600 hover:file:to-red-700 file:transition-all file:duration-300
+                       file:shadow-sm hover:file:shadow-md"
                 onchange="validateFileSize(this)">
-              <div class="text-xs text-gray-500 mt-1 flex items-center">
+              <div class="text-xs text-gray-500 mt-2 flex items-center">
                 <svg class="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
                 </svg>
-                Formatos aceitos: PDF, JPG, PNG, GIF, BMP, WebP (máx. 10MB)
+                PDF, JPG, PNG (máx. 10MB)
               </div>
             </div>
           </div>
 
-          <div class="col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-2">&nbsp;</label>
-            <button type="button"
-              class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-xl font-medium shadow-sm hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center"
-              hx-post="{% url 'documentos:draft-upload' %}"
-              hx-encoding="multipart/form-data"
-              hx-include="#tipo_doc,#arquivo_doc"
-              hx-target="#draft-list">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-              Anexar
-            </button>
+          <!-- 2. Documento Verso -->
+          <div class="space-y-3">
+            <label for="doc_verso" class="block text-sm font-semibold text-gray-800 mb-2">
+              📄 Documento Verso
+            </label>
+            <div class="relative group">
+              <input 
+                id="doc_verso" 
+                name="doc_verso" 
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp"
+                class="w-full px-4 py-3 text-sm border-2 rounded-xl shadow-sm transition-all duration-300 
+                       focus:border-red-500 focus:ring-4 focus:ring-red-500/10 focus:outline-none 
+                       hover:shadow-md bg-white group-hover:bg-gray-50
+                       file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                       file:bg-gradient-to-r file:from-red-500 file:to-red-600 file:text-white
+                       hover:file:from-red-600 hover:file:to-red-700 file:transition-all file:duration-300
+                       file:shadow-sm hover:file:shadow-md"
+                style="border-color: #374151; hover:border-color: #4B5563;"
+                onchange="validateFileSize(this)">
+              <div class="text-xs text-gray-500 mt-2 flex items-center">
+                <svg class="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
+                </svg>
+                PDF, JPG, PNG (máx. 10MB)
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Comprovante de Endereço -->
+          <div class="space-y-3">
+            <label for="comp_endereco" class="block text-sm font-semibold text-gray-800 mb-2">
+              🏠 Comprovante de Endereço
+            </label>
+            <div class="relative group">
+              <input 
+                id="comp_endereco" 
+                name="comp_endereco" 
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp"
+                class="w-full px-4 py-3 text-sm border-2 rounded-xl shadow-sm transition-all duration-300 
+                       focus:border-red-500 focus:ring-4 focus:ring-red-500/10 focus:outline-none 
+                       hover:shadow-md bg-white group-hover:bg-gray-50
+                       file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                       file:bg-gradient-to-r file:from-red-500 file:to-red-600 file:text-white
+                       hover:file:from-red-600 hover:file:to-red-700 file:transition-all file:duration-300
+                       file:shadow-sm hover:file:shadow-md"
+                style="border-color: #374151; hover:border-color: #4B5563;"
+                onchange="validateFileSize(this)">
+              <div class="text-xs text-gray-500 mt-2 flex items-center">
+                <svg class="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
+                </svg>
+                PDF, JPG, PNG (máx. 10MB)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Segunda linha: 4 colunas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- 4. Contracheque Atual -->
+          <div class="space-y-3">
+            <label for="contracheque_atual" class="block text-sm font-semibold text-gray-800 mb-2">
+              📊 Contracheque Atual
+            </label>
+            <div class="relative group">
+              <input 
+                id="contracheque_atual" 
+                name="contracheque_atual" 
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp"
+                class="w-full px-4 py-3 text-sm border-2 rounded-xl shadow-sm transition-all duration-300 
+                       focus:border-red-500 focus:ring-4 focus:ring-red-500/10 focus:outline-none 
+                       hover:shadow-md bg-white group-hover:bg-gray-50
+                       file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                       file:bg-gradient-to-r file:from-red-500 file:to-red-600 file:text-white
+                       hover:file:from-red-600 hover:file:to-red-700 file:transition-all file:duration-300
+                       file:shadow-sm hover:file:shadow-md"
+                style="border-color: #374151; hover:border-color: #4B5563;"
+                onchange="validateFileSize(this)">
+              <div class="text-xs text-gray-500 mt-2 flex items-center">
+                <svg class="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
+                </svg>
+                PDF, JPG, PNG (máx. 10MB)
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Print da Simulação -->
+          <div class="space-y-3">
+            <label for="print_simulacao" class="block text-sm font-semibold text-gray-800 mb-2">
+              🖼️ Print da Simulação
+            </label>
+            <div class="relative group">
+              <input 
+                id="print_simulacao" 
+                name="print_simulacao" 
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp"
+                class="w-full px-4 py-3 text-sm border-2 rounded-xl shadow-sm transition-all duration-300 
+                       focus:border-red-500 focus:ring-4 focus:ring-red-500/10 focus:outline-none 
+                       hover:shadow-md bg-white group-hover:bg-gray-50
+                       file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                       file:bg-gradient-to-r file:from-red-500 file:to-red-600 file:text-white
+                       hover:file:from-red-600 hover:file:to-red-700 file:transition-all file:duration-300
+                       file:shadow-sm hover:file:shadow-md"
+                style="border-color: #374151; hover:border-color: #4B5563;"
+                onchange="validateFileSize(this)">
+              <div class="text-xs text-gray-500 mt-2 flex items-center">
+                <svg class="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
+            </svg>
+                PDF, JPG, PNG (máx. 10MB)
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Termo de Adesão -->
+          <div class="space-y-3">
+            <label for="termo_adesao" class="block text-sm font-semibold text-gray-800 mb-2">
+              📋 Termo de Adesão
+            </label>
+            <div class="relative group">
+              <input 
+                id="termo_adesao" 
+                name="termo_adesao" 
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp"
+                class="w-full px-4 py-3 text-sm border-2 rounded-xl shadow-sm transition-all duration-300 
+                       focus:border-red-500 focus:ring-4 focus:ring-red-500/10 focus:outline-none 
+                       hover:shadow-md bg-white group-hover:bg-gray-50
+                       file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                       file:bg-gradient-to-r file:from-red-500 file:to-red-600 file:text-white
+                       hover:file:from-red-600 hover:file:to-red-700 file:transition-all file:duration-300
+                       file:shadow-sm hover:file:shadow-md"
+                style="border-color: #374151; hover:border-color: #4B5563;"
+                onchange="validateFileSize(this)">
+              <div class="text-xs text-gray-500 mt-2 flex items-center">
+                <svg class="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
+                </svg>
+                PDF, JPG, PNG (máx. 10MB)
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. Termo de Antecipação -->
+          <div class="space-y-3">
+            <label for="termo_antecipacao" class="block text-sm font-semibold text-gray-800 mb-2">
+              📝 Termo de Antecipação
+            </label>
+            <div class="relative group">
+              <input 
+                id="termo_antecipacao" 
+                name="termo_antecipacao" 
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp"
+                class="w-full px-4 py-3 text-sm border-2 rounded-xl shadow-sm transition-all duration-300 
+                       focus:border-red-500 focus:ring-4 focus:ring-red-500/10 focus:outline-none 
+                       hover:shadow-md bg-white group-hover:bg-gray-50
+                       file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                       file:bg-gradient-to-r file:from-red-500 file:to-red-600 file:text-white
+                       hover:file:from-red-600 hover:file:to-red-700 file:transition-all file:duration-300
+                       file:shadow-sm hover:file:shadow-md"
+                style="border-color: #374151; hover:border-color: #4B5563;"
+                onchange="validateFileSize(this)">
+              <div class="text-xs text-gray-500 mt-2 flex items-center">
+                <svg class="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
+                </svg>
+                PDF, JPG, PNG (máx. 10MB)
+              </div>
+            </div>
           </div>
         </div>
 
         {% if is_edit and existing_docs %}
-        <div class="mt-6">
+        <div class="mt-8 pt-6 border-t border-gray-200">
           <h4 class="text-md font-medium text-gray-800 mb-3">Documentos Já Enviados</h4>
           <div class="space-y-2">
             {% for doc in existing_docs %}
@@ -559,13 +719,8 @@
             </div>
             {% endfor %}
           </div>
-          <hr class="my-6">
         </div>
         {% endif %}
-
-        <div id="draft-list" class="mt-8">
-          {% include "documentos/_draft_list.html" with docs=docs %}
-        </div>
       </div>
     </div>
 

@@ -100,7 +100,7 @@
               <td style="color: var(--muted);">{{ importacao.data_upload|date:'d/m/Y H:i' }}</td>
               <td style="display: flex; gap: 0.5rem;">
                 <a href="{% url 'importador:detalhe' importacao.id %}"
-                   style="color: #3b82f6; font-weight: 500; text-decoration: none;">Ver detalhes</a>
+                   style="color: #60a5fa; font-weight: 500; text-decoration: none;">Ver detalhes</a>
                 {% comment %}
                 {% if importacao.status == 'ERRO' %}
                   <span style="color: var(--muted); font-size: 0.875rem;">Reprocessamento não disponível</span>

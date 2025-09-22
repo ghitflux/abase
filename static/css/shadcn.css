@@ -177,16 +177,7 @@
   display: block;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: calc(var(--radius) - 2px);
-  border: 1px solid hsl(var(--border));
-  padding: 0.125rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  transition: colors 0.2s;
-}
+/* Badge styles removed to avoid conflicts with DS badges */
 
 .card {
   border-radius: calc(var(--radius) + 2px);
@@ -215,22 +206,7 @@
   color: hsl(var(--muted-foreground));
 }
 
-.table {
-  width: 100%;
-  font-size: 0.875rem;
-}
-
-.table th {
-  text-align: left;
-  color: hsl(var(--muted-foreground));
-  border-bottom: 1px solid hsl(var(--border));
-  padding: 0.5rem 0;
-}
-
-.table td {
-  border-bottom: 1px solid hsl(var(--border) / 0.5);
-  padding: 0.5rem 0;
-}
+/* Table styles removed to avoid conflicts with DS tables */
 
 .tabs {
   display: flex;

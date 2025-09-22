@@ -117,12 +117,12 @@
               Aprovar
             </button>
 
-            <button type="button" onclick="assumirEPendenciar()" class="btn" style="background:#d97706; color:#fff">
+            <button type="button" onclick="assumirEPendenciar()" class="btn btn-warning">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               Pendenciar
             </button>
 
-            <button type="button" onclick="assumirECancelar()" class="btn" style="background:#dc2626; color:#fff">
+            <button type="button" onclick="assumirECancelar()" class="btn btn-error">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               Cancelar
             </button>
@@ -151,12 +151,12 @@
             Aprovar
           </button>
 
-          <button type="button" onclick="openPendencyModal()" class="btn" style="background:#d97706; color:#fff">
+          <button type="button" onclick="openPendencyModal()" class="btn btn-warning">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             Pendenciar
           </button>
 
-          <button type="button" onclick="openCancelModal()" class="btn" style="background:#dc2626; color:#fff">
+          <button type="button" onclick="openCancelModal()" class="btn btn-error">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             Cancelar
           </button>
@@ -613,7 +613,7 @@
           </div>
         </div>
         <div style="margin-top:1rem; display:flex; flex-direction:column; gap:.5rem">
-          <button type="submit" class="btn" style="width:100%; background:#d97706; color:#fff">Enviar para Revisão</button>
+          <button type="submit" class="btn btn-warning" style="width:100%">Enviar para Revisão</button>
           <button type="button" onclick="closePendencyModal()" class="btn btn-ghost" style="width:100%">Cancelar</button>
         </div>
       </form>
@@ -634,7 +634,7 @@
         {% csrf_token %}
         <textarea name="motivo_cancelamento" placeholder="Motivo do cancelamento (obrigatório)" required class="input" rows="4" style="width:100%"></textarea>
         <div style="margin-top:1rem; display:flex; flex-direction:column; gap:.5rem">
-          <button type="submit" class="btn" style="width:100%; background:#dc2626; color:#fff">Confirmar Cancelamento</button>
+          <button type="submit" class="btn btn-error" style="width:100%">Confirmar Cancelamento</button>
           <button type="button" onclick="closeCancelModal()" class="btn btn-ghost" style="width:100%">Cancelar</button>
         </div>
       </form>

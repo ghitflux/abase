@@ -18,9 +18,17 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
 from core import views_ds
 
+def root_redirect(request):
+    """Redireciona a rota raiz para o login ou dashboard conforme autenticação"""
+    if request.user.is_authenticated:
+        return redirect('accounts:dashboard')
+    return redirect('accounts:login')
+
 urlpatterns = [
+    path('', root_redirect, name='root'),
     path('design-system/', views_ds.design_system, name='design_system'),
     path('admin/', admin.site.urls),
     path('accounts/', include(('apps.accounts.urls', 'accounts'), namespace='accounts')),
@@ -32,8 +40,6 @@ urlpatterns = [
     path('auditoria/', include(('apps.auditoria.urls', 'auditoria'), namespace='auditoria')),
     path('notificacoes/', include(('apps.notificacoes.urls', 'notificacoes'), namespace='notificacoes')),
     path('p/', include(('apps.documentos.urls', 'documentos'), namespace='documentos')),
-    path('api/', include('apps.accounts.urls')),
-    path('', include('apps.accounts.urls')),
 ]
 
 # Serve media files in development

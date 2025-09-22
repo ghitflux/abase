@@ -48,8 +48,6 @@
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-override">
-<div class="container-xl" style="padding: 1.5rem; min-height: 100vh; display: flex; flex-direction: column; gap: 1.5rem;">
   <!-- Header Section -->
   <header class="card" style="padding: 1.5rem;">
     <div style="display: flex; flex-direction: column; gap: 1.5rem;">
@@ -112,17 +110,17 @@
     </div>
   </header>
 
-  <!-- KPI Cards Grid -->
-  <section class="row">
+  <!-- KPI Cards Grid - Métricas Compactas -->
+  <section class="row" style="margin-bottom: 1.5rem;">
     <!-- Total Usuários -->
-    <article class="col-3">
-      <div class="kpi">
+    <article class="col-2">
+      <div class="kpi" style="padding: 0.75rem; min-height: auto;">
         <div>
-          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Total de usuários</p>
-          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">{{ total_users|default:0 }}</p>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Total de usuários</p>
+          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">{{ total_users|default:0 }}</p>
         </div>
-        <div style="background: rgba(96, 165, 250, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(96, 165, 250, 0.2);">
-          <svg style="width: 1.5rem; height: 1.5rem; color: #93c5fd;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div style="background: rgba(96, 165, 250, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(96, 165, 250, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #93c5fd;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/>
             <path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2"/>
           </svg>
@@ -131,29 +129,19 @@
     </article>
 
     <!-- Associados Cadastrados -->
-    <article class="col-3">
-      <div class="kpi">
+    <article class="col-2">
+      <div class="kpi" style="padding: 0.75rem; min-height: auto;">
         <div>
-          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Associados cadastrados</p>
-          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">{{ total_associados|default:0 }}</p>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Associados</p>
+          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">{{ total_associados|default:0 }}</p>
           {% if variacao_associados %}
-          <span style="display: inline-flex; align-items: center; gap: 0.25rem; margin-top: 0.5rem; font-size: 0.75rem; font-weight: 500; {% if variacao_associados > 0 %}color: var(--success);{% else %}color: var(--danger);{% endif %}">
-            {% if variacao_associados > 0 %}
-              <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-              </svg>
-              +{{ variacao_associados|floatformat:1 }}%
-            {% else %}
-              <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-              </svg>
-              {{ variacao_associados|floatformat:1 }}%
-            {% endif %}
+          <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; {% if variacao_associados > 0 %}color: var(--success);{% else %}color: var(--danger);{% endif %}">
+            {% if variacao_associados > 0 %}+{% endif %}{{ variacao_associados|floatformat:1 }}%
           </span>
           {% endif %}
         </div>
-        <div style="background: rgba(122, 19, 64, 0.2); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(122, 19, 64, 0.3);">
-          <svg style="width: 1.5rem; height: 1.5rem; color: #f4d6e3;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div style="background: rgba(122, 19, 64, 0.2); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(122, 19, 64, 0.3);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #f4d6e3;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0"/>
             <path d="M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
           </svg>
@@ -162,14 +150,14 @@
     </article>
 
     <!-- Fundo Atual -->
-    <article class="col-3">
-      <div class="kpi">
+    <article class="col-2">
+      <div class="kpi" style="padding: 0.75rem; min-height: auto;">
         <div>
-          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Fundo atual</p>
-          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">R$ {{ saldo_atual|floatformat:2|default:"0,00" }}</p>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Fundo atual</p>
+          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">R$ {{ saldo_atual|floatformat:2|default:"0,00" }}</p>
         </div>
-        <div style="background: rgba(22, 163, 74, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(22, 163, 74, 0.2);">
-          <svg style="width: 1.5rem; height: 1.5rem; color: #86efac;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div style="background: rgba(22, 163, 74, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(22, 163, 74, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #86efac;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"/>
             <path d="M12 6v14"/>
           </svg>
@@ -178,79 +166,45 @@
     </article>
 
     <!-- Retorno Estimado -->
-    <article class="col-3">
-      <div class="kpi">
+    <article class="col-2">
+      <div class="kpi" style="padding: 0.75rem; min-height: auto;">
         <div>
-          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Retorno estimado</p>
-          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">R$ {{ retorno_estimado|floatformat:2|default:"0,00" }}</p>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Retorno estimado</p>
+          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">R$ {{ retorno_estimado|floatformat:2|default:"0,00" }}</p>
         </div>
-        <div style="background: rgba(167, 139, 250, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(167, 139, 250, 0.2);">
-          <svg style="width: 1.5rem; height: 1.5rem; color: #c4b5fd;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div style="background: rgba(167, 139, 250, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(167, 139, 250, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #c4b5fd;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 10c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
             <path d="M3 16c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
           </svg>
         </div>
       </div>
     </article>
-  </section>
 
-  <!-- Second Row of KPI Cards -->
-  <section class="row">
     <!-- Taxas Mensais Pendentes -->
-    <article class="col-3">
-      <div class="kpi">
+    <article class="col-2">
+      <div class="kpi" style="padding: 0.75rem; min-height: auto;">
         <div>
-          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Taxas mensais pendentes</p>
-          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">R$ {{ taxas_mensais_pendentes|floatformat:2|default:"0,00" }}</p>
-          <p style="color: var(--muted); font-size: 0.75rem; margin-top: 0.25rem;">Valor líquido de pagamentos pendentes</p>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Taxas pendentes</p>
+          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">R$ {{ taxas_mensais_pendentes|floatformat:2|default:"0,00" }}</p>
         </div>
-        <div style="background: rgba(239, 68, 68, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(239, 68, 68, 0.2);">
-          <svg style="width: 1.5rem; height: 1.5rem; color: #fca5a5;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div style="background: rgba(239, 68, 68, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(239, 68, 68, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #fca5a5;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
         </div>
       </div>
     </article>
 
-    <!-- Placeholder for future KPIs -->
-    <article class="col-3">
-      <div class="kpi" style="opacity: 0.6;">
+    <!-- Disponível -->
+    <article class="col-2">
+      <div class="kpi" style="padding: 0.75rem; min-height: auto; opacity: 0.6;">
         <div>
-          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Disponível</p>
-          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">—</p>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Disponível</p>
+          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">—</p>
         </div>
-        <div style="background: rgba(156, 163, 175, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(156, 163, 175, 0.2);">
-          <svg style="width: 1.5rem; height: 1.5rem; color: #d1d5db;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 6v6l4 2"/>
-          </svg>
-        </div>
-      </div>
-    </article>
-
-    <article class="col-3">
-      <div class="kpi" style="opacity: 0.6;">
-        <div>
-          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Disponível</p>
-          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">—</p>
-        </div>
-        <div style="background: rgba(156, 163, 175, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(156, 163, 175, 0.2);">
-          <svg style="width: 1.5rem; height: 1.5rem; color: #d1d5db;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 6v6l4 2"/>
-          </svg>
-        </div>
-      </div>
-    </article>
-
-    <article class="col-3">
-      <div class="kpi" style="opacity: 0.6;">
-        <div>
-          <p style="color: var(--muted); font-size: 0.875rem; font-weight: 500;">Disponível</p>
-          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">—</p>
-        </div>
-        <div style="background: rgba(156, 163, 175, 0.15); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(156, 163, 175, 0.2);">
-          <svg style="width: 1.5rem; height: 1.5rem; color: #d1d5db;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div style="background: rgba(156, 163, 175, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(156, 163, 175, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #d1d5db;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/>
             <path d="M12 6v6l4 2"/>
           </svg>
@@ -346,157 +300,90 @@
     </article>
   </section>
 
-  <!-- Charts Grid -->
-  <section class="row">
+  <!-- Charts Grid - 2 Colunas x 3 Linhas -->
+  <section class="row" style="margin-bottom: 1.5rem;">
     <!-- Status dos Processos -->
-    <article class="col-4">
-      <div class="card" style="padding: 1.5rem;">
+    <article class="col-6">
+      <div class="card" style="padding: 1.25rem;">
         <header style="margin-bottom: 1rem;">
           <h2 class="section-title">Status dos Processos</h2>
           <p style="color: var(--muted); font-size: 0.875rem;">Distribuição por situação</p>
         </header>
-        <div style="height: 16rem; display: flex; align-items: center; justify-content: center;">
+        <div style="height: 14rem; display: flex; align-items: center; justify-content: center;">
           <canvas id="statusChart"></canvas>
         </div>
       </div>
     </article>
 
     <!-- Cadastros por Dia -->
-    <article class="col-4">
-      <div class="card" style="padding: 1.5rem;">
+    <article class="col-6">
+      <div class="card" style="padding: 1.25rem;">
         <header style="margin-bottom: 1rem;">
           <h2 class="section-title">Cadastros por Dia</h2>
           <p style="color: var(--muted); font-size: 0.875rem;">Volume de solicitações recebidas</p>
         </header>
-        <div style="height: 16rem;">
+        <div style="height: 14rem;">
           <canvas id="cadastrosChart"></canvas>
         </div>
       </div>
     </article>
+  </section>
 
+  <section class="row" style="margin-bottom: 1.5rem;">
     <!-- Aprovações por Dia -->
-    <article class="col-4">
-      <div class="card" style="padding: 1.5rem;">
+    <article class="col-6">
+      <div class="card" style="padding: 1.25rem;">
         <header style="margin-bottom: 1rem;">
           <h2 class="section-title">Aprovações por Dia</h2>
           <p style="color: var(--muted); font-size: 0.875rem;">Tendência de aprovações</p>
         </header>
-        <div style="height: 16rem;">
+        <div style="height: 14rem;">
           <canvas id="aprovacoesChart"></canvas>
         </div>
       </div>
     </article>
 
     <!-- Cargos dos Associados -->
-    <article class="col-4">
-      <div class="card" style="padding: 1.5rem;">
+    <article class="col-6">
+      <div class="card" style="padding: 1.25rem;">
         <header style="margin-bottom: 1rem;">
           <h2 class="section-title">Cargos dos Associados</h2>
           <p style="color: var(--muted); font-size: 0.875rem;">Distribuição por função</p>
         </header>
-        <div style="height: 16rem;">
+        <div style="height: 14rem;">
           <canvas id="cargosChart"></canvas>
         </div>
       </div>
     </article>
+  </section>
 
+  <section class="row">
     <!-- Liquidações por Mês -->
-    <article class="col-4">
-      <div class="card" style="padding: 1.5rem;">
+    <article class="col-6">
+      <div class="card" style="padding: 1.25rem;">
         <header style="margin-bottom: 1rem;">
           <h2 class="section-title">Liquidações por Mês</h2>
           <p style="color: var(--muted); font-size: 0.875rem;">Resultados financeiros liquidados</p>
         </header>
-        <div style="height: 16rem;">
+        <div style="height: 14rem;">
           <canvas id="liquidacoesChart"></canvas>
         </div>
       </div>
     </article>
 
     <!-- Progresso de Aprovação -->
-    <article class="col-4">
-      <div class="card" style="padding: 1.5rem;">
+    <article class="col-6">
+      <div class="card" style="padding: 1.25rem;">
         <header style="margin-bottom: 1rem;">
           <h2 class="section-title">Progresso de Aprovação</h2>
           <p style="color: var(--muted); font-size: 0.875rem;">Etapas do fluxo de cadastro</p>
         </header>
-        <div style="height: 20rem;">
+        <div style="height: 14rem;">
           <canvas id="progressoChart"></canvas>
         </div>
       </div>
     </article>
   </section>
-
-  <!-- Quick Actions -->
-  <section>
-    <div class="card" style="padding: 1.5rem;">
-      <header style="margin-bottom: 1.5rem;">
-        <h2 class="section-title">Ações Rápidas</h2>
-        <p style="color: var(--muted); font-size: 0.875rem;">Acesso direto às principais rotinas</p>
-      </header>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
-        <a
-          href="{% url 'cadastros:agente-create' %}"
-          style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; text-decoration: none; transition: all 0.2s ease;"
-          onmouseover="this.style.borderColor='var(--accent)'; this.style.background='rgba(122, 19, 64, 0.05)';"
-          onmouseout="this.style.borderColor='var(--border)'; this.style.background='transparent';"
-        >
-          <div style="background: rgba(122, 19, 64, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(122, 19, 64, 0.2);">
-            <svg style="width: 1.25rem; height: 1.25rem; color: #f4d6e3;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 9v6"/>
-              <path d="M15 12h6"/>
-              <path d="M12 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/>
-              <path d="M3 20v-1a5 5 0 0 1 5-5h1"/>
-            </svg>
-          </div>
-          <div>
-            <h3 style="color: var(--text); font-weight: 600; font-size: 0.875rem; margin: 0;">Novo Cadastro</h3>
-            <p style="color: var(--muted); font-size: 0.75rem; margin: 0;">Registrar associado</p>
-          </div>
-        </a>
-
-        <a
-          href="{% url 'tesouraria:nova_movimentacao' %}"
-          style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; text-decoration: none; transition: all 0.2s ease;"
-          onmouseover="this.style.borderColor='var(--success)'; this.style.background='rgba(22, 163, 74, 0.05)';"
-          onmouseout="this.style.borderColor='var(--border)'; this.style.background='transparent';"
-        >
-          <div style="background: rgba(22, 163, 74, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(22, 163, 74, 0.2);">
-            <svg style="width: 1.25rem; height: 1.25rem; color: #86efac;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 5v14"/>
-              <path d="M5 12h14"/>
-            </svg>
-          </div>
-          <div>
-            <h3 style="color: var(--text); font-weight: 600; font-size: 0.875rem; margin: 0;">Nova Movimentação</h3>
-            <p style="color: var(--muted); font-size: 0.75rem; margin: 0;">Lançar receita ou despesa</p>
-          </div>
-        </a>
-
-        <a
-          href="{% url 'relatorios:dashboard-diretoria' %}"
-          style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; text-decoration: none; transition: all 0.2s ease;"
-          onmouseover="this.style.borderColor='var(--info)'; this.style.background='rgba(96, 165, 250, 0.05)';"
-          onmouseout="this.style.borderColor='var(--border)'; this.style.background='transparent';"
-        >
-          <div style="background: rgba(96, 165, 250, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(96, 165, 250, 0.2);">
-            <svg style="width: 1.25rem; height: 1.25rem; color: #93c5fd;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 12h18"/>
-              <path d="M3 16h12"/>
-              <path d="M3 8h18"/>
-            </svg>
-          </div>
-          <div>
-            <h3 style="color: var(--text); font-weight: 600; font-size: 0.875rem; margin: 0;">Relatório Executivo</h3>
-            <p style="color: var(--muted); font-size: 0.75rem; margin: 0;">Dashboard para diretoria</p>
-          </div>
-        </a>
-      </div>
-    </div>
-  </section>
-</div>
-</div>
 
 <script>
 const statusData = {{ status_processos|safe }};

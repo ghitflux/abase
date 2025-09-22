@@ -6,7 +6,7 @@
 
 {% block content %}
 <!-- Modal de Detalhes -->
-<div id="processo-modal" class="fixed inset-0 bg-background hidden z-50" onclick="closeModal(event)">
+<div id="processo-modal" class="fixed inset-0 bg-background opacity-0 invisible z-50" onclick="closeModal(event)">
   <div class="h-full w-full flex flex-col" onclick="event.stopPropagation()">
     <div id="modal-content" class="flex-1 overflow-y-auto">
       <!-- Conteúdo do modal será carregado aqui -->
@@ -429,14 +429,14 @@
 </div>
 
 <!-- Modal de Detalhes do Processo -->
-<div id="processModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
-            <div id="modalContent">
-                <!-- Conteúdo carregado via AJAX -->
-            </div>
-        </div>
+<div id="processo-modal" class="fixed inset-0 bg-black/50 opacity-0 invisible z-50 transition-all duration-300" onclick="closeModal(event)" style="z-index: 9999;">
+  <div class="flex items-center justify-center min-h-screen px-4 py-8" onclick="event.stopPropagation()">
+    <div class="bg-card rounded-lg shadow-xl w-full border border-border theme-transition transform scale-95 transition-transform duration-300" style="width: 90% !important; max-width: 1000px !important; max-height: 80vh !important; overflow: hidden !important;">
+      <div id="modal-content" class="flex-1 overflow-y-auto">
+        <!-- Conteúdo carregado via AJAX -->
+      </div>
     </div>
+  </div>
 </div>
 </div>
 {% endblock content %}
@@ -445,14 +445,20 @@
 <script>
   // Função para abrir modal de detalhes
   function openProcessoModal(processoId) {
+    console.log('Tentando abrir modal para processo:', processoId);
+    
     const modal = document.getElementById('processo-modal');
     const modalContent = document.getElementById('modal-content');
+    
+    console.log('Elementos do modal encontrados:', { modal: !!modal, modalContent: !!modalContent });
     
     // Verificar se os elementos existem
     if (!modal || !modalContent) {
       console.error('Elementos do modal não encontrados:', { modal: !!modal, modalContent: !!modalContent });
       return;
     }
+    
+    console.log('Modal aberto, carregando conteúdo...');
     
     // Mostrar modal com loading
     modalContent.innerHTML = `
@@ -463,13 +469,28 @@
         </div>
       </div>
     `;
-    modal.classList.remove('hidden');
+    
+    // Mostrar modal
+    modal.classList.remove('opacity-0', 'invisible');
+    modal.classList.add('opacity-100', 'visible');
+    
+    // Animar o modal
+    const modalDialog = modal.querySelector('div > div');
+    if (modalDialog) {
+      modalDialog.classList.remove('scale-95');
+      modalDialog.classList.add('scale-100');
+    }
+    
     document.body.style.overflow = 'hidden';
     
     // Carregar conteúdo do modal
     fetch(`/tesouraria/processos/${processoId}/modal/`)
-      .then(response => response.text())
+      .then(response => {
+        console.log('Resposta recebida:', response.status);
+        return response.text();
+      })
       .then(html => {
+        console.log('HTML recebido, atualizando modal...');
         if (modalContent) {
           modalContent.innerHTML = html;
         }
@@ -483,13 +504,13 @@
                 <div class="text-red-500 mb-4">
                   <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                </svg>
+                  </svg>
+                </div>
+                <p class="text-gray-400 mb-4">Erro ao carregar detalhes do processo</p>
+                <button onclick="closeModal()" class="btn btn-ghost">Fechar</button>
               </div>
-              <p class="text-gray-400 mb-4">Erro ao carregar detalhes do processo</p>
-              <button onclick="closeModal()" class="btn btn-ghost">Fechar</button>
             </div>
-          </div>
-        `;
+          `;
         }
       });
   }
@@ -499,8 +520,18 @@
     if (event && event.target !== event.currentTarget) return;
     
     const modal = document.getElementById('processo-modal');
-    modal.classList.add('hidden');
-    document.body.style.overflow = '';
+    if (modal) {
+      // Animar o fechamento
+      const modalDialog = modal.querySelector('div > div');
+      if (modalDialog) {
+        modalDialog.classList.remove('scale-100');
+        modalDialog.classList.add('scale-95');
+      }
+      
+      modal.classList.add('opacity-0', 'invisible');
+      modal.classList.remove('opacity-100', 'visible');
+      document.body.style.overflow = '';
+    }
   }
 
   // Fechar modal com ESC
