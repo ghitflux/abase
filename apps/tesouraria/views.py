@@ -800,5 +800,83 @@ def devolver_analise(request, processo_id):
         
     except Exception as e:
         messages.error(request, f'Erro ao devolver processo: {str(e)}')
-    
+
     return redirect('tesouraria:processos')
+
+
+@login_required
+@tesouraria_required
+def upload_comprovantes(request, processo_id):
+    """
+    Endpoint para upload de comprovantes via AJAX
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
+
+    processo = get_object_or_404(ProcessoTesouraria, id=processo_id)
+
+    try:
+        comprovante_associado = request.FILES.get('comprovante_associado')
+        comprovante_agente = request.FILES.get('comprovante_agente')
+
+        if not comprovante_associado and not comprovante_agente:
+            return JsonResponse({
+                'success': False,
+                'message': 'Nenhum arquivo foi enviado'
+            }, status=400)
+
+        # Validar tamanho dos arquivos (máx 10MB)
+        max_size = 10 * 1024 * 1024  # 10MB
+
+        if comprovante_associado and comprovante_associado.size > max_size:
+            return JsonResponse({
+                'success': False,
+                'message': 'Comprovante do associado muito grande (máx 10MB)'
+            }, status=400)
+
+        if comprovante_agente and comprovante_agente.size > max_size:
+            return JsonResponse({
+                'success': False,
+                'message': 'Comprovante do agente muito grande (máx 10MB)'
+            }, status=400)
+
+        # Validar tipos de arquivo
+        allowed_types = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png']
+
+        if comprovante_associado and comprovante_associado.content_type not in allowed_types:
+            return JsonResponse({
+                'success': False,
+                'message': 'Tipo de arquivo inválido para comprovante do associado'
+            }, status=400)
+
+        if comprovante_agente and comprovante_agente.content_type not in allowed_types:
+            return JsonResponse({
+                'success': False,
+                'message': 'Tipo de arquivo inválido para comprovante do agente'
+            }, status=400)
+
+        # Salvar arquivos
+        with transaction.atomic():
+            if comprovante_associado:
+                processo.comprovante_associado = comprovante_associado
+
+            if comprovante_agente:
+                processo.comprovante_agente = comprovante_agente
+
+            processo.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Comprovantes enviados com sucesso',
+            'data': {
+                'processo_id': processo.id,
+                'comprovante_associado': bool(processo.comprovante_associado),
+                'comprovante_agente': bool(processo.comprovante_agente)
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Erro interno do servidor: {str(e)}'
+        }, status=500)

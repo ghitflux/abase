@@ -60,7 +60,7 @@
       <div class="side-actions">
         {% if cadastro.status %}
           <span class="badge {{ cadastro.status|status_class }}">
-            {{ cadastro.get_status_display|default:cadastro.status }}
+            {{ cadastro.get_current_status_display }}
           </span>
         {% endif %}
         {% if pode_renovar %}

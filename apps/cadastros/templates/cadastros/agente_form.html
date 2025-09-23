@@ -421,64 +421,90 @@
         <h2 class="text-xl font-semibold tracking-tight group-title">Detalhes do Contrato</h2>
       </div>
       <div class="p-8">
-        <div class="grid grid-cols-12 gap-6">
-          <div class="col-span-3">
-            <label for="{{ form.mensalidade_associativa.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+        <div class="grid grid-cols-5 gap-6">
+          <!-- Linha 1: 5 colunas -->
+          <div>
+            <label for="{{ form.mensalidade_associativa.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
               {{ form.mensalidade_associativa.label }}
             </label>
-            {{ form.mensalidade_associativa }}
+            <select name="mensalidade_associativa" id="{{ form.mensalidade_associativa.id_for_label }}" required
+              class="w-full px-4 py-3 text-sm border {% if form.mensalidade_associativa.errors %}border-red-500{% else %}border-gray-200{% endif %} rounded-xl shadow-sm bg-gray-900/60 text-gray-100 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
+              <option value="">Selecione...</option>
+              {% with current_value=form.instance.mensalidade_associativa %}
+                <option value="100" {% if current_value == 100 %}selected{% endif %}>R$ 100,00</option>
+                <option value="150" {% if current_value == 150 %}selected{% endif %}>R$ 150,00</option>
+                <option value="200" {% if current_value == 200 %}selected{% endif %}>R$ 200,00</option>
+                <option value="250" {% if current_value == 250 %}selected{% endif %}>R$ 250,00</option>
+                <option value="300" {% if current_value == 300 %}selected{% endif %}>R$ 300,00</option>
+                <option value="350" {% if current_value == 350 %}selected{% endif %}>R$ 350,00</option>
+                <option value="400" {% if current_value == 400 %}selected{% endif %}>R$ 400,00</option>
+                <option value="450" {% if current_value == 450 %}selected{% endif %}>R$ 450,00</option>
+                <option value="500" {% if current_value == 500 %}selected{% endif %}>R$ 500,00</option>
+                <!-- Valor personalizado, se existir e não estiver na lista padrão -->
+                {% if current_value and current_value != 100 and current_value != 150 and current_value != 200 and current_value != 250 and current_value != 300 and current_value != 350 and current_value != 400 and current_value != 450 and current_value != 500 %}
+                  <option value="{{ current_value }}" selected>
+                    R$ {{ current_value|floatformat:2 }}
+                  </option>
+                {% endif %}
+              {% endwith %}
+            </select>
+            {% if form.mensalidade_associativa.errors %}<p class="mt-1 text-sm text-red-600">{{ form.mensalidade_associativa.errors.0 }}</p>{% endif %}
           </div>
 
-          <div class="col-span-2">
+          <div>
             <label for="taxa_antecipacao_percent" class="block text-sm font-medium text-gray-700 mb-2">Taxa de Antecipação (%)</label>
             <input id="taxa_antecipacao_percent" value="30,00" readonly
               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600">
           </div>
 
-          <div class="col-span-3">
+          <div>
             <label for="disponivel" class="block text-sm font-medium text-gray-700 mb-2">Repasse ao Associado (R$)</label>
             <input id="disponivel" placeholder="R$ 0,00" readonly
               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600">
           </div>
 
-          <div class="col-span-4">
+          <div>
             <label for="valor_total_ant" class="block text-sm font-medium text-gray-700 mb-2">Total das 3 Cotas (R$)</label>
             <input id="valor_total_ant" placeholder="R$ 0,00" readonly
               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600">
           </div>
 
-          <div class="col-span-3">
+          <div>
             <label for="{{ form.data_aprovacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Data da Aprovação</label>
             <input type="date" name="data_aprovacao" id="{{ form.data_aprovacao.id_for_label }}"
               value="{{ form.instance.data_aprovacao|date:'Y-m-d'|default_if_none:'' }}"
               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
           </div>
 
-          <div class="col-span-3">
+          <!-- Linha 2: 5 colunas -->
+          <div>
             <label for="{{ form.data_primeira_mensalidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Data da primeira contribuição</label>
             <input type="date" name="data_primeira_mensalidade" id="{{ form.data_primeira_mensalidade.id_for_label }}"
               value="{{ form.instance.data_primeira_mensalidade|date:'Y-m-d'|default_if_none:'' }}"
               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
           </div>
 
-          <div class="col-span-3">
+          <div>
             <label for="{{ form.mes_averbacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Mês de Averbação (AAAA-MM)</label>
             <input type="month" name="mes_averbacao" id="{{ form.mes_averbacao.id_for_label }}"
               value="{{ form.instance.mes_averbacao|default_if_none:'' }}"
               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none hover:border-gray-300">
           </div>
 
-          <div class="col-span-3">
+          <div>
             <label for="doacao" class="block text-sm font-medium text-gray-700 mb-2">Doação do Associado (R$)</label>
             <input id="doacao" placeholder="R$ 0,00" readonly
               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600">
           </div>
 
-          <div class="col-span-3">
+          <div>
             <label for="auxilio_agente" class="block text-sm font-medium text-gray-700 mb-2">Auxílio do Agente (10%)</label>
             <input id="auxilio_agente" placeholder="R$ 0,00" readonly
               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl shadow-sm bg-gray-50 text-gray-600">
           </div>
+
+          <!-- Campo vazio na quinta posição da segunda linha -->
+          <div></div>
         </div>
       </div>
     </div>
@@ -582,7 +608,7 @@
         </div>
 
         <!-- Segunda linha: 4 colunas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
           <!-- 4. Contracheque Atual -->
           <div class="space-y-3">
             <label for="contracheque_atual" class="block text-sm font-semibold text-gray-800 mb-2">

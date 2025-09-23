@@ -57,7 +57,7 @@
             {% else %}
               bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
             {% endif %}">
-            {{ processo.get_status_display }}
+            {{ processo.cadastro.get_current_status_display }}
           </span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-primary-foreground">

@@ -19,17 +19,17 @@
         <div>
           <h3 class="text-lg font-medium text-white mb-2">Status do Processo</h3>
           {% if processo.status == 'AGUARDANDO_ANALISE' %}
-            <span class="badge badge--aguardando">{{ processo.get_status_display }}</span>
+            <span class="badge badge--aguardando">{{ processo.cadastro.get_current_status_display }}</span>
           {% elif processo.status == 'EM_ANALISE' %}
-            <span class="badge badge--analise">{{ processo.get_status_display }}</span>
+            <span class="badge badge--analise">{{ processo.cadastro.get_current_status_display }}</span>
           {% elif processo.status == 'APROVADO' %}
-            <span class="badge badge--aprovado">{{ processo.get_status_display }}</span>
+            <span class="badge badge--aprovado">{{ processo.cadastro.get_current_status_display }}</span>
           {% elif processo.status == 'REJEITADO' %}
-            <span class="badge badge--cancelado">{{ processo.get_status_display }}</span>
+            <span class="badge badge--cancelado">{{ processo.cadastro.get_current_status_display }}</span>
           {% elif processo.status == 'EFETIVADO' %}
-            <span class="badge badge--efetivado">{{ processo.get_status_display }}</span>
+            <span class="badge badge--efetivado">{{ processo.cadastro.get_current_status_display }}</span>
           {% else %}
-            <span class="badge badge--default">{{ processo.get_status_display }}</span>
+            <span class="badge badge--default">{{ processo.cadastro.get_current_status_display }}</span>
           {% endif %}
         </div>
         <div class="text-right">

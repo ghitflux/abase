@@ -44,24 +44,32 @@ class CadastroForm(forms.ModelForm):
 
         base_choices = [format_choice(amount) for amount in self.CONTRIBUTION_OPTIONS]
 
-        current_value = self.initial.get("mensalidade_associativa")
-        if current_value in (None, "") and self.instance and self.instance.pk:
+        # Priorizar valor da instância durante edição
+        current_value = None
+        if self.instance and self.instance.pk and self.instance.mensalidade_associativa:
             current_value = self.instance.mensalidade_associativa
+        elif self.initial.get("mensalidade_associativa"):
+            current_value = self.initial.get("mensalidade_associativa")
 
         current_decimal = None
-        try:
-            current_decimal = Decimal(current_value)
-        except Exception:
-            current_decimal = None
+        if current_value is not None:
+            try:
+                current_decimal = Decimal(str(current_value))
+            except (ValueError, TypeError, Exception):
+                current_decimal = None
 
+        # Sempre incluir o valor atual nas opções, mesmo que não esteja na lista padrão
         if current_decimal is not None and current_decimal not in self.CONTRIBUTION_OPTIONS:
             base_choices.append(format_choice(current_decimal))
+            # Ordenar as opções para manter consistência
+            base_choices.sort(key=lambda x: Decimal(x[0]))
 
         choice_list = [("", "Selecione...")] + base_choices
 
+        # Definir initial corretamente
         initial = ""
-        if current_decimal is not None and current_decimal not in (Decimal("0"), Decimal("0.00")):
-            initial = format_choice(current_decimal)[0]
+        if current_decimal is not None and current_decimal > Decimal("0"):
+            initial = str(current_decimal.quantize(Decimal('1')) if current_decimal == current_decimal.to_integral_value() else current_decimal)
 
         self.fields["mensalidade_associativa"] = forms.ChoiceField(
             label="Contribuição Associativa (R$)",

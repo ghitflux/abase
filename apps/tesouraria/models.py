@@ -142,7 +142,7 @@ class StatusProcessoTesouraria(models.TextChoices):
     EM_PROCESSAMENTO = 'em_processamento', 'Em Processamento'
     EM_VALIDACAO_VIDEO = 'em_validacao_video', 'Em Validação Vídeo'
     EM_AVERBACAO = 'em_averbacao', 'Em Averbação'
-    PROCESSADO = 'processado', 'Processado com Sucesso'
+    PROCESSADO = 'processado', 'Efetivado'
     REJEITADO = 'rejeitado', 'Rejeitado'
     
 

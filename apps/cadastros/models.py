@@ -205,6 +205,13 @@ class Cadastro(models.Model):
         blocked_statuses = ['processado', 'EFFECTIVATED']
         return current_status['status'] not in blocked_statuses
 
+    def can_devolver(self):
+        """Verifica se o processo pode ser devolvido para análise"""
+        current_status = self.get_current_status()
+        # Pode devolver exceto se já foi processado/efetivado
+        blocked_statuses = ['processado', 'EFFECTIVATED']
+        return current_status['status'] not in blocked_statuses
+
     def can_validacao_video(self):
         """Verifica se pode fazer validação de vídeo"""
         current_status = self.get_current_status()

@@ -38,4 +38,5 @@ urlpatterns = [
     path('processos/<int:processo_id>/validacao-video/', views.validacao_video, name='validacao_video'),
     path('processos/<int:processo_id>/averbacao/', views.averbacao, name='averbacao'),
     path('processos/<int:processo_id>/observacoes/', views.salvar_observacoes, name='salvar_observacoes'),
+    path('processos/<int:processo_id>/upload-comprovantes/', views.upload_comprovantes, name='upload_comprovantes'),
 ]

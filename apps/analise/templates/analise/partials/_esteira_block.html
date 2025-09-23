@@ -48,7 +48,7 @@
           <td>
             {# Usando badges do design system #}
             <span class="badge {{ p.status|status_class }}">
-              {{ p.get_status_display|default:p.status }}
+              {{ p.cadastro.get_current_status_display }}
             </span>
           </td>
           <td class="text-gray-300">

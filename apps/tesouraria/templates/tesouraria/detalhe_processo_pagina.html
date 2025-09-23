@@ -308,15 +308,27 @@ function aprovarProcesso(processoId) {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        alert('Processo aprovado com sucesso!');
+        showNotification({
+          type: 'success',
+          title: 'Processo Aprovado!',
+          message: 'Processo aprovado com sucesso!'
+        });
         window.location.href = '{% url "tesouraria:processos_lista" %}';
       } else {
-        alert('Erro ao aprovar processo: ' + data.message);
+        showNotification({
+          type: 'error',
+          title: 'Erro',
+          message: 'Erro ao aprovar processo: ' + data.message
+        });
       }
     })
     .catch(error => {
       console.error('Erro:', error);
-      alert('Erro ao aprovar processo');
+      showNotification({
+        type: 'error',
+        title: 'Erro',
+        message: 'Erro ao aprovar processo'
+      });
     });
   }
 }
@@ -336,15 +348,27 @@ function pendenciarProcesso(processoId) {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        alert('Processo pendenciado com sucesso!');
+        showNotification({
+          type: 'success',
+          title: 'Processo Pendenciado!',
+          message: 'Processo pendenciado com sucesso!'
+        });
         window.location.href = '{% url "tesouraria:processos_lista" %}';
       } else {
-        alert('Erro ao pendenciar processo: ' + data.message);
+        showNotification({
+          type: 'error',
+          title: 'Erro',
+          message: 'Erro ao pendenciar processo: ' + data.message
+        });
       }
     })
     .catch(error => {
       console.error('Erro:', error);
-      alert('Erro ao pendenciar processo');
+      showNotification({
+        type: 'error',
+        title: 'Erro',
+        message: 'Erro ao pendenciar processo'
+      });
     });
   }
 }
@@ -364,15 +388,27 @@ function cancelarProcesso(processoId) {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        alert('Processo cancelado com sucesso!');
+        showNotification({
+          type: 'success',
+          title: 'Processo Cancelado!',
+          message: 'Processo cancelado com sucesso!'
+        });
         window.location.href = '{% url "tesouraria:processos_lista" %}';
       } else {
-        alert('Erro ao cancelar processo: ' + data.message);
+        showNotification({
+          type: 'error',
+          title: 'Erro',
+          message: 'Erro ao cancelar processo: ' + data.message
+        });
       }
     })
     .catch(error => {
       console.error('Erro:', error);
-      alert('Erro ao cancelar processo');
+      showNotification({
+        type: 'error',
+        title: 'Erro',
+        message: 'Erro ao cancelar processo'
+      });
     });
   }
 }
@@ -397,16 +433,114 @@ document.getElementById('file-upload').addEventListener('change', function(e) {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        alert('Documentos enviados com sucesso!');
+        showNotification({
+          type: 'success',
+          title: 'Documentos Enviados!',
+          message: 'Documentos enviados com sucesso!'
+        });
         location.reload();
       } else {
-        alert('Erro ao enviar documentos: ' + data.message);
+        showNotification({
+          type: 'error',
+          title: 'Erro',
+          message: 'Erro ao enviar documentos: ' + data.message
+        });
       }
     })
     .catch(error => {
       console.error('Erro:', error);
-      alert('Erro ao enviar documentos');
+      showNotification({
+        type: 'error',
+        title: 'Erro',
+        message: 'Erro ao enviar documentos'
+      });
     });
+  }
+
+  // Sistema de Notificação Estilizada (copiado do processos_lista.html)
+  function showNotification(options) {
+    const {
+      type = 'success',
+      title = 'Notificação',
+      message = '',
+      duration = 3000
+    } = options;
+
+    const existingNotification = document.getElementById('notification-modal');
+    if (existingNotification) {
+      existingNotification.remove();
+    }
+
+    const types = {
+      success: {
+        bgColor: 'bg-emerald-600',
+        borderColor: 'border-emerald-500',
+        iconColor: 'text-emerald-100',
+        icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+               </svg>`
+      },
+      error: {
+        bgColor: 'bg-red-600',
+        borderColor: 'border-red-500',
+        iconColor: 'text-red-100',
+        icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+               </svg>`
+      }
+    };
+
+    const config = types[type];
+
+    const notificationHTML = `
+      <div id="notification-modal" class="fixed inset-0 flex items-start justify-center pt-16 px-4 z-50 pointer-events-none">
+        <div class="pointer-events-auto ${config.bgColor} border ${config.borderColor} rounded-lg shadow-xl max-w-md w-full transform transition-all duration-300 ease-out opacity-0 scale-95">
+          <div class="p-4 flex items-start space-x-3">
+            <div class="flex-shrink-0 ${config.iconColor}">
+              ${config.icon}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-medium text-white">${title}</h3>
+              ${message ? `<p class="mt-1 text-sm text-gray-100">${message}</p>` : ''}
+            </div>
+            <button onclick="closeNotification()" class="flex-shrink-0 text-gray-200 hover:text-white transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', notificationHTML);
+
+    const modal = document.getElementById('notification-modal');
+    const content = modal.querySelector('div > div');
+
+    setTimeout(() => {
+      content.classList.remove('opacity-0', 'scale-95');
+      content.classList.add('opacity-100', 'scale-100');
+    }, 10);
+
+    if (duration > 0) {
+      setTimeout(() => {
+        closeNotification();
+      }, duration);
+    }
+  }
+
+  function closeNotification() {
+    const modal = document.getElementById('notification-modal');
+    if (modal) {
+      const content = modal.querySelector('div > div');
+      content.classList.remove('opacity-100', 'scale-100');
+      content.classList.add('opacity-0', 'scale-95');
+
+      setTimeout(() => {
+        modal.remove();
+      }, 300);
+    }
   }
 });
 </script>

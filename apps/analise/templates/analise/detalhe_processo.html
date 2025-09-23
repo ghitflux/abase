@@ -71,7 +71,7 @@
       <div class="side-actions">
         {% if processo.status %}
           <span class="badge {{ processo.status|status_class }}">
-            {{ processo.get_status_display|default:processo.status }}
+            {{ processo.cadastro.get_current_status_display }}
           </span>
         {% endif %}
         {% if processo.analista_responsavel %}

@@ -743,14 +743,26 @@
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        alert('Observações salvas com sucesso!');
+        showNotification({
+          type: 'success',
+          title: 'Salvo!',
+          message: 'Observações salvas com sucesso!'
+        });
       } else {
-        alert('Erro ao salvar observações: ' + data.message);
+        showNotification({
+          type: 'error',
+          title: 'Erro',
+          message: 'Erro ao salvar observações: ' + data.message
+        });
       }
     })
     .catch(error => {
       console.error('Erro:', error);
-      alert('Erro ao salvar observações');
+      showNotification({
+        type: 'error',
+        title: 'Erro',
+        message: 'Erro ao salvar observações'
+      });
     });
   }
 
@@ -786,16 +798,28 @@
         })
         .then(response => {
           if (response.ok) {
-            alert('Contrato efetivado com sucesso!');
+            showNotification({
+              type: 'success',
+              title: 'Contrato Efetivado!',
+              message: 'Contrato efetivado com sucesso!'
+            });
             closeModal();
             location.reload();
           } else {
-            alert('Erro ao efetivar contrato');
+            showNotification({
+              type: 'error',
+              title: 'Erro',
+              message: 'Erro ao efetivar contrato'
+            });
           }
         })
         .catch(error => {
           console.error('Erro:', error);
-          alert('Erro ao efetivar contrato');
+          showNotification({
+            type: 'error',
+            title: 'Erro',
+            message: 'Erro ao efetivar contrato'
+          });
         });
       }
     });
@@ -812,7 +836,11 @@
       confirmText: 'Confirmar Cancelamento',
       onConfirm: (motivo) => {
         if (!motivo || motivo.trim() === '') {
-          alert('O motivo do cancelamento é obrigatório');
+          showNotification({
+            type: 'warning',
+            title: 'Campo Obrigatório',
+            message: 'O motivo do cancelamento é obrigatório'
+          });
           return;
         }
 
@@ -826,16 +854,28 @@
         })
         .then(response => {
           if (response.ok) {
-            alert('Contrato cancelado com sucesso!');
+            showNotification({
+              type: 'success',
+              title: 'Contrato Cancelado!',
+              message: 'Contrato cancelado com sucesso!'
+            });
             closeModal();
             location.reload();
           } else {
-            alert('Erro ao cancelar contrato');
+            showNotification({
+              type: 'error',
+              title: 'Erro',
+              message: 'Erro ao cancelar contrato'
+            });
           }
         })
         .catch(error => {
           console.error('Erro:', error);
-          alert('Erro ao cancelar contrato');
+          showNotification({
+            type: 'error',
+            title: 'Erro',
+            message: 'Erro ao cancelar contrato'
+          });
         });
       }
     });
@@ -852,7 +892,11 @@
       confirmText: 'Confirmar Devolução',
       onConfirm: (motivo) => {
         if (!motivo || motivo.trim() === '') {
-          alert('O motivo da devolução é obrigatório');
+          showNotification({
+            type: 'warning',
+            title: 'Campo Obrigatório',
+            message: 'O motivo da devolução é obrigatório'
+          });
           return;
         }
 
@@ -866,16 +910,28 @@
         })
         .then(response => {
           if (response.ok) {
-            alert('Processo devolvido para análise com sucesso!');
+            showNotification({
+              type: 'success',
+              title: 'Processo Devolvido!',
+              message: 'Processo devolvido para análise com sucesso!'
+            });
             closeModal();
             location.reload();
           } else {
-            alert('Erro ao devolver processo');
+            showNotification({
+              type: 'error',
+              title: 'Erro',
+              message: 'Erro ao devolver processo'
+            });
           }
         })
         .catch(error => {
           console.error('Erro:', error);
-          alert('Erro ao devolver processo');
+          showNotification({
+            type: 'error',
+            title: 'Erro',
+            message: 'Erro ao devolver processo'
+          });
         });
       }
     });
@@ -902,15 +958,27 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            alert('Status alterado para "Em Validação Vídeo" com sucesso!');
+            showNotification({
+              type: 'success',
+              title: 'Status Alterado!',
+              message: 'Processo alterado para "Em Validação Vídeo" com sucesso!'
+            });
             location.reload();
           } else {
-            alert('Erro ao alterar status: ' + data.message);
+            showNotification({
+              type: 'error',
+              title: 'Erro ao Alterar Status',
+              message: data.message
+            });
           }
         })
         .catch(error => {
           console.error('Erro:', error);
-          alert('Erro ao alterar status para validação de vídeo');
+          showNotification({
+            type: 'error',
+            title: 'Erro',
+            message: 'Erro ao alterar status para validação de vídeo'
+          });
         });
       }
     });
@@ -937,18 +1005,138 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            alert('Status alterado para "Em Averbação" com sucesso!');
+            showNotification({
+              type: 'success',
+              title: 'Status Alterado!',
+              message: 'Processo alterado para "Em Averbação" com sucesso!'
+            });
             location.reload();
           } else {
-            alert('Erro ao alterar status: ' + data.message);
+            showNotification({
+              type: 'error',
+              title: 'Erro ao Alterar Status',
+              message: data.message
+            });
           }
         })
         .catch(error => {
           console.error('Erro:', error);
-          alert('Erro ao alterar status para averbação');
+          showNotification({
+            type: 'error',
+            title: 'Erro',
+            message: 'Erro ao alterar status para averbação'
+          });
         });
       }
     });
+  }
+
+  // Sistema de Notificação Estilizada
+  function showNotification(options) {
+    const {
+      type = 'success', // success, error, warning, info
+      title = 'Notificação',
+      message = '',
+      duration = 3000
+    } = options;
+
+    // Remove notificação anterior se existir
+    const existingNotification = document.getElementById('notification-modal');
+    if (existingNotification) {
+      existingNotification.remove();
+    }
+
+    // Define cores e ícones por tipo
+    const types = {
+      success: {
+        bgColor: 'bg-emerald-600',
+        borderColor: 'border-emerald-500',
+        iconColor: 'text-emerald-100',
+        icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+               </svg>`
+      },
+      error: {
+        bgColor: 'bg-red-600',
+        borderColor: 'border-red-500',
+        iconColor: 'text-red-100',
+        icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+               </svg>`
+      },
+      warning: {
+        bgColor: 'bg-yellow-600',
+        borderColor: 'border-yellow-500',
+        iconColor: 'text-yellow-100',
+        icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+               </svg>`
+      },
+      info: {
+        bgColor: 'bg-blue-600',
+        borderColor: 'border-blue-500',
+        iconColor: 'text-blue-100',
+        icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+               </svg>`
+      }
+    };
+
+    const config = types[type];
+
+    // Cria o modal de notificação
+    const notificationHTML = `
+      <div id="notification-modal" class="fixed inset-0 flex items-start justify-center pt-16 px-4 z-50 pointer-events-none">
+        <div class="pointer-events-auto ${config.bgColor} border ${config.borderColor} rounded-lg shadow-xl max-w-md w-full transform transition-all duration-300 ease-out opacity-0 scale-95">
+          <div class="p-4 flex items-start space-x-3">
+            <div class="flex-shrink-0 ${config.iconColor}">
+              ${config.icon}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-medium text-white">${title}</h3>
+              ${message ? `<p class="mt-1 text-sm text-gray-100">${message}</p>` : ''}
+            </div>
+            <button onclick="closeNotification()" class="flex-shrink-0 text-gray-200 hover:text-white transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Adiciona ao DOM
+    document.body.insertAdjacentHTML('beforeend', notificationHTML);
+
+    // Anima entrada
+    const modal = document.getElementById('notification-modal');
+    const content = modal.querySelector('div > div');
+
+    setTimeout(() => {
+      content.classList.remove('opacity-0', 'scale-95');
+      content.classList.add('opacity-100', 'scale-100');
+    }, 10);
+
+    // Auto-remove após duração especificada
+    if (duration > 0) {
+      setTimeout(() => {
+        closeNotification();
+      }, duration);
+    }
+  }
+
+  function closeNotification() {
+    const modal = document.getElementById('notification-modal');
+    if (modal) {
+      const content = modal.querySelector('div > div');
+      content.classList.remove('opacity-100', 'scale-100');
+      content.classList.add('opacity-0', 'scale-95');
+
+      setTimeout(() => {
+        modal.remove();
+      }, 300);
+    }
   }
 </script>
 {% endblock extra_js %}

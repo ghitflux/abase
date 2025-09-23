@@ -68,25 +68,40 @@ def serve_private(request):
     DEV: retorna o arquivo diretamente.
     PROD: se PRIVATE_ACCEL_ENABLED=True, responde com cabeçalho X-Accel-Redirect para o Nginx entregar.
     Uso: GET /p/serve/?path=docs/2025/08/arquivo.pdf
+    Uso: GET /p/serve/?doc_id=54
     """
     from django.http import HttpResponseForbidden, HttpResponse
-    
-    rel_path = request.GET.get("path")
-    if not rel_path:
-        raise Http404()
 
-    doc = Documento.objects.filter(arquivo=rel_path).first()
-    if not doc:
-        # fallback: permite servir qualquer caminho existente (opcional)
-        pass
-    else:
+    # Suporte a doc_id (novo) e path (compatibilidade)
+    doc_id = request.GET.get("doc_id")
+    rel_path = request.GET.get("path")
+
+    doc = None
+
+    if doc_id:
+        # Buscar documento por ID
+        try:
+            doc = Documento.objects.get(id=doc_id)
+            rel_path = str(doc.arquivo)
+        except Documento.DoesNotExist:
+            raise Http404("Documento não encontrado")
+
+        # Verificar permissão
         if not _can_view(request.user, doc):
             return HttpResponseForbidden("Sem permissão.")
+
+    elif rel_path:
+        # Método original por caminho
+        doc = Documento.objects.filter(arquivo=rel_path).first()
+        if doc and not _can_view(request.user, doc):
+            return HttpResponseForbidden("Sem permissão.")
+    else:
+        raise Http404("Parâmetro doc_id ou path é obrigatório")
 
     abs_path = settings.PRIVATE_MEDIA_ROOT / rel_path
     abs_path = Path(abs_path)
     if not abs_path.exists() or not abs_path.is_file():
-        raise Http404()
+        raise Http404("Arquivo não encontrado no sistema de arquivos")
 
     if getattr(settings, "PRIVATE_ACCEL_ENABLED", False):
         internal = f"{settings.PRIVATE_ACCEL_INTERNAL_URL}/{rel_path.replace('\\','/')}"

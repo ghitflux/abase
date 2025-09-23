@@ -282,6 +282,25 @@ def agente_create(request):
     except Exception as e:
         messages.warning(request, f'Cadastro salvo, mas houve erro ao criar parcelas: {e}')
 
+    # processa arquivos enviados via form tradicional
+    try:
+        file_fields = [
+            ('doc_frente', 'DOC_FRENTE'),
+            ('doc_verso', 'DOC_VERSO'),
+            ('comp_endereco', 'COMP_ENDERECO'),
+            ('contracheque_atual', 'CONTRACHEQUE_ATUAL'),
+            ('print_simulacao', 'PRINT_SIMULACAO'),
+            ('termo_adesao', 'TERMO_ADESAO'),
+            ('termo_antecipacao', 'TERMO_ANTECIPACAO'),
+        ]
+
+        for field_name, doc_type in file_fields:
+            file_obj = request.FILES.get(field_name)
+            if file_obj:
+                Documento.objects.create(cadastro=cad, tipo=doc_type, arquivo=file_obj)
+    except Exception as e:
+        messages.warning(request, f'Cadastro salvo, mas houve erro ao processar arquivos: {e}')
+
     # promove rascunhos -> documentos
     try:
         for d in docs:
