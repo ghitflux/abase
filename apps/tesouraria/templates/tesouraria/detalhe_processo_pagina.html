@@ -61,7 +61,7 @@
         <div class="space-y-4">
           <div>
             <h4 class="text-lg font-medium text-white mb-3">Dados Pessoais</h4>
-            <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-4">
               <div>
                  <span class="text-sm text-gray-400">Nome Completo</span>
                  <p class="text-sm font-medium text-white">{{ processo.cadastro.nome_completo|default:"—" }}</p>
@@ -71,22 +71,9 @@
                  <p class="text-sm font-medium text-white">{{ processo.cadastro.cpf_cnpj|default:"—" }}</p>
                </div>
                <div>
-                 <span class="text-sm text-gray-400">Email</span>
-                 <p class="text-sm font-medium text-white">{{ processo.cadastro.email|default:"—" }}</p>
-               </div>
-               <div>
-                 <span class="text-sm text-gray-400">Celular</span>
-                 <p class="text-sm font-medium text-white">{{ processo.cadastro.celular|default:"—" }}</p>
-               </div>
-               <div>
-                 <span class="text-sm text-gray-400">Órgão</span>
-                 <p class="text-sm font-medium text-white">{{ processo.cadastro.orgao_publico|default:"—" }}</p>
-               </div>
-               <div>
                  <span class="text-sm text-gray-400">Matrícula</span>
                  <p class="text-sm font-medium text-white">{{ processo.cadastro.matricula_servidor|default:"—" }}</p>
                </div>
-
                <div>
                  <span class="text-sm text-gray-400">Agente Responsável</span>
                  <p class="text-sm font-medium text-white">
@@ -105,7 +92,7 @@
         <div class="space-y-4">
           <div>
             <h4 class="text-lg font-medium text-white mb-3">Dados Bancários</h4>
-            <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-4">
               <div>
                 <span class="text-sm text-gray-400">Banco</span>
                 <p class="text-sm font-medium text-white">{{ processo.cadastro.banco|default:"—" }}</p>

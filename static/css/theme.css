@@ -19,6 +19,14 @@
   --accent-foreground: 222.2 84% 4.9%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
+
+  /* Status color variables for consistency */
+  --warning: 45 93% 47%;
+  --warning-foreground: 26 83% 14%;
+  --info: 221 83% 53%;
+  --info-foreground: 210 40% 98%;
+  --success: 142 76% 36%;
+  --success-foreground: 356 29% 15%;
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
   --ring: 339 48% 30%;
@@ -104,6 +112,25 @@ body {
 .text-accent-foreground { color: hsl(var(--accent-foreground)); }
 .text-destructive { color: hsl(var(--destructive)); }
 .text-destructive-foreground { color: hsl(var(--destructive-foreground)); }
+
+/* Status color utilities */
+.bg-warning { background-color: hsl(var(--warning)); }
+.bg-warning-foreground { background-color: hsl(var(--warning-foreground)); }
+.text-warning { color: hsl(var(--warning)); }
+.text-warning-foreground { color: hsl(var(--warning-foreground)); }
+.border-warning { border-color: hsl(var(--warning)); }
+
+.bg-info { background-color: hsl(var(--info)); }
+.bg-info-foreground { background-color: hsl(var(--info-foreground)); }
+.text-info { color: hsl(var(--info)); }
+.text-info-foreground { color: hsl(var(--info-foreground)); }
+.border-info { border-color: hsl(var(--info)); }
+
+.bg-success { background-color: hsl(var(--success)); }
+.bg-success-foreground { background-color: hsl(var(--success-foreground)); }
+.text-success { color: hsl(var(--success)); }
+.text-success-foreground { color: hsl(var(--success-foreground)); }
+.border-success { border-color: hsl(var(--success)); }
 
 .border-border { border-color: hsl(var(--border)); }
 .border-input { border-color: hsl(var(--input)); }

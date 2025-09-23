@@ -1,0 +1,13 @@
+<!-- Erro no Modal -->
+<div style="background: var(--surface) !important; color: var(--text) !important; border-radius: 1rem !important; border: 1px solid var(--border) !important;">
+  <div class="p-8 text-center">
+    <div class="text-red-500 mb-4">
+      <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+      </svg>
+    </div>
+    <h3 class="text-lg font-semibold text-foreground mb-2">Erro ao Carregar</h3>
+    <p class="text-muted-foreground mb-4">{{ error_message|default:"Erro inesperado ao carregar os detalhes do processo" }}</p>
+    <button onclick="closeModal()" class="btn btn-ghost">Fechar</button>
+  </div>
+</div>

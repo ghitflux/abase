@@ -5,14 +5,7 @@
 {% block title %}Processos da Tesouraria{% endblock %}
 
 {% block content %}
-<!-- Modal de Detalhes -->
-<div id="processo-modal" class="fixed inset-0 bg-background opacity-0 invisible z-50" onclick="closeModal(event)">
-  <div class="h-full w-full flex flex-col" onclick="event.stopPropagation()">
-    <div id="modal-content" class="flex-1 overflow-y-auto">
-      <!-- Conteúdo do modal será carregado aqui -->
-    </div>
-  </div>
-</div>
+<!-- Modal de Detalhes removido - substituído pelo modal centrado no final -->
 
 <div class="container mx-auto px-4 py-6">
   <div class="mb-6">
@@ -165,6 +158,16 @@
          style="{% if request.GET.status == 'pendente' %}background: #3b2a0a; border-color: #713f12; color: #facc15;{% endif %}">
         Pendentes
       </a>
+      <a href="?status=em_validacao_video"
+         class="ds-pill {% if request.GET.status == 'em_validacao_video' %}is-active{% endif %}"
+         style="{% if request.GET.status == 'em_validacao_video' %}background: #1e3a8a; border-color: #3b82f6; color: #93c5fd;{% endif %}">
+        Em Validação Vídeo
+      </a>
+      <a href="?status=em_averbacao"
+         class="ds-pill {% if request.GET.status == 'em_averbacao' %}is-active{% endif %}"
+         style="{% if request.GET.status == 'em_averbacao' %}background: #581c87; border-color: #9333ea; color: #c4b5fd;{% endif %}">
+        Em Averbação
+      </a>
       <a href="?status=processado"
          class="ds-pill {% if request.GET.status == 'processado' %}is-active{% endif %}"
          style="{% if request.GET.status == 'processado' %}background: #052e1b; border-color: #065f46; color: #34d399;{% endif %}">
@@ -218,6 +221,8 @@
                         hx-trigger="change">
                   <option value="">Todos</option>
                   <option value="pendente" {% if request.GET.status == 'pendente' %}selected{% endif %}>Pendente</option>
+                  <option value="em_validacao_video" {% if request.GET.status == 'em_validacao_video' %}selected{% endif %}>Em Validação Vídeo</option>
+                  <option value="em_averbacao" {% if request.GET.status == 'em_averbacao' %}selected{% endif %}>Em Averbação</option>
                   <option value="processado" {% if request.GET.status == 'processado' %}selected{% endif %}>Processado</option>
                   <option value="rejeitado" {% if request.GET.status == 'rejeitado' %}selected{% endif %}>Rejeitado</option>
                 </select>
@@ -320,7 +325,7 @@
   <div id="processos-container">
     <div class="space-y-6">
       <!-- Tabela de Processos Pendentes -->
-      {% if not request.GET.status or request.GET.status == 'PENDENTE' %}
+      {% if not request.GET.status or request.GET.status == 'pendente' %}
       {% if processos_pendentes %}
       <div id="block-pendentes"
            hx-get="{% url 'tesouraria:processo_block' %}?block=pendentes&{{ request.GET.urlencode }}"
@@ -333,12 +338,40 @@
       {% endif %}
       {% endif %}
 
+      <!-- Tabela de Processos Em Validação Vídeo -->
+      {% if not request.GET.status or request.GET.status == 'em_validacao_video' %}
+      {% if processos_em_validacao_video %}
+      <div id="block-em-validacao-video"
+           hx-get="{% url 'tesouraria:processo_block' %}?block=em_validacao_video&{{ request.GET.urlencode }}"
+           hx-trigger="load delay:150ms"
+           hx-swap="outerHTML">
+        <div class="ds-card p-6">
+          <div class="ds-skeleton">Carregando Em Validação Vídeo...</div>
+        </div>
+      </div>
+      {% endif %}
+      {% endif %}
+
+      <!-- Tabela de Processos Em Averbação -->
+      {% if not request.GET.status or request.GET.status == 'em_averbacao' %}
+      {% if processos_em_averbacao %}
+      <div id="block-em-averbacao"
+           hx-get="{% url 'tesouraria:processo_block' %}?block=em_averbacao&{{ request.GET.urlencode }}"
+           hx-trigger="load delay:200ms"
+           hx-swap="outerHTML">
+        <div class="ds-card p-6">
+          <div class="ds-skeleton">Carregando Em Averbação...</div>
+        </div>
+      </div>
+      {% endif %}
+      {% endif %}
+
       <!-- Tabela de Processos Processados -->
-      {% if not request.GET.status or request.GET.status == 'PROCESSADO' %}
+      {% if not request.GET.status or request.GET.status == 'processado' %}
       {% if processos_processados %}
       <div id="block-processados"
            hx-get="{% url 'tesouraria:processo_block' %}?block=processados&{{ request.GET.urlencode }}"
-           hx-trigger="load delay:200ms"
+           hx-trigger="load delay:250ms"
            hx-swap="outerHTML">
         <div class="ds-card p-6">
           <div class="ds-skeleton">Carregando Processados...</div>
@@ -431,9 +464,41 @@
 <!-- Modal de Detalhes do Processo -->
 <div id="processo-modal" class="fixed inset-0 bg-black/50 opacity-0 invisible z-50 transition-all duration-300" onclick="closeModal(event)" style="z-index: 9999;">
   <div class="flex items-center justify-center min-h-screen px-4 py-8" onclick="event.stopPropagation()">
-    <div class="bg-card rounded-lg shadow-xl w-full border border-border theme-transition transform scale-95 transition-transform duration-300" style="width: 90% !important; max-width: 1000px !important; max-height: 80vh !important; overflow: hidden !important;">
+    <div class="bg-card rounded-lg shadow-xl w-full border border-border theme-transition transform scale-95 transition-transform duration-300" style="width: 95% !important; max-width: 1200px !important; max-height: 85vh !important; overflow: hidden !important; display: flex !important; flex-direction: column !important;">
       <div id="modal-content" class="flex-1 overflow-y-auto">
         <!-- Conteúdo carregado via AJAX -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmação -->
+<div id="confirmation-modal" class="fixed inset-0 bg-black/50 opacity-0 invisible z-50 transition-all duration-300" style="z-index: 10000;">
+  <div class="flex items-center justify-center min-h-screen px-4 py-8">
+    <div class="ds-modal w-full max-w-md transform scale-95 transition-transform duration-300">
+      <!-- Header com ícone -->
+      <div class="p-6 text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" id="confirmation-icon">
+          <!-- Ícone será inserido dinamicamente -->
+        </div>
+        <h3 class="text-lg font-semibold ds-modal-title mb-2" id="confirmation-title">Confirmar Ação</h3>
+        <p class="ds-modal-muted mb-4" id="confirmation-message">Tem certeza que deseja realizar esta ação?</p>
+
+        <!-- Campo de observações (opcional) -->
+        <div id="confirmation-input-container" class="mb-4 hidden">
+          <label class="block text-sm font-medium ds-modal-muted mb-2" id="confirmation-input-label">Observações</label>
+          <textarea id="confirmation-input" rows="3" class="w-full px-3 py-2 rounded-lg ds-modal-input focus:ring-2 focus:ring-accent focus:border-accent" placeholder="Digite suas observações..."></textarea>
+        </div>
+      </div>
+
+      <!-- Footer com botões -->
+      <div class="px-6 pb-6 flex flex-col gap-3">
+        <button id="confirmation-confirm" class="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
+          Confirmar
+        </button>
+        <button id="confirmation-cancel" class="w-full px-4 py-3 ds-modal-muted hover:ds-modal-text font-medium rounded-lg transition-colors">
+          Cancelar
+        </button>
       </div>
     </div>
   </div>
@@ -545,11 +610,11 @@
   function filterManager() {
     return {
       showAdvanced: false,
-      
+
       toggleAdvanced() {
         this.showAdvanced = !this.showAdvanced;
       },
-      
+
       resetAdvanced() {
         const advancedForm = document.querySelectorAll('[x-show="showAdvanced"] input, [x-show="showAdvanced"] select');
         advancedForm.forEach(field => {
@@ -561,6 +626,329 @@
         });
       }
     }
+  }
+
+  // Sistema de confirmação modal padronizado
+  function showConfirmationModal(options) {
+    const modal = document.getElementById('confirmation-modal');
+    const icon = document.getElementById('confirmation-icon');
+    const title = document.getElementById('confirmation-title');
+    const message = document.getElementById('confirmation-message');
+    const inputContainer = document.getElementById('confirmation-input-container');
+    const inputLabel = document.getElementById('confirmation-input-label');
+    const input = document.getElementById('confirmation-input');
+    const confirmBtn = document.getElementById('confirmation-confirm');
+    const cancelBtn = document.getElementById('confirmation-cancel');
+
+    // Configurar ícone e cores do botão
+    const iconColors = {
+      success: 'bg-emerald-500/20 text-emerald-400',
+      warning: 'bg-amber-500/20 text-amber-400',
+      danger: 'bg-red-500/20 text-red-400',
+      info: 'bg-blue-500/20 text-blue-400'
+    };
+
+    const buttonColors = {
+      success: 'bg-emerald-600 hover:bg-emerald-700',
+      warning: 'bg-amber-600 hover:bg-amber-700',
+      danger: 'bg-red-600 hover:bg-red-700',
+      info: 'bg-blue-600 hover:bg-blue-700'
+    };
+
+    const icons = {
+      success: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+      warning: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>',
+      danger: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
+      info: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+    };
+
+    // Aplicar configurações
+    icon.className = `w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${iconColors[options.type] || iconColors.info}`;
+    icon.innerHTML = icons[options.type] || icons.info;
+    title.textContent = options.title || 'Confirmar Ação';
+    message.textContent = options.message || 'Tem certeza que deseja realizar esta ação?';
+
+    // Configurar campo de input se necessário
+    if (options.showInput) {
+      inputContainer.classList.remove('hidden');
+      inputLabel.textContent = options.inputLabel || 'Observações';
+      input.placeholder = options.inputPlaceholder || 'Digite suas observações...';
+      input.value = '';
+    } else {
+      inputContainer.classList.add('hidden');
+    }
+
+    // Configurar botões
+    confirmBtn.textContent = options.confirmText || 'Confirmar';
+    confirmBtn.className = `w-full px-4 py-3 text-white font-medium rounded-lg transition-colors ${buttonColors[options.type] || buttonColors.info}`;
+    cancelBtn.textContent = options.cancelText || 'Cancelar';
+
+    // Event listeners
+    const handleConfirm = () => {
+      const inputValue = options.showInput ? input.value : null;
+      closeConfirmationModal();
+      if (options.onConfirm) {
+        options.onConfirm(inputValue);
+      }
+    };
+
+    const handleCancel = () => {
+      closeConfirmationModal();
+      if (options.onCancel) {
+        options.onCancel();
+      }
+    };
+
+    // Remover listeners anteriores
+    confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+    cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+
+    // Adicionar novos listeners
+    document.getElementById('confirmation-confirm').addEventListener('click', handleConfirm);
+    document.getElementById('confirmation-cancel').addEventListener('click', handleCancel);
+
+    // Mostrar modal
+    modal.classList.remove('opacity-0', 'invisible');
+    modal.classList.add('opacity-100', 'visible');
+    const modalDialog = modal.querySelector('div > div');
+    if (modalDialog) {
+      modalDialog.classList.remove('scale-95');
+      modalDialog.classList.add('scale-100');
+    }
+  }
+
+  function closeConfirmationModal() {
+    const modal = document.getElementById('confirmation-modal');
+    const modalDialog = modal.querySelector('div > div');
+    if (modalDialog) {
+      modalDialog.classList.remove('scale-100');
+      modalDialog.classList.add('scale-95');
+    }
+    modal.classList.add('opacity-0', 'invisible');
+    modal.classList.remove('opacity-100', 'visible');
+  }
+
+  // Funções para ações dos processos da tesouraria
+  function salvarObservacoes(processoId) {
+    const observacoes = document.querySelector('textarea[name="observacoes_tesouraria"]').value;
+
+    fetch(`/tesouraria/processos/${processoId}/observacoes/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ observacoes: observacoes })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Observações salvas com sucesso!');
+      } else {
+        alert('Erro ao salvar observações: ' + data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Erro:', error);
+      alert('Erro ao salvar observações');
+    });
+  }
+
+  function efetivarContrato(processoId) {
+    showConfirmationModal({
+      type: 'success',
+      title: 'Efetivar Contrato',
+      message: 'O contrato será aprovado e encaminhado para a tesouraria.',
+      confirmText: 'Confirmar Efetivação',
+      onConfirm: () => {
+        const formData = new FormData();
+
+        // Adicionar comprovantes se selecionados
+        const comprovanteAssociadoInput = document.querySelector('input[name="comprovante_associado"]');
+        const comprovanteAgenteInput = document.querySelector('input[name="comprovante_agente"]');
+        const observacoesTextarea = document.querySelector('textarea[name="observacoes_tesouraria"]');
+
+        if (comprovanteAssociadoInput && comprovanteAssociadoInput.files[0]) {
+          formData.append('comprovante_associado', comprovanteAssociadoInput.files[0]);
+        }
+        if (comprovanteAgenteInput && comprovanteAgenteInput.files[0]) {
+          formData.append('comprovante_agente', comprovanteAgenteInput.files[0]);
+        }
+        if (observacoesTextarea && observacoesTextarea.value) {
+          formData.append('observacoes_efetivacao', observacoesTextarea.value);
+        }
+
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        fetch(`/tesouraria/processos/${processoId}/efetivar/`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => {
+          if (response.ok) {
+            alert('Contrato efetivado com sucesso!');
+            closeModal();
+            location.reload();
+          } else {
+            alert('Erro ao efetivar contrato');
+          }
+        })
+        .catch(error => {
+          console.error('Erro:', error);
+          alert('Erro ao efetivar contrato');
+        });
+      }
+    });
+  }
+
+  function cancelarContrato(processoId) {
+    showConfirmationModal({
+      type: 'danger',
+      title: 'Cancelar Contrato',
+      message: 'O contrato será cancelado definitivamente.',
+      showInput: true,
+      inputLabel: 'Motivo do cancelamento (obrigatório)',
+      inputPlaceholder: 'Informe o motivo do cancelamento...',
+      confirmText: 'Confirmar Cancelamento',
+      onConfirm: (motivo) => {
+        if (!motivo || motivo.trim() === '') {
+          alert('O motivo do cancelamento é obrigatório');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('observacoes_cancelamento', motivo);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        fetch(`/tesouraria/processos/${processoId}/cancelar/`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => {
+          if (response.ok) {
+            alert('Contrato cancelado com sucesso!');
+            closeModal();
+            location.reload();
+          } else {
+            alert('Erro ao cancelar contrato');
+          }
+        })
+        .catch(error => {
+          console.error('Erro:', error);
+          alert('Erro ao cancelar contrato');
+        });
+      }
+    });
+  }
+
+  function devolverAnalise(processoId) {
+    showConfirmationModal({
+      type: 'warning',
+      title: 'Devolver para Análise',
+      message: 'O processo será devolvido para análise.',
+      showInput: true,
+      inputLabel: 'Motivo da devolução (obrigatório)',
+      inputPlaceholder: 'Informe o motivo da devolução...',
+      confirmText: 'Confirmar Devolução',
+      onConfirm: (motivo) => {
+        if (!motivo || motivo.trim() === '') {
+          alert('O motivo da devolução é obrigatório');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('observacoes_devolucao', motivo);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        fetch(`/tesouraria/processos/${processoId}/devolver/`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => {
+          if (response.ok) {
+            alert('Processo devolvido para análise com sucesso!');
+            closeModal();
+            location.reload();
+          } else {
+            alert('Erro ao devolver processo');
+          }
+        })
+        .catch(error => {
+          console.error('Erro:', error);
+          alert('Erro ao devolver processo');
+        });
+      }
+    });
+  }
+
+  function validacaoVideo(processoId) {
+    showConfirmationModal({
+      type: 'info',
+      title: 'Validação Vídeo',
+      message: 'O processo será marcado como "Em Validação Vídeo".',
+      showInput: true,
+      inputLabel: 'Observações da validação vídeo (opcional)',
+      inputPlaceholder: 'Observações sobre a validação de vídeo...',
+      confirmText: 'Confirmar Validação Vídeo',
+      onConfirm: (observacoes) => {
+        fetch(`/tesouraria/processos/${processoId}/validacao-video/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ observacoes_validacao: observacoes || '' })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Status alterado para "Em Validação Vídeo" com sucesso!');
+            location.reload();
+          } else {
+            alert('Erro ao alterar status: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Erro:', error);
+          alert('Erro ao alterar status para validação de vídeo');
+        });
+      }
+    });
+  }
+
+  function averbacao(processoId) {
+    showConfirmationModal({
+      type: 'info',
+      title: 'Averbação',
+      message: 'O processo será marcado como "Em Averbação".',
+      showInput: true,
+      inputLabel: 'Observações da averbação (opcional)',
+      inputPlaceholder: 'Observações sobre a averbação...',
+      confirmText: 'Confirmar Averbação',
+      onConfirm: (observacoes) => {
+        fetch(`/tesouraria/processos/${processoId}/averbacao/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ observacoes_averbacao: observacoes || '' })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Status alterado para "Em Averbação" com sucesso!');
+            location.reload();
+          } else {
+            alert('Erro ao alterar status: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Erro:', error);
+          alert('Erro ao alterar status para averbação');
+        });
+      }
+    });
   }
 </script>
 {% endblock extra_js %}

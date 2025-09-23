@@ -1,5 +1,5 @@
 <!-- Modal Header -->
-<div style="background: var(--surface) !important; color: var(--text) !important; border-radius: 1rem 1rem 0 0 !important; border: 1px solid var(--border) !important; border-bottom: none !important; position: sticky !important; top: 0 !important; z-index: 10 !important;">
+<div style="background: var(--surface) !important; color: var(--text) !important; border-radius: 1rem 1rem 0 0 !important; border: 0px solid var(--border) !important; border-bottom: none !important; position: sticky !important; top: 0 !important; z-index: 10 !important;">
   <div class="flex items-center justify-between gap-4 p-6 border-b border-border/60">
     <h2 class="text-2xl font-bold text-foreground">Processo da Tesouraria #{{ processo.id }}</h2>
     <button onclick="closeModal()" class="text-muted-foreground hover:text-foreground theme-transition">
@@ -11,31 +11,39 @@
 </div>
 
 <!-- Modal Body - Scrollable -->
-<div style="background: var(--surface) !important; border: 1px solid var(--border) !important; border-top: none !important; border-radius: 0 0 1rem 1rem !important; max-height: 400px !important; overflow-y: auto !important; padding: 1.5rem !important; display: flex !important; flex-direction: column !important; gap: 1.5rem !important;">
+<div style="background: var(--surface) !important; border: 1px solid var(--border) !important; border-top: none !important; border-radius: 0 0 1rem 1rem !important; max-height: 75vh !important; overflow-y: auto !important; padding: 1.5rem !important; display: flex !important; flex-direction: column !important; gap: 1.5rem !important;">
   <!-- Status e Informações Gerais -->
   <div class="modal-section">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <div>
         <h3 class="modal-section__title">Status do Processo</h3>
         {% if processo.status == 'pendente' %}
-          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-amber-500/15 text-amber-200 border border-amber-500/30">
-            Pendente de Processamento
+          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full status-pendente" style="background:rgba(217,119,6,0.2) !important;color:#fbbf24 !important;border:1px solid rgba(217,119,6,0.3) !important;">
+            {{ processo.get_status_display }}
           </span>
         {% elif processo.status == 'em_processamento' %}
-          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-sky-500/15 text-sky-200 border border-sky-500/30">
-            Em Processamento
+          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full status-em_validacao_video" style="background:rgba(96,165,250,0.2) !important;color:#60a5fa !important;border:1px solid rgba(96,165,250,0.3) !important;">
+            {{ processo.get_status_display }}
+          </span>
+        {% elif processo.status == 'em_validacao_video' %}
+          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full status-em_validacao_video" style="background:rgba(96,165,250,0.2) !important;color:#60a5fa !important;border:1px solid rgba(96,165,250,0.3) !important;">
+            Em Validação Vídeo
+          </span>
+        {% elif processo.status == 'em_averbacao' %}
+          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full status-em_averbacao" style="background:rgba(167,139,250,0.2) !important;color:#a78bfa !important;border:1px solid rgba(167,139,250,0.3) !important;">
+            Em Averbação
           </span>
         {% elif processo.status == 'processado' %}
-          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-emerald-500/15 text-emerald-200 border border-emerald-500/30">
-            Processado com Sucesso
+          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full status-processado" style="background:rgba(34,197,94,0.2) !important;color:#22c55e !important;border:1px solid rgba(34,197,94,0.3) !important;">
+            {{ processo.get_status_display }}
           </span>
         {% elif processo.status == 'rejeitado' %}
-          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-rose-500/15 text-rose-200 border border-rose-500/30">
-            Rejeitado
+          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full status-rejeitado" style="background:rgba(239,68,68,0.2) !important;color:#ef4444 !important;border:1px solid rgba(239,68,68,0.3) !important;">
+            {{ processo.get_status_display }}
           </span>
         {% else %}
-          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-slate-500/20 text-slate-200 border border-slate-500/40">
-            {{ processo.status|default:'—'|title }}
+          <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full status-default" style="background:rgba(156,163,175,0.2) !important;color:#9ca3af !important;border:1px solid rgba(156,163,175,0.3) !important;">
+            {{ processo.get_status_display|default:'Status Desconhecido' }}
           </span>
         {% endif %}
       </div>
@@ -51,7 +59,7 @@
     <!-- Informações Pessoais -->
     <div class="modal-section">
       <h4 class="modal-section__title">Dados Pessoais</h4>
-      <div class="modal-section__grid">
+      <div class="grid grid-cols-2 gap-4">
         <div>
           <span class="modal-field-label">Nome/Razão Social</span>
           <p class="modal-field-value">{{ processo.cadastro.nome_completo|default:"Não informado" }}</p>
@@ -65,12 +73,14 @@
           <p class="modal-field-value">{{ processo.cadastro.matricula_servidor|default:"—" }}</p>
         </div>
         <div>
-          <span class="modal-field-label">Órgão</span>
-          <p class="modal-field-value">{{ processo.cadastro.orgao_publico|default:"—" }}</p>
-        </div>
-        <div>
           <span class="modal-field-label">Agente Responsável</span>
-          <p class="modal-field-value text-sky-200">{{ processo.agente_responsavel.username|default:"—" }}</p>
+          <p class="modal-field-value text-sky-200">
+            {% if processo.agente_responsavel %}
+              {{ processo.agente_responsavel.get_full_name|default:processo.agente_responsavel.username }}
+            {% else %}
+              —
+            {% endif %}
+          </p>
         </div>
       </div>
     </div>
@@ -78,7 +88,7 @@
     <!-- Dados Bancários e PIX -->
     <div class="modal-section">
       <h4 class="modal-section__title">Dados Bancários</h4>
-      <div class="modal-section__grid">
+      <div class="grid grid-cols-3 gap-4">
         <div>
           <span class="modal-field-label">Banco</span>
           <p class="modal-field-value">{{ processo.cadastro.banco|default:"—" }}</p>
@@ -95,7 +105,7 @@
           <span class="modal-field-label">Tipo de Conta</span>
           <p class="modal-field-value">{{ processo.cadastro.get_tipo_conta_display|default:"—" }}</p>
         </div>
-        <div>
+        <div class="col-span-2">
           <span class="modal-field-label">Chave PIX</span>
           <p class="modal-field-value">{{ processo.cadastro.chave_pix|default:"—" }}</p>
         </div>
@@ -103,10 +113,150 @@
     </div>
   </div>
 
-  {% if processo.observacoes_analise %}
+  <!-- Botões de Ação -->
+  {% if processo.status == 'pendente' or processo.status == 'em_validacao_video' or processo.status == 'em_averbacao' %}
   <div class="modal-section">
-    <h4 class="modal-section__title">Observações da Análise</h4>
-    <p class="modal-field-value leading-relaxed">{{ processo.observacoes_analise }}</p>
+    <h4 class="modal-section__title">Ações do Processo</h4>
+    <div class="flex flex-wrap gap-3 justify-center">
+
+      {% if processo.status == 'pendente' %}
+        <!-- Botão Devolver para Análise -->
+        <button type="button" onclick="devolverAnalise({{ processo.id }})"
+                class="px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center space-x-2 text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"></path>
+          </svg>
+          <span>Devolver</span>
+        </button>
+
+        <!-- Botão Cancelar -->
+        <button type="button" onclick="cancelarContrato({{ processo.id }})"
+                class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center space-x-2 text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          <span>Cancelar</span>
+        </button>
+
+        <!-- Botão Validação Vídeo -->
+        <button type="button" onclick="validacaoVideo({{ processo.id }})"
+                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center space-x-2 text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+          <span>Validação Vídeo</span>
+        </button>
+
+        <!-- Botão Averbação -->
+        <button type="button" onclick="averbacao({{ processo.id }})"
+                class="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center space-x-2 text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <span>Averbação</span>
+        </button>
+      {% endif %}
+
+      <!-- Botão Efetivar - Disponível para pendente, validação e averbação -->
+      <button type="button" onclick="efetivarContrato({{ processo.id }})"
+              class="ds-btn ds-btn--accent text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span>Efetivar Contrato</span>
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Informações Financeiras -->
+  <div class="modal-section">
+    <h4 class="modal-section__title">Informações Financeiras</h4>
+
+    <!-- Valores Principais -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+      <div class="border border-border rounded-lg p-3 bg-surface">
+        <span class="modal-field-label text-emerald-300">Valor Bruto</span>
+        <p class="modal-field-value text-emerald-200 text-lg font-semibold">R$ {{ processo.cadastro.bruto|floatformat:2|default:"0,00" }}</p>
+      </div>
+      <div class="border border-border rounded-lg p-3 bg-surface">
+        <span class="modal-field-label text-emerald-300">Valor Líquido</span>
+        <p class="modal-field-value text-emerald-200 text-lg font-semibold">R$ {{ processo.cadastro.liquido|floatformat:2|default:"0,00" }}</p>
+      </div>
+      <div class="border border-primary/40 rounded-lg p-3 bg-primary/5">
+        <span class="modal-field-label text-primary">Valor Disponível (70%)</span>
+        <p class="modal-field-value text-primary text-xl font-bold">R$ {{ processo.cadastro.disponivel|floatformat:2|default:"0,00" }}</p>
+      </div>
+    </div>
+
+    <!-- Distribuição de Valores -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="border border-border rounded-lg p-3 bg-surface">
+        <span class="modal-field-label text-amber-300">Doação Associado (30%)</span>
+        <p class="modal-field-value text-amber-200 text-lg font-semibold">R$ {{ processo.cadastro.doacao_associado|floatformat:2|default:"0,00" }}</p>
+      </div>
+      <div class="border border-border rounded-lg p-3 bg-surface">
+        <span class="modal-field-label text-sky-300">Auxílio Agente (10%)</span>
+        <p class="modal-field-value text-sky-200 text-lg font-semibold">R$ {{ processo.cadastro.auxilio_agente_valor|floatformat:2|default:"0,00" }}</p>
+      </div>
+      <div class="border border-border rounded-lg p-3 bg-surface">
+        <span class="modal-field-label text-purple-300">Mensalidade (3x parcelas)</span>
+        <p class="modal-field-value text-purple-200 text-lg font-semibold">R$ {{ processo.cadastro.mensalidade|floatformat:2|default:"0,00" }}</p>
+        <p class="text-xs text-purple-300 mt-1">Total 3x: R$ {{ processo.cadastro.valor_total_antecipacao|floatformat:2|default:"0,00" }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Informações de Processamento -->
+  {% if processo.status == 'processado' or processo.data_processamento %}
+  <div class="modal-section">
+    <h4 class="modal-section__title">Processamento na Tesouraria</h4>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div>
+        <span class="modal-field-label">Data de Processamento</span>
+        <p class="modal-field-value">{{ processo.data_processamento|date:"d/m/Y H:i"|default:"—" }}</p>
+      </div>
+      <div>
+        <span class="modal-field-label">Processado por</span>
+        <p class="modal-field-value">
+          {% if processo.processado_por %}
+            {{ processo.processado_por.get_full_name|default:processo.processado_por.username }}
+          {% else %}
+            —
+          {% endif %}
+        </p>
+      </div>
+    </div>
+    {% if processo.observacoes_tesouraria %}
+    <div class="mt-3">
+      <span class="modal-field-label">Observações da Tesouraria</span>
+      <p class="modal-field-value leading-relaxed">{{ processo.observacoes_tesouraria }}</p>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if processo.observacoes_analise or processo.origem_analise %}
+  <div class="modal-section">
+    <h4 class="modal-section__title">Informações da Análise</h4>
+    {% if processo.origem_analise %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-3">
+      <div>
+        <span class="modal-field-label">Processo de Origem</span>
+        <p class="modal-field-value">#{{ processo.origem_analise.id }}</p>
+      </div>
+      <div>
+        <span class="modal-field-label">Data de Aprovação</span>
+        <p class="modal-field-value">{{ processo.data_aprovacao|date:"d/m/Y H:i"|default:"—" }}</p>
+      </div>
+    </div>
+    {% endif %}
+    {% if processo.observacoes_analise %}
+    <div>
+      <span class="modal-field-label">Observações da Análise</span>
+      <p class="modal-field-value leading-relaxed">{{ processo.observacoes_analise }}</p>
+    </div>
+    {% endif %}
   </div>
   {% endif %}
 
@@ -185,4 +335,52 @@
     </div>
   </div>
   {% endif %}
+
+  <!-- Seção de Upload de Comprovantes -->
+  {% if processo.status == 'pendente' or processo.status == 'em_validacao_video' or processo.status == 'em_averbacao' %}
+  <div class="modal-section">
+    <h4 class="modal-section__title">Upload de Comprovantes</h4>
+    <form id="comprovantes-form" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Upload Comprovante Associado -->
+        <div>
+          <label class="modal-field-label">Comprovante do Associado</label>
+          <div class="mt-2">
+            <input type="file" name="comprovante_associado" accept=".pdf,.jpg,.jpeg,.png"
+                   class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-500/20 file:text-emerald-200 hover:file:bg-emerald-500/30 file:cursor-pointer border border-border rounded-lg bg-surface">
+          </div>
+        </div>
+
+        <!-- Upload Comprovante Agente -->
+        <div>
+          <label class="modal-field-label">Comprovante do Agente</label>
+          <div class="mt-2">
+            <input type="file" name="comprovante_agente" accept=".pdf,.jpg,.jpeg,.png"
+                   class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-sky-500/20 file:text-sky-200 hover:file:bg-sky-500/30 file:cursor-pointer border border-border rounded-lg bg-surface">
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- Campo de Observações da Tesouraria -->
+  <div class="modal-section">
+    <h4 class="modal-section__title">Observações da Tesouraria</h4>
+    <form id="observacoes-form">
+      {% csrf_token %}
+      <textarea name="observacoes_tesouraria" rows="3"
+                class="w-full px-3 py-2 border border-border rounded-lg bg-surface text-foreground placeholder-muted focus:ring-2 focus:ring-primary focus:border-primary"
+                placeholder="Adicione observações sobre o processamento...">{{ processo.observacoes_tesouraria|default:"" }}</textarea>
+      <div class="mt-2 text-right">
+        <button type="button" onclick="salvarObservacoes({{ processo.id }})"
+                class="px-3 py-1 text-sm bg-primary hover:bg-primary/80 text-primary-foreground rounded-md transition-colors">
+          Salvar Observações
+        </button>
+      </div>
+    </form>
+  </div>
+
 </div>
+

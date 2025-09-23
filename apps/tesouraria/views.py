@@ -13,6 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.utils import timezone
 from django.db import transaction
+from django.http import JsonResponse
 from datetime import datetime, timedelta
 
 from .models import MovimentacaoTesouraria, Mensalidade, ReconciliacaoLog, StatusMensalidade, ProcessoTesouraria, StatusProcessoTesouraria
@@ -377,6 +378,8 @@ def processos_tesouraria(request):
     # KPIs baseados no queryset filtrado
     total_processos = ProcessoTesouraria.objects.count()
     pendentes = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.PENDENTE).count()
+    em_validacao_video = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.EM_VALIDACAO_VIDEO).count()
+    em_averbacao = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.EM_AVERBACAO).count()
     processados = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.PROCESSADO).count()
     rejeitados = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.REJEITADO).count()
     
@@ -441,28 +444,38 @@ def processos_tesouraria(request):
     
     # Preparar dados por status para as tabelas
     processos_pendentes = None
+    processos_em_validacao_video = None
+    processos_em_averbacao = None
     processos_processados = None
     processos_rejeitados = None
-    
-    if not status_filter or status_filter == 'PENDENTE':
+
+    if not status_filter or status_filter == 'pendente':
         processos_pendentes = processos_base.filter(status=StatusProcessoTesouraria.PENDENTE)[:10]
-    
-    if not status_filter or status_filter == 'PROCESSADO':
+
+    if not status_filter or status_filter == 'em_validacao_video':
+        processos_em_validacao_video = processos_base.filter(status=StatusProcessoTesouraria.EM_VALIDACAO_VIDEO)[:10]
+
+    if not status_filter or status_filter == 'em_averbacao':
+        processos_em_averbacao = processos_base.filter(status=StatusProcessoTesouraria.EM_AVERBACAO)[:10]
+
+    if not status_filter or status_filter == 'processado':
         processos_processados = processos_base.filter(status=StatusProcessoTesouraria.PROCESSADO)[:10]
-    
-    if not status_filter or status_filter == 'REJEITADO':
+
+    if not status_filter or status_filter == 'rejeitado':
         processos_rejeitados = processos_base.filter(status=StatusProcessoTesouraria.REJEITADO)[:10]
-    
+
     context = {
         'status_choices': StatusProcessoTesouraria.choices,
         'agentes': agentes,
         'kpis': kpis,
         'processos_pendentes': processos_pendentes,
+        'processos_em_validacao_video': processos_em_validacao_video,
+        'processos_em_averbacao': processos_em_averbacao,
         'processos_processados': processos_processados,
         'processos_rejeitados': processos_rejeitados,
         'current_filters': {
             'status': status_filter,
-            'agente': request.GET.get('agente', ''), 
+            'agente': request.GET.get('agente', ''),
             'search': request.GET.get('search', ''),
         }
     }
@@ -476,7 +489,7 @@ def processo_block(request):
     """
     Fragmento HTMX para um bloco específico com paginação.
     Parâmetros:
-      - block: pendentes|processados|rejeitados
+      - block: pendentes|em_validacao_video|em_averbacao|processados|rejeitados
       - page: número (default 1)
     """
     block = request.GET.get("block", "pendentes")
@@ -485,6 +498,8 @@ def processo_block(request):
     # Mapear block para status
     block_to_status = {
         "pendentes": StatusProcessoTesouraria.PENDENTE,
+        "em_validacao_video": StatusProcessoTesouraria.EM_VALIDACAO_VIDEO,
+        "em_averbacao": StatusProcessoTesouraria.EM_AVERBACAO,
         "processados": StatusProcessoTesouraria.PROCESSADO,
         "rejeitados": StatusProcessoTesouraria.REJEITADO,
     }
@@ -509,7 +524,7 @@ def processo_block(request):
 @tesouraria_required
 def detalhe_processo_tesouraria(request, processo_id):
     """
-    Exibe detalhes de um processo da tesouraria com modal de ações
+    Exibe detalhes de um processo da tesouraria em página completa
     """
     processo = get_object_or_404(
         ProcessoTesouraria.objects.select_related(
@@ -517,34 +532,42 @@ def detalhe_processo_tesouraria(request, processo_id):
         ).prefetch_related('cadastro__documentos'),
         id=processo_id
     )
-    
+
     context = {
         'processo': processo,
         'status_choices': StatusProcessoTesouraria.choices,
+        'is_page_view': True,  # Flag para distinguir da view modal
     }
-    
-    return render(request, 'tesouraria/detalhe_processo.html', context)
+
+    return render(request, 'tesouraria/detalhe_processo_pagina.html', context)
 
 
 @login_required
 @tesouraria_required
 def processo_modal(request, processo_id):
     """
-    Retorna o conteúdo do modal de detalhes do processo
+    Retorna o conteúdo do modal de detalhes do processo via AJAX
     """
-    processo = get_object_or_404(
-        ProcessoTesouraria.objects.select_related(
-            'cadastro', 'origem_analise', 'agente_responsavel', 'processado_por'
-        ).prefetch_related('cadastro__documentos'),
-        id=processo_id
-    )
-    
-    context = {
-        'processo': processo,
-        'status_choices': StatusProcessoTesouraria.choices,
-    }
-    
-    return render(request, 'tesouraria/detalhe_processo.html', context)
+    try:
+        processo = get_object_or_404(
+            ProcessoTesouraria.objects.select_related(
+                'cadastro', 'origem_analise', 'agente_responsavel', 'processado_por'
+            ).prefetch_related('cadastro__documentos'),
+            id=processo_id
+        )
+
+        context = {
+            'processo': processo,
+            'status_choices': StatusProcessoTesouraria.choices,
+            'is_modal_view': True,  # Flag para identificar view modal
+        }
+
+        return render(request, 'tesouraria/detalhe_processo.html', context)
+
+    except ProcessoTesouraria.DoesNotExist:
+        return render(request, 'tesouraria/partials/_modal_error.html', {
+            'error_message': 'Processo não encontrado'
+        })
 
 
 @login_required 
@@ -636,6 +659,98 @@ def cancelar_contrato(request, processo_id):
         messages.error(request, f'Erro ao cancelar contrato: {str(e)}')
     
     return redirect('tesouraria:processos')
+
+
+@login_required
+@tesouraria_required
+def salvar_observacoes(request, processo_id):
+    """
+    Salva observações da tesouraria via AJAX
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'})
+
+    try:
+        import json
+        data = json.loads(request.body)
+        observacoes = data.get('observacoes', '')
+
+        processo = get_object_or_404(ProcessoTesouraria, id=processo_id)
+        processo.observacoes_tesouraria = observacoes
+        processo.save()
+
+        return JsonResponse({'success': True, 'message': 'Observações salvas com sucesso'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
+
+@login_required
+@tesouraria_required
+def validacao_video(request, processo_id):
+    """
+    Marca processo como Em Validação Vídeo
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'})
+
+    try:
+        import json
+        data = json.loads(request.body)
+        observacoes = data.get('observacoes_validacao', '')
+
+        processo = get_object_or_404(ProcessoTesouraria, id=processo_id)
+
+        with transaction.atomic():
+            # Atualizar status do processo
+            processo.status = StatusProcessoTesouraria.EM_VALIDACAO_VIDEO
+            if observacoes:
+                processo.observacoes_tesouraria = f"{processo.observacoes_tesouraria or ''}\n[Validação Vídeo] {observacoes}".strip()
+            processo.save()
+
+            # Atualizar status no cadastro também
+            from apps.cadastros.choices import StatusCadastro
+            processo.cadastro.status = StatusCadastro.APPROVED_REVIEW
+            processo.cadastro.save()
+
+        return JsonResponse({'success': True, 'message': 'Processo marcado para validação de vídeo'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
+
+@login_required
+@tesouraria_required
+def averbacao(request, processo_id):
+    """
+    Marca processo como Em Averbação
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'})
+
+    try:
+        import json
+        data = json.loads(request.body)
+        observacoes = data.get('observacoes_averbacao', '')
+
+        processo = get_object_or_404(ProcessoTesouraria, id=processo_id)
+
+        with transaction.atomic():
+            # Atualizar status do processo
+            processo.status = StatusProcessoTesouraria.EM_AVERBACAO
+            if observacoes:
+                processo.observacoes_tesouraria = f"{processo.observacoes_tesouraria or ''}\n[Averbação] {observacoes}".strip()
+            processo.save()
+
+            # Atualizar status no cadastro também
+            from apps.cadastros.choices import StatusCadastro
+            processo.cadastro.status = StatusCadastro.APPROVED_REVIEW
+            processo.cadastro.save()
+
+        return JsonResponse({'success': True, 'message': 'Processo marcado para averbação'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
 
 
 @login_required

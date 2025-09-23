@@ -5,6 +5,10 @@
     <div class="flex items-center justify-between">
       {% if block == 'pendentes' %}
         <h3 class="text-xl font-bold text-white">Pendentes</h3>
+      {% elif block == 'em_validacao_video' %}
+        <h3 class="text-xl font-bold text-white">Em Validação Vídeo</h3>
+      {% elif block == 'em_averbacao' %}
+        <h3 class="text-xl font-bold text-white">Em Averbação</h3>
       {% elif block == 'processados' %}
         <h3 class="text-xl font-bold text-white">Processados</h3>
       {% elif block == 'rejeitados' %}
@@ -44,18 +48,30 @@
             </div>
           </td>
           <td>
-            {% if p.status == 'AGUARDANDO_ANALISE' %}
-              <span class="badge badge--aguardando">{{ p.get_status_display }}</span>
-            {% elif p.status == 'EM_ANALISE' %}
-              <span class="badge badge--analise">{{ p.get_status_display }}</span>
-            {% elif p.status == 'APROVADO' %}
-              <span class="badge badge--aprovado">{{ p.get_status_display }}</span>
-            {% elif p.status == 'REJEITADO' %}
-              <span class="badge badge--cancelado">{{ p.get_status_display }}</span>
-            {% elif p.status == 'EFETIVADO' %}
-              <span class="badge badge--efetivado">{{ p.get_status_display }}</span>
+            {% if p.status == 'pendente' %}
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full status-pendente" style="background:rgba(217,119,6,0.2) !important;color:#fbbf24 !important;border:1px solid rgba(217,119,6,0.3) !important;">
+                {{ p.get_status_display }}
+              </span>
+            {% elif p.status == 'em_validacao_video' %}
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full status-em_validacao_video" style="background:rgba(96,165,250,0.2) !important;color:#60a5fa !important;border:1px solid rgba(96,165,250,0.3) !important;">
+                {{ p.get_status_display }}
+              </span>
+            {% elif p.status == 'em_averbacao' %}
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full status-em_averbacao" style="background:rgba(167,139,250,0.2) !important;color:#a78bfa !important;border:1px solid rgba(167,139,250,0.3) !important;">
+                {{ p.get_status_display }}
+              </span>
+            {% elif p.status == 'processado' %}
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full status-processado" style="background:rgba(34,197,94,0.2) !important;color:#22c55e !important;border:1px solid rgba(34,197,94,0.3) !important;">
+                {{ p.get_status_display }}
+              </span>
+            {% elif p.status == 'rejeitado' %}
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full status-rejeitado" style="background:rgba(239,68,68,0.2) !important;color:#ef4444 !important;border:1px solid rgba(239,68,68,0.3) !important;">
+                {{ p.get_status_display }}
+              </span>
             {% else %}
-              <span class="badge badge--default">{{ p.get_status_display }}</span>
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full status-default" style="background:rgba(156,163,175,0.2) !important;color:#9ca3af !important;border:1px solid rgba(156,163,175,0.3) !important;">
+                {{ p.get_status_display }}
+              </span>
             {% endif %}
           </td>
           <td class="text-gray-300">

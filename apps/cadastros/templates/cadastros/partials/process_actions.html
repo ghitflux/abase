@@ -1,0 +1,107 @@
+{% load static %}
+{% load status_tags %}
+
+<!-- Botões de Ação Baseados nas Regras de Negócio -->
+<div class="flex flex-wrap gap-2 justify-center">
+
+  <!-- Botão Cancelar/Devolver - Disponível em todos os status exceto efetivados -->
+  {% if can_cancel %}
+    {% if module == 'tesouraria' %}
+      <button type="button" onclick="devolverAnalise({{ cadastro.id }})"
+              class="px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center space-x-2 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"></path>
+        </svg>
+        <span>Devolver</span>
+      </button>
+
+      <button type="button" onclick="cancelarContrato({{ cadastro.id }})"
+              class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center space-x-2 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        <span>Cancelar</span>
+      </button>
+    {% elif module == 'analise' %}
+      <button type="button" onclick="cancelarProcesso({{ cadastro.id }})"
+              class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center space-x-2 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        <span>Cancelar</span>
+      </button>
+    {% endif %}
+  {% endif %}
+
+  <!-- Botão Validação Vídeo - Disponível exceto em efetivados -->
+  {% if can_validacao_video %}
+    {% if module == 'tesouraria' %}
+      <button type="button" onclick="validacaoVideo({{ cadastro.id }})"
+              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center space-x-2 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+        </svg>
+        <span>Validação Vídeo</span>
+      </button>
+    {% elif module == 'analise' %}
+      <button type="button" onclick="marcarValidacaoVideo({{ cadastro.id }})"
+              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center space-x-2 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+        </svg>
+        <span>Validação Vídeo</span>
+      </button>
+    {% endif %}
+  {% endif %}
+
+  <!-- Botão Averbação - Disponível apenas em validação de vídeo -->
+  {% if can_averbacao %}
+    {% if module == 'tesouraria' %}
+      <button type="button" onclick="averbacao({{ cadastro.id }})"
+              class="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center space-x-2 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <span>Averbação</span>
+      </button>
+    {% elif module == 'analise' %}
+      <button type="button" onclick="marcarAverbacao({{ cadastro.id }})"
+              class="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center space-x-2 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <span>Averbação</span>
+      </button>
+    {% endif %}
+  {% endif %}
+
+  <!-- Botão Efetivar - Disponível apenas em averbação -->
+  {% if can_efetivar %}
+    {% if module == 'tesouraria' %}
+      <button type="button" onclick="efetivarContrato({{ cadastro.id }})"
+              class="ds-btn ds-btn--accent text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span>Efetivar Contrato</span>
+      </button>
+    {% elif module == 'analise' %}
+      <button type="button" onclick="aprovarProcesso({{ cadastro.id }})"
+              class="ds-btn ds-btn--accent text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span>Aprovar para Efetivação</span>
+      </button>
+    {% endif %}
+  {% endif %}
+
+</div>
+
+<!-- Informações do Status (Debug) -->
+{% if status_info %}
+<div class="mt-2 text-xs text-muted-foreground">
+  Status: {{ status_info.display }}
+  <span class="text-xs opacity-60">({{ status_info.source }})</span>
+</div>
+{% endif %}

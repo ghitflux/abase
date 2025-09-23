@@ -154,10 +154,79 @@ class Cadastro(models.Model):
     def cpf_cnpj(self):
         """Retorna CPF ou CNPJ, o que estiver preenchido"""
         return self.cpf or self.cnpj or "—"
-    
+
+    def get_current_status(self):
+        """
+        Retorna o status atual unificado do processo.
+        Prioridade: Tesouraria > Análise > Cadastro
+        """
+        # 1. Verificar se existe processo na tesouraria (maior prioridade)
+        if hasattr(self, 'processo_tesouraria'):
+            try:
+                processo_tesouraria = self.processo_tesouraria
+                return {
+                    'status': processo_tesouraria.status,
+                    'display': processo_tesouraria.get_status_display(),
+                    'source': 'tesouraria',
+                    'date': processo_tesouraria.data_entrada
+                }
+            except:
+                pass
+
+        # 2. Verificar se existe processo na análise
+        if hasattr(self, 'analise_processo'):
+            try:
+                analise_processo = self.analise_processo
+                return {
+                    'status': analise_processo.status,
+                    'display': analise_processo.get_status_display(),
+                    'source': 'analise',
+                    'date': analise_processo.data_entrada
+                }
+            except:
+                pass
+
+        # 3. Fallback para status do cadastro
+        return {
+            'status': self.status,
+            'display': self.get_status_display(),
+            'source': 'cadastro',
+            'date': self.created_at
+        }
+
+    def get_current_status_display(self):
+        """Retorna apenas o display do status atual"""
+        return self.get_current_status()['display']
+
+    def can_cancel(self):
+        """Verifica se o processo pode ser cancelado"""
+        current_status = self.get_current_status()
+        # Pode cancelar exceto se já foi processado/efetivado
+        blocked_statuses = ['processado', 'EFFECTIVATED']
+        return current_status['status'] not in blocked_statuses
+
+    def can_validacao_video(self):
+        """Verifica se pode fazer validação de vídeo"""
+        current_status = self.get_current_status()
+        # Disponível exceto em efetivados
+        blocked_statuses = ['processado', 'EFFECTIVATED']
+        return current_status['status'] not in blocked_statuses
+
+    def can_averbacao(self):
+        """Verifica se pode fazer averbação"""
+        current_status = self.get_current_status()
+        # Disponível apenas em validação de vídeo
+        return current_status['status'] == 'em_validacao_video'
+
+    def can_efetivar(self):
+        """Verifica se pode efetivar contrato"""
+        current_status = self.get_current_status()
+        # Disponível apenas em averbação
+        return current_status['status'] == 'em_averbacao'
+
     def __str__(self):
         doc = self.cpf or self.cnpj or "—"
-        return f"{self.nome_completo} • {doc} • {self.get_status_display()}"
+        return f"{self.nome_completo} • {doc} • {self.get_current_status_display()}"
 
 class ParcelaAntecipacao(models.Model):
     cadastro   = models.ForeignKey(Cadastro, on_delete=models.CASCADE, related_name="parcelas")
