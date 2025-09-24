@@ -10,5 +10,6 @@ urlpatterns = [
     path("<int:cadastro_id>/renovacao/verificar/", views.verificar_elegibilidade_renovacao, name="verificar-renovacao"),
     path("<int:cadastro_id>/renovacao/", views.renovar_cadastro, name="renovar-cadastro"),
     path("<int:pk>/renovar/", views.renovar_contrato, name="renovar-contrato"),
+    path("todos-associados/", views.todos_associados, name="todos_associados"),
     # path("<int:cadastro_id>/reenviar/", views.reenviar_apos_correcao, name="reenviar-apos-correcao"), # Removido - reenvio agora é automático
 ]

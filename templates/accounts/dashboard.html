@@ -44,12 +44,120 @@
 .dashboard-override .col-3 { grid-column: span 3 !important; }
 .dashboard-override .col-4 { grid-column: span 4 !important; }
 .dashboard-override .col-6 { grid-column: span 6 !important; }
+
+/* Layout KPI Cards - Sistema flexível e responsivo */
+.kpi-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1.5rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.kpi-card {
+  flex: 1 1 300px !important; /* Flex-grow, flex-shrink, min-width */
+  min-width: 280px !important;
+  max-width: 100% !important;
+  height: 120px !important; /* Altura fixa para todos os cards */
+}
+
+.kpi-card .kpi {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+/* Responsividade para KPI Cards */
+@media (min-width: 1600px) {
+  .kpi-card {
+    flex: 1 1 calc(12.5% - 1.5rem) !important; /* 8 cards por linha */
+    max-width: calc(12.5% - 1.5rem) !important;
+  }
+}
+
+@media (min-width: 1400px) and (max-width: 1599px) {
+  .kpi-card {
+    flex: 1 1 calc(14.285% - 1.3rem) !important; /* 7 cards por linha */
+    max-width: calc(14.285% - 1.3rem) !important;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .kpi-card {
+    flex: 1 1 calc(16.666% - 1.25rem) !important; /* 6 cards por linha */
+    max-width: calc(16.666% - 1.25rem) !important;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .kpi-card {
+    flex: 1 1 calc(20% - 1.2rem) !important; /* 5 cards por linha */
+    max-width: calc(20% - 1.2rem) !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .kpi-card {
+    flex: 1 1 calc(25% - 1.125rem) !important; /* 4 cards por linha */
+    max-width: calc(25% - 1.125rem) !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+  .kpi-card {
+    flex: 1 1 calc(33.333% - 1rem) !important; /* 3 cards por linha */
+    max-width: calc(33.333% - 1rem) !important;
+  }
+}
+
+@media (min-width: 400px) and (max-width: 575px) {
+  .kpi-card {
+    flex: 1 1 calc(50% - 0.75rem) !important; /* 2 cards por linha */
+    max-width: calc(50% - 0.75rem) !important;
+  }
+}
+
+@media (max-width: 399px) {
+  .kpi-grid {
+    gap: 1rem !important;
+  }
+  .kpi-card {
+    flex: 1 1 100% !important; /* 1 card por linha */
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+  .dashboard-override .container-xl {
+    padding: 1rem !important;
+  }
+  .dashboard-override .kpi {
+    padding: 0.75rem !important;
+  }
+}
+
+/* Ajustes gerais para outras seções */
+@media (max-width: 1024px) {
+  .dashboard-override .row {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-override .row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-override .row {
+    grid-template-columns: 1fr !important;
+  }
+}
 </style>
 {% endblock %}
 
 {% block content %}
   <!-- Header Section -->
-  <header class="card" style="padding: 1.5rem;">
+  <header class="card" style="padding: 1.5rem; margin-bottom: 2rem;">
     <div style="display: flex; flex-direction: column; gap: 1.5rem;">
       <div>
         <h1 style="color: var(--heading); font-size: 2rem; font-weight: 700; margin: 0;">Dashboard Principal</h1>
@@ -57,8 +165,9 @@
       </div>
 
       <!-- Enhanced Filter Form -->
-      <form method="get" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 1rem;">
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: end;">
+      <form method="get" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+          <!-- Título da Seção -->
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <svg style="width: 1.25rem; height: 1.25rem; color: var(--accent);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M8 7V3"/>
@@ -66,76 +175,97 @@
               <path d="M4 9h16"/>
               <rect x="4" y="5" width="16" height="16" rx="2"/>
             </svg>
-            <span style="color: var(--text); font-size: 0.875rem; font-weight: 500;">Período</span>
+            <span style="color: var(--text); font-size: 0.875rem; font-weight: 600;">Filtros de Período</span>
           </div>
 
-          <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <label style="display: flex; flex-direction: column; gap: 0.25rem;">
-              <span style="color: var(--muted); font-size: 0.75rem;">Início</span>
+          <!-- Campos de Data e Botões -->
+          <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: end;">
+            <div style="display: flex; flex-direction: column; gap: 0.25rem; min-width: 140px;">
+              <label style="color: var(--muted); font-size: 0.75rem; font-weight: 500;">Data de Início</label>
               <input
                 type="date"
                 name="data_inicio"
                 value="{{ data_inicio|date:'Y-m-d' }}"
                 class="input"
-                style="min-width: 140px;"
+                style="width: 100%; font-size: 0.875rem;"
+                required
               >
-            </label>
+            </div>
 
-            <span style="color: var(--muted); margin-top: 1.25rem;">→</span>
+            <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+              <svg style="width: 0.875rem; height: 0.875rem; color: var(--muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/>
+                <path d="M12 5l7 7-7 7"/>
+              </svg>
+            </div>
 
-            <label style="display: flex; flex-direction: column; gap: 0.25rem;">
-              <span style="color: var(--muted); font-size: 0.75rem;">Fim</span>
+            <div style="display: flex; flex-direction: column; gap: 0.25rem; min-width: 140px;">
+              <label style="color: var(--muted); font-size: 0.75rem; font-weight: 500;">Data de Fim</label>
               <input
                 type="date"
                 name="data_fim"
                 value="{{ data_fim|date:'Y-m-d' }}"
                 class="input"
-                style="min-width: 140px;"
+                style="width: 100%; font-size: 0.875rem;"
+                required
               >
-            </label>
-          </div>
+            </div>
 
-          <button type="submit" class="btn btn-accent" style="display: flex; align-items: center; gap: 0.5rem;">
-            <svg style="width: 1rem; height: 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 4h18"/>
-              <path d="M4 8h16"/>
-              <path d="M6 12h12"/>
-              <path d="M10 16h8"/>
-              <path d="M12 20h6"/>
-            </svg>
-            Aplicar
-          </button>
+            <!-- Botões de Ação -->
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="submit" class="btn btn-accent" style="display: flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                <svg style="width: 0.875rem; height: 0.875rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 4h18"/>
+                  <path d="M4 8h16"/>
+                  <path d="M6 12h12"/>
+                  <path d="M10 16h8"/>
+                  <path d="M12 20h6"/>
+                </svg>
+                Aplicar
+              </button>
+
+              <a href="{% url 'accounts:dashboard' %}" class="btn btn-secondary" style="display: flex; align-items: center; gap: 0.4rem; text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                <svg style="width: 0.875rem; height: 0.875rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                  <path d="M3 3v5h5"/>
+                </svg>
+                Limpar
+              </a>
+            </div>
+          </div>
         </div>
+
+        <!-- Indicador de Filtros Ativos -->
+        {% if request.GET.data_inicio or request.GET.data_fim %}
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg style="width: 1rem; height: 1rem; color: var(--accent);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            <span style="color: var(--text); font-size: 0.75rem;">
+              Período ativo: {{ data_inicio|date:'d/m/Y' }} até {{ data_fim|date:'d/m/Y' }}
+              <span style="color: var(--muted);">({{ data_fim|timeuntil:data_inicio }})</span>
+            </span>
+          </div>
+        </div>
+        {% endif %}
       </form>
     </div>
   </header>
 
-  <!-- KPI Cards Grid - Métricas Compactas -->
-  <section class="row" style="margin-bottom: 1.5rem;">
-    <!-- Total Usuários -->
-    <article class="col-2">
-      <div class="kpi" style="padding: 0.75rem; min-height: auto;">
-        <div>
-          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Total de usuários</p>
-          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">{{ total_users|default:0 }}</p>
-        </div>
-        <div style="background: rgba(96, 165, 250, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(96, 165, 250, 0.2);">
-          <svg style="width: 1.25rem; height: 1.25rem; color: #93c5fd;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/>
-            <path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2"/>
-          </svg>
-        </div>
-      </div>
-    </article>
+  <!-- KPI Cards Grid - Layout Responsivo -->
+  <section class="kpi-grid">
+
 
     <!-- Associados Cadastrados -->
-    <article class="col-2">
-      <div class="kpi" style="padding: 0.75rem; min-height: auto;">
+    <article class="kpi-card">
+      <div class="kpi" style="padding: 1rem; height: 100%;">
         <div>
-          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Associados</p>
-          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">{{ total_associados|default:0 }}</p>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">Associados</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">{{ total_associados|default:0 }}</p>
           {% if variacao_associados %}
-          <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; {% if variacao_associados > 0 %}color: var(--success);{% else %}color: var(--danger);{% endif %}">
+          <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: {% if variacao_associados > 0 %}var(--success){% else %}var(--danger){% endif %};">
             {% if variacao_associados > 0 %}+{% endif %}{{ variacao_associados|floatformat:1 }}%
           </span>
           {% endif %}
@@ -150,11 +280,11 @@
     </article>
 
     <!-- Fundo Atual -->
-    <article class="col-2">
-      <div class="kpi" style="padding: 0.75rem; min-height: auto;">
+    <article class="kpi-card">
+      <div class="kpi" style="padding: 1rem; height: 100%;">
         <div>
-          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Fundo atual</p>
-          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">R$ {{ saldo_atual|floatformat:2|default:"0,00" }}</p>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">Fundo atual</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;" data-money="{{ saldo_atual|default:0 }}">R$ {{ saldo_atual|floatformat:2|default:"0,00" }}</p>
         </div>
         <div style="background: rgba(22, 163, 74, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(22, 163, 74, 0.2);">
           <svg style="width: 1.25rem; height: 1.25rem; color: #86efac;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -166,11 +296,11 @@
     </article>
 
     <!-- Retorno Estimado -->
-    <article class="col-2">
-      <div class="kpi" style="padding: 0.75rem; min-height: auto;">
+    <article class="kpi-card">
+      <div class="kpi" style="padding: 1rem; height: 100%;">
         <div>
-          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Retorno estimado</p>
-          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">R$ {{ retorno_estimado|floatformat:2|default:"0,00" }}</p>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">Retorno estimado</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;" data-money="{{ retorno_estimado|default:0 }}">R$ {{ retorno_estimado|floatformat:2|default:"0,00" }}</p>
         </div>
         <div style="background: rgba(167, 139, 250, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(167, 139, 250, 0.2);">
           <svg style="width: 1.25rem; height: 1.25rem; color: #c4b5fd;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -181,12 +311,12 @@
       </div>
     </article>
 
-    <!-- Taxas Mensais Pendentes -->
-    <article class="col-2">
-      <div class="kpi" style="padding: 0.75rem; min-height: auto;">
+    <!-- Envios Pendentes -->
+    <article class="kpi-card">
+      <div class="kpi" style="padding: 1rem; height: 100%;">
         <div>
-          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Taxas pendentes</p>
-          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">R$ {{ taxas_mensais_pendentes|floatformat:2|default:"0,00" }}</p>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">Envios pendentes</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;" data-money="{{ taxas_mensais_pendentes|default:0 }}">R$ {{ taxas_mensais_pendentes|floatformat:2|default:"0,00" }}</p>
         </div>
         <div style="background: rgba(239, 68, 68, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(239, 68, 68, 0.2);">
           <svg style="width: 1.25rem; height: 1.25rem; color: #fca5a5;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -196,17 +326,16 @@
       </div>
     </article>
 
-    <!-- Disponível -->
-    <article class="col-2">
-      <div class="kpi" style="padding: 0.75rem; min-height: auto; opacity: 0.6;">
+    <!-- Doações Recebidas -->
+    <article class="kpi-card">
+      <div class="kpi" style="padding: 1rem; height: 100%;">
         <div>
-          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.25rem;">Disponível</p>
-          <p style="color: var(--heading); font-size: 1.25rem; font-weight: 700;">—</p>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">Doações recebidas</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;" data-money="{{ doacoes|default:0 }}">R$ {{ doacoes|floatformat:2|default:"0,00" }}</p>
         </div>
-        <div style="background: rgba(156, 163, 175, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(156, 163, 175, 0.2);">
-          <svg style="width: 1.25rem; height: 1.25rem; color: #d1d5db;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 6v6l4 2"/>
+        <div style="background: rgba(251, 191, 36, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(251, 191, 36, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #fbbf24;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </div>
       </div>
@@ -214,52 +343,10 @@
   </section>
 
   <!-- Information Cards -->
-  <section class="row">
-    <!-- Tesouraria e Doações -->
+  <section class="row" style="margin-bottom: 2rem; gap: 1.5rem;">
+    <!-- Situação dos Servidores -->
     <article class="col-6">
-      <div class="card" style="padding: 1.5rem;">
-        <header style="margin-bottom: 1.5rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-            <div style="background: rgba(22, 163, 74, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(22, 163, 74, 0.2);">
-              <svg style="width: 1.25rem; height: 1.25rem; color: #86efac;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"/>
-                <path d="M12 6v14"/>
-              </svg>
-            </div>
-            <div>
-              <h2 class="section-title">Tesouraria e Doações</h2>
-              <p style="color: var(--muted); font-size: 0.875rem;">Movimentação financeira consolidada</p>
-            </div>
-          </div>
-        </header>
-
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-          <div style="text-align: center;">
-            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Total de entradas</dt>
-            <dd style="color: var(--success); font-size: 1.125rem; font-weight: 600;">R$ {{ total_entradas|floatformat:2 }}</dd>
-          </div>
-          <div style="text-align: center;">
-            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Total de saídas</dt>
-            <dd style="color: var(--danger); font-size: 1.125rem; font-weight: 600;">R$ {{ total_saidas|floatformat:2 }}</dd>
-          </div>
-          <div style="text-align: center;">
-            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Total de doações</dt>
-            <dd style="color: var(--info); font-size: 1.125rem; font-weight: 600;">R$ {{ total_doacoes|floatformat:2 }}</dd>
-          </div>
-        </div>
-
-        <footer style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
-          <span style="color: var(--muted); font-size: 0.875rem;">Fundo final</span>
-          <span style="color: {% if saldo_atual >= 0 %}var(--success){% else %}var(--danger){% endif %}; font-size: 1.25rem; font-weight: 700;">
-            R$ {{ saldo_atual|floatformat:2 }}
-          </span>
-        </footer>
-      </div>
-    </article>
-
-    <!-- Perfil dos Associados -->
-    <article class="col-6">
-      <div class="card" style="padding: 1.5rem;">
+      <div class="card" style="padding: 1.5rem; height: 400px;">
         <header style="margin-bottom: 1.5rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
             <div style="background: rgba(96, 165, 250, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(96, 165, 250, 0.2);">
@@ -269,47 +356,52 @@
               </svg>
             </div>
             <div>
-              <h2 class="section-title">Perfil dos Associados</h2>
-              <p style="color: var(--muted); font-size: 0.875rem;">Atividade e tempo de aprovação</p>
+              <h2 class="section-title">Situação dos Servidores</h2>
+              <p style="color: var(--muted); font-size: 0.875rem;">Distribuição por situação funcional</p>
             </div>
           </div>
         </header>
 
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-          <div style="text-align: center;">
-            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Total cadastrados</dt>
-            <dd style="color: var(--info); font-size: 1.125rem; font-weight: 600;">{{ total_associados|default:0 }}</dd>
-          </div>
-          <div style="text-align: center;">
-            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Associados ativos</dt>
-            <dd style="color: var(--success); font-size: 1.125rem; font-weight: 600;">{{ associados_ativos|default:0 }}</dd>
-          </div>
-          <div style="text-align: center;">
-            <dt style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem;">Novos no período</dt>
-            <dd style="color: var(--violet); font-size: 1.125rem; font-weight: 600;">{{ associados_periodo|default:0 }}</dd>
+        <div style="height: 280px;">
+          <canvas id="situacaoServidoresChart"></canvas>
+        </div>
+      </div>
+    </article>
+
+    <!-- Modal KPI Retorno Estimado -->
+    <article class="col-6">
+      <div class="card" style="padding: 1.5rem; height: 400px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+        <div style="background: rgba(34, 197, 94, 0.15); padding: 1rem; border-radius: 1rem; border: 1px solid rgba(34, 197, 94, 0.2); margin-bottom: 1.5rem;">
+          <svg style="width: 2.5rem; height: 2.5rem; color: #4ade80;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        
+        <div>
+          <h3 style="color: var(--heading); font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Retorno Estimado</h3>
+          <p style="color: var(--muted); font-size: 0.875rem; margin-bottom: 1.5rem;">Mensalidades dos associados efetivados</p>
+          
+          <div style="background: rgba(34, 197, 94, 0.1); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid rgba(34, 197, 94, 0.2);">
+            <p style="color: var(--heading); font-size: 2rem; font-weight: 700; margin-bottom: 0.25rem;" data-money="{{ retorno_estimado|default:0 }}">
+              R$ {{ retorno_estimado|floatformat:2|default:"0,00" }}
+            </p>
+            <p style="color: var(--muted); font-size: 0.75rem;">Valor mensal recorrente</p>
           </div>
         </div>
-
-        {% if tempo_aprovacao %}
-        <footer style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
-          <span style="color: var(--muted); font-size: 0.875rem;">Tempo médio de aprovação</span>
-          <span style="color: var(--warn); font-size: 1.25rem; font-weight: 700;">{{ tempo_aprovacao.days }} dias</span>
-        </footer>
-        {% endif %}
       </div>
     </article>
   </section>
 
   <!-- Charts Grid - 2 Colunas x 3 Linhas -->
-  <section class="row" style="margin-bottom: 1.5rem;">
+  <section class="row" style="margin-bottom: 2rem; gap: 1.5rem;">
     <!-- Status dos Processos -->
     <article class="col-6">
-      <div class="card" style="padding: 1.25rem;">
-        <header style="margin-bottom: 1rem;">
+      <div class="card" style="padding: 1.25rem; height: 400px; display: flex; flex-direction: column;">
+        <header style="margin-bottom: 1rem; flex-shrink: 0;">
           <h2 class="section-title">Status dos Processos</h2>
           <p style="color: var(--muted); font-size: 0.875rem;">Distribuição por situação</p>
         </header>
-        <div style="height: 14rem; display: flex; align-items: center; justify-content: center;">
+        <div style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0;">
           <canvas id="statusChart"></canvas>
         </div>
       </div>
@@ -317,55 +409,55 @@
 
     <!-- Cadastros por Dia -->
     <article class="col-6">
-      <div class="card" style="padding: 1.25rem;">
-        <header style="margin-bottom: 1rem;">
+      <div class="card" style="padding: 1.25rem; height: 400px; display: flex; flex-direction: column;">
+        <header style="margin-bottom: 1rem; flex-shrink: 0;">
           <h2 class="section-title">Cadastros por Dia</h2>
           <p style="color: var(--muted); font-size: 0.875rem;">Volume de solicitações recebidas</p>
         </header>
-        <div style="height: 14rem;">
+        <div style="flex: 1; min-height: 0;">
           <canvas id="cadastrosChart"></canvas>
         </div>
       </div>
     </article>
   </section>
 
-  <section class="row" style="margin-bottom: 1.5rem;">
+  <section class="row" style="margin-bottom: 2rem; gap: 1.5rem;">
     <!-- Aprovações por Dia -->
     <article class="col-6">
-      <div class="card" style="padding: 1.25rem;">
-        <header style="margin-bottom: 1rem;">
+      <div class="card" style="padding: 1.25rem; height: 350px; display: flex; flex-direction: column;">
+        <header style="margin-bottom: 1rem; flex-shrink: 0;">
           <h2 class="section-title">Aprovações por Dia</h2>
           <p style="color: var(--muted); font-size: 0.875rem;">Tendência de aprovações</p>
         </header>
-        <div style="height: 14rem;">
+        <div style="flex: 1; min-height: 0; position: relative;">
           <canvas id="aprovacoesChart"></canvas>
         </div>
       </div>
     </article>
 
-    <!-- Cargos dos Associados -->
+    <!-- Volume de Processos e Valores -->
     <article class="col-6">
-      <div class="card" style="padding: 1.25rem;">
-        <header style="margin-bottom: 1rem;">
-          <h2 class="section-title">Cargos dos Associados</h2>
-          <p style="color: var(--muted); font-size: 0.875rem;">Distribuição por função</p>
+      <div class="card" style="padding: 1.25rem; height: 350px; display: flex; flex-direction: column;">
+        <header style="margin-bottom: 1rem; flex-shrink: 0;">
+          <h2 class="section-title">Volume de Processos e Valores</h2>
+          <p style="color: var(--muted); font-size: 0.875rem;">Processos efetivados e valores repassados por dia</p>
         </header>
-        <div style="height: 14rem;">
-          <canvas id="cargosChart"></canvas>
+        <div style="flex: 1; min-height: 0; position: relative;">
+          <canvas id="volumeChart"></canvas>
         </div>
       </div>
     </article>
   </section>
 
-  <section class="row">
+  <section class="row" style="margin-bottom: 2rem; gap: 1.5rem;">
     <!-- Liquidações por Mês -->
     <article class="col-6">
-      <div class="card" style="padding: 1.25rem;">
-        <header style="margin-bottom: 1rem;">
+      <div class="card" style="padding: 1.25rem; height: 350px; display: flex; flex-direction: column;">
+        <header style="margin-bottom: 1rem; flex-shrink: 0;">
           <h2 class="section-title">Liquidações por Mês</h2>
           <p style="color: var(--muted); font-size: 0.875rem;">Resultados financeiros liquidados</p>
         </header>
-        <div style="height: 14rem;">
+        <div style="flex: 1; min-height: 0; position: relative;">
           <canvas id="liquidacoesChart"></canvas>
         </div>
       </div>
@@ -373,23 +465,418 @@
 
     <!-- Progresso de Aprovação -->
     <article class="col-6">
-      <div class="card" style="padding: 1.25rem;">
-        <header style="margin-bottom: 1rem;">
+      <div class="card" style="padding: 1.25rem; height: 350px; display: flex; flex-direction: column;">
+        <header style="margin-bottom: 1rem; flex-shrink: 0;">
           <h2 class="section-title">Progresso de Aprovação</h2>
           <p style="color: var(--muted); font-size: 0.875rem;">Etapas do fluxo de cadastro</p>
         </header>
-        <div style="height: 14rem;">
+        <div style="flex: 1; min-height: 0; position: relative;">
           <canvas id="progressoChart"></canvas>
         </div>
       </div>
     </article>
   </section>
 
+  <!-- TOP 3 Ranking de Agentes -->
+  <section style="margin-bottom: 2rem;">
+    <div class="card" style="padding: 1.5rem;">
+      <header style="margin-bottom: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+          <div style="background: rgba(122, 19, 64, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(122, 19, 64, 0.2);">
+            <svg style="width: 1.25rem; height: 1.25rem; color: #f4d6e3;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 6l2 14-4-2-4 2-4-2-4 2 2-14h12Z"/>
+              <path d="M8 8l.01 0"/>
+              <path d="M16 8l.01 0"/>
+              <path d="M12 12h.01"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="section-title">🏆 TOP 3 - Ranking de Agentes</h2>
+            <p style="color: var(--muted); font-size: 0.875rem;">Os 3 agentes com melhor performance no período</p>
+          </div>
+        </div>
+      </header>
+
+      <!-- Pódio TOP 3 -->
+      {% if ranking_agentes|length > 0 %}
+      <div style="display: flex; justify-content: center; align-items: end; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        {% for agente in ranking_agentes|slice:":3" %}
+          <div style="display: flex; flex-direction: column; align-items: center; order: {% if forloop.counter == 1 %}2{% elif forloop.counter == 2 %}1{% else %}3{% endif %};">
+            <!-- Medalha -->
+            <div style="position: relative; margin-bottom: 1rem;">
+              {% if forloop.counter == 1 %}
+                <div style="width: 4rem; height: 4rem; background: linear-gradient(135deg, #ffd700, #ffb700); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3); border: 3px solid #fff;">
+                  <span style="color: #000; font-size: 1.25rem; font-weight: 700;">👑</span>
+                </div>
+                <div style="position: absolute; top: -0.5rem; right: -0.5rem; background: #ffd700; color: #000; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; border: 2px solid #fff;">1</div>
+              {% elif forloop.counter == 2 %}
+                <div style="width: 3.5rem; height: 3.5rem; background: linear-gradient(135deg, #c0c0c0, #a8a8a8); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 24px rgba(192, 192, 192, 0.3); border: 3px solid #fff;">
+                  <span style="color: #000; font-size: 1rem; font-weight: 700;">🥈</span>
+                </div>
+                <div style="position: absolute; top: -0.5rem; right: -0.5rem; background: #c0c0c0; color: #000; width: 1.25rem; height: 1.25rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid #fff;">2</div>
+              {% else %}
+                <div style="width: 3rem; height: 3rem; background: linear-gradient(135deg, #cd7f32, #b8691a); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(205, 127, 50, 0.3); border: 3px solid #fff;">
+                  <span style="color: #fff; font-size: 0.875rem; font-weight: 700;">🥉</span>
+                </div>
+                <div style="position: absolute; top: -0.5rem; right: -0.5rem; background: #cd7f32; color: #fff; width: 1.25rem; height: 1.25rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; border: 2px solid #fff;">3</div>
+              {% endif %}
+            </div>
+
+            <!-- Dados do Agente -->
+            <div style="text-align: center; min-width: {% if forloop.counter == 1 %}200px{% else %}160px{% endif %};">
+              <h3 style="color: var(--text); font-size: {% if forloop.counter == 1 %}1rem{% else %}0.875rem{% endif %}; font-weight: 600; margin-bottom: 0.25rem;">{{ agente.nome|truncatechars:20 }}</h3>
+              <p style="color: var(--muted); font-size: 0.75rem; margin-bottom: 0.75rem;">@{{ agente.username }}</p>
+
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="background: rgba(96, 165, 250, 0.1); padding: 0.25rem 0.5rem; border-radius: 0.375rem;">
+                  <span style="color: var(--info); font-size: 0.75rem; font-weight: 600;">{{ agente.volume_cadastros }} cadastros</span>
+                </div>
+                <div style="background: rgba(34, 197, 94, 0.1); padding: 0.25rem 0.5rem; border-radius: 0.375rem;">
+                  <span style="color: var(--success); font-size: 0.75rem; font-weight: 600;" data-money="{{ agente.auxilio_recebido }}">R$ {{ agente.auxilio_recebido|floatformat:2 }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Tabela Completa com Paginação -->
+      {% if ranking_agentes|length > 3 %}
+      <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+          <h3 style="color: var(--text); font-size: 1rem; font-weight: 600;">📊 Ranking Completo</h3>
+          <div id="paginationInfo" style="color: var(--muted); font-size: 0.75rem;"></div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);">
+            <thead>
+              <tr style="background: linear-gradient(180deg, #1e293b, #0f172a); border-bottom: 2px solid var(--border);">
+                <th style="padding: 0.75rem; text-align: left; color: var(--text); font-size: 0.75rem; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">#</th>
+                <th style="padding: 0.75rem; text-align: left; color: var(--text); font-size: 0.75rem; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Agente</th>
+                <th style="padding: 0.75rem; text-align: center; color: var(--text); font-size: 0.75rem; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Cadastros</th>
+                <th style="padding: 0.75rem; text-align: center; color: var(--text); font-size: 0.75rem; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Mensalidades</th>
+                <th style="padding: 0.75rem; text-align: center; color: var(--text); font-size: 0.75rem; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Auxílio</th>
+                <th style="padding: 0.75rem; text-align: center; color: var(--text); font-size: 0.75rem; font-weight: 600;">Pendências</th>
+              </tr>
+            </thead>
+            <tbody id="rankingTableBody">
+              <!-- Conteúdo será gerado via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Controles de Paginação -->
+        <div style="display: flex; justify-content: between; align-items: center; margin-top: 1rem; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button id="prevPageBtn" onclick="changePage(-1)"
+                    style="background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 0.5rem; border-radius: 0.375rem; cursor: pointer; display: flex; align-items: center;">
+              <svg style="width: 1rem; height: 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15,18 9,12 15,6"/>
+              </svg>
+            </button>
+
+            <div id="pageNumbers" style="display: flex; gap: 0.25rem;">
+              <!-- Números das páginas serão gerados via JavaScript -->
+            </div>
+
+            <button id="nextPageBtn" onclick="changePage(1)"
+                    style="background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 0.5rem; border-radius: 0.375rem; cursor: pointer; display: flex; align-items: center;">
+              <svg style="width: 1rem; height: 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9,18 15,12 9,6"/>
+              </svg>
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.75rem; color: var(--muted);">
+            <span>{{ ranking_agentes|length }} de {{ total_agentes }} agentes no período</span>
+            <span>•</span>
+            <span>{{ data_inicio|date:'d/m/Y' }} até {{ data_fim|date:'d/m/Y' }}</span>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- Produção da Tesouraria -->
+  <section style="margin-bottom: 2rem;">
+    <div class="card" style="padding: 1.5rem;">
+      <header style="margin-bottom: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+          <div style="background: rgba(34, 197, 94, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(34, 197, 94, 0.2);">
+            <svg style="width: 1.25rem; height: 1.25rem; color: #4ade80;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="section-title">💼 Produção da Tesouraria</h2>
+            <p style="color: var(--muted); font-size: 0.875rem;">Performance de processamento e efetivação por mês</p>
+          </div>
+        </div>
+      </header>
+
+      {% if producao_tesouraria %}
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);">
+          <thead>
+            <tr style="background: linear-gradient(180deg, #1e293b, #0f172a); border-bottom: 2px solid var(--border);">
+              <th style="padding: 1rem; text-align: left; color: var(--text); font-size: 0.875rem; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Período</th>
+              <th style="padding: 1rem; text-align: center; color: var(--text); font-size: 0.875rem; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Efetivados</th>
+              <th style="padding: 1rem; text-align: center; color: var(--text); font-size: 0.875rem; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Pendentes</th>
+              <th style="padding: 1rem; text-align: center; color: var(--text); font-size: 0.875rem; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Devolvidos</th>
+              <th style="padding: 1rem; text-align: center; color: var(--text); font-size: 0.875rem; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Valor Total</th>
+              <th style="padding: 1rem; text-align: center; color: var(--text); font-size: 0.875rem; font-weight: 600;">Tempo Médio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mes_data in producao_tesouraria %}
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding: 1rem;">
+                <div style="display: flex; flex-direction: column;">
+                  <span style="color: var(--text); font-weight: 600; font-size: 0.875rem;">{{ mes_data.mes_nome|capfirst }}</span>
+                  <span style="color: var(--muted); font-size: 0.75rem;">{{ mes_data.mes }}</span>
+                </div>
+              </td>
+              <td style="padding: 1rem; text-align: center;">
+                <div style="background: rgba(34, 197, 94, 0.1); color: var(--success); padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.875rem; display: inline-block;">
+                  {{ mes_data.processos_efetivados }}
+                </div>
+              </td>
+              <td style="padding: 1rem; text-align: center;">
+                <div style="background: rgba(251, 191, 36, 0.1); color: var(--warn); padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.875rem; display: inline-block;">
+                  {{ mes_data.processos_pendentes }}
+                </div>
+              </td>
+              <td style="padding: 1rem; text-align: center;">
+                {% if mes_data.processos_devolvidos > 0 %}
+                <div style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.875rem; display: inline-block;">
+                  {{ mes_data.processos_devolvidos }}
+                </div>
+                {% else %}
+                <div style="background: rgba(34, 197, 94, 0.1); color: var(--success); padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.875rem; display: inline-block;">
+                  0
+                </div>
+                {% endif %}
+              </td>
+              <td style="padding: 1rem; text-align: center;">
+                <div style="color: var(--success); font-weight: 600; font-size: 0.875rem;" data-money="{{ mes_data.valor_total }}">
+                  R$ {{ mes_data.valor_total|floatformat:2 }}
+                </div>
+              </td>
+              <td style="padding: 1rem; text-align: center;">
+                <div style="background: rgba(96, 165, 250, 0.1); color: var(--info); padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.875rem; display: inline-block;">
+                  {{ mes_data.tempo_medio_dias|default:"0" }} dias
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" style="padding: 2rem; text-align: center; color: var(--muted); font-style: italic;">
+                Nenhum dado de produção encontrado no período selecionado
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <footer style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+        <div style="display: flex; justify-content: between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.75rem; color: var(--muted);">
+            <span>Performance da tesouraria no período</span>
+            <span>•</span>
+            <span>{{ data_inicio|date:'d/m/Y' }} até {{ data_fim|date:'d/m/Y' }}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1.5rem; font-size: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--success);">
+              <div style="width: 0.75rem; height: 0.75rem; background: var(--success); border-radius: 50%;"></div>
+              <span>Efetivados</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--warn);">
+              <div style="width: 0.75rem; height: 0.75rem; background: var(--warn); border-radius: 50%;"></div>
+              <span>Pendentes</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--danger);">
+              <div style="width: 0.75rem; height: 0.75rem; background: var(--danger); border-radius: 50%;"></div>
+              <span>Devolvidos</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+      {% else %}
+      <div style="text-align: center; padding: 3rem; color: var(--muted);">
+        <svg style="width: 3rem; height: 3rem; margin-bottom: 1rem; opacity: 0.5;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Nenhum dados da tesouraria</h3>
+        <p style="font-size: 0.875rem;">Não há dados de produção da tesouraria para o período selecionado.</p>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+
 <script>
+// Dados do ranking para paginação
+const rankingData = {{ ranking_agentes|safe }};
+let currentPage = 1;
+const itemsPerPage = 10;
+
+// Função para renderizar a tabela de ranking
+function renderRankingTable() {
+  const tableBody = document.getElementById('rankingTableBody');
+  const paginationInfo = document.getElementById('paginationInfo');
+
+  if (!tableBody || !rankingData || rankingData.length === 0) return;
+
+  const totalPages = Math.ceil(rankingData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = rankingData.slice(startIndex, endIndex);
+
+  // Limpar tabela
+  tableBody.innerHTML = '';
+
+  // Adicionar linhas da página atual
+  currentData.forEach((agente, index) => {
+    const globalIndex = startIndex + index + 1;
+    const row = document.createElement('tr');
+    row.style.borderBottom = '1px solid var(--border)';
+
+    if (globalIndex <= 3) {
+      row.style.background = 'linear-gradient(90deg, rgba(122, 19, 64, 0.05), transparent)';
+    }
+
+    let positionCell = '';
+    if (globalIndex === 1) {
+      positionCell = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="background: linear-gradient(135deg, #ffd700, #ffb700); color: #000; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">1</span>
+        </div>
+      `;
+    } else if (globalIndex === 2) {
+      positionCell = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #000; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">2</span>
+        </div>
+      `;
+    } else if (globalIndex === 3) {
+      positionCell = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="background: linear-gradient(135deg, #cd7f32, #b8691a); color: #fff; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">3</span>
+        </div>
+      `;
+    } else {
+      positionCell = `<span style="color: var(--muted); font-size: 0.75rem;">${globalIndex}</span>`;
+    }
+
+    const pendenciasStyle = agente.pendencias_abertas > 0
+      ? 'background: rgba(239, 68, 68, 0.1); color: var(--danger);'
+      : 'background: rgba(34, 197, 94, 0.1); color: var(--success);';
+
+    row.innerHTML = `
+      <td style="padding: 0.75rem; color: var(--text); font-weight: 600;">${positionCell}</td>
+      <td style="padding: 0.75rem;">
+        <div style="display: flex; flex-direction: column;">
+          <span style="color: var(--text); font-weight: 600; font-size: 0.75rem;">${agente.nome}</span>
+          <span style="color: var(--muted); font-size: 0.625rem;">@${agente.username}</span>
+        </div>
+      </td>
+      <td style="padding: 0.75rem; text-align: center;">
+        <div style="background: rgba(96, 165, 250, 0.1); color: var(--info); padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; display: inline-block;">
+          ${agente.volume_cadastros}
+        </div>
+      </td>
+      <td style="padding: 0.75rem; text-align: center;">
+        <div style="color: var(--success); font-weight: 600; font-size: 0.75rem;">
+          R$ ${parseFloat(agente.mensalidades_geradas).toFixed(2).replace('.', ',')}
+        </div>
+      </td>
+      <td style="padding: 0.75rem; text-align: center;">
+        <div style="color: var(--success); font-weight: 600; font-size: 0.75rem;">
+          R$ ${parseFloat(agente.auxilio_recebido).toFixed(2).replace('.', ',')}
+        </div>
+      </td>
+      <td style="padding: 0.75rem; text-align: center;">
+        <div style="${pendenciasStyle} padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; display: inline-block;">
+          ${agente.pendencias_abertas}
+        </div>
+      </td>
+    `;
+
+    tableBody.appendChild(row);
+  });
+
+  // Atualizar informações de paginação
+  paginationInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+
+  // Atualizar controles de paginação
+  updatePaginationControls(totalPages);
+}
+
+// Função para atualizar controles de paginação
+function updatePaginationControls(totalPages) {
+  const prevBtn = document.getElementById('prevPageBtn');
+  const nextBtn = document.getElementById('nextPageBtn');
+  const pageNumbers = document.getElementById('pageNumbers');
+
+  // Habilitar/desabilitar botões
+  if (prevBtn) {
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.style.opacity = currentPage === 1 ? '0.5' : '1';
+  }
+
+  if (nextBtn) {
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.style.opacity = currentPage === totalPages ? '0.5' : '1';
+  }
+
+  // Gerar números das páginas
+  if (pageNumbers) {
+    pageNumbers.innerHTML = '';
+
+    for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.textContent = i;
+      pageBtn.onclick = () => goToPage(i);
+      pageBtn.style.cssText = `
+        background: ${i === currentPage ? 'var(--accent)' : 'var(--surface-2)'};
+        border: 1px solid var(--border);
+        color: ${i === currentPage ? 'white' : 'var(--text)'};
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-size: 0.75rem;
+      `;
+      pageNumbers.appendChild(pageBtn);
+    }
+  }
+}
+
+// Função para mudar página
+function changePage(direction) {
+  const totalPages = Math.ceil(rankingData.length / itemsPerPage);
+  const newPage = currentPage + direction;
+
+  if (newPage >= 1 && newPage <= totalPages) {
+    currentPage = newPage;
+    renderRankingTable();
+  }
+}
+
+// Função para ir para página específica
+function goToPage(page) {
+  currentPage = page;
+  renderRankingTable();
+}
+
 const statusData = {{ status_processos|safe }};
 const cadastrosData = {{ cadastros_por_dia|safe }};
 const aprovacoesData = {{ aprovacoes_por_dia|safe }};
-const cargosData = {{ cargos_associados|safe }};
+const situacaoServidoresData = {{ situacao_servidores|safe }};
+const volumeData = {{ volume_processos_valores|safe }};
 const liquidacoesData = {{ liquidadas_por_mes|safe }};
 const progressoData = JSON.parse('{{ progresso_aprovacao|safe }}');
 
@@ -468,6 +955,34 @@ if (statusData && statusData.length) {
   });
 }
 
+if (situacaoServidoresData && situacaoServidoresData.length) {
+  const ctx = document.getElementById('situacaoServidoresChart');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: situacaoServidoresData.map(item => item.label),
+      datasets: [buildDataset({ 
+        label: 'Quantidade', 
+        data: situacaoServidoresData.map(item => item.total), 
+        color: palette.info 
+      })]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: axisConfig(),
+        y: axisConfig('Total')
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
+      }
+    }
+  });
+}
+
 if (cadastrosData && cadastrosData.length) {
   const ctx = document.getElementById('cadastrosChart');
   new Chart(ctx, {
@@ -501,27 +1016,77 @@ if (aprovacoesData && aprovacoesData.length) {
       datasets: [buildDataset({ label: 'Aprovações', data: aprovacoesData.map(item => item.total), color: palette.success, type: 'line', fill: true })]
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: axisConfig(),
         y: axisConfig('Total')
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
       }
     }
   });
 }
 
-if (cargosData && cargosData.length) {
-  const ctx = document.getElementById('cargosChart');
+if (volumeData && volumeData.length) {
+  const ctx = document.getElementById('volumeChart');
   new Chart(ctx, {
-    type: 'bar',
     data: {
-      labels: cargosData.map(item => item.cargo_funcao),
-      datasets: [buildDataset({ label: 'Quantidade', data: cargosData.map(item => item.total), color: palette.violet })]
+      labels: volumeData.map(item => new Date(item.dia).toLocaleDateString('pt-BR')),
+      datasets: [
+        buildDataset({
+          label: 'Processos',
+          data: volumeData.map(item => item.processos),
+          color: palette.accent,
+          type: 'bar'
+        }),
+        buildDataset({
+          label: 'Valores (R$)',
+          data: volumeData.map(item => item.valores),
+          color: palette.success,
+          type: 'line',
+          yAxisID: 'y1',
+          fill: false
+        })
+      ]
     },
     options: {
-      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
       scales: {
-        x: axisConfig('Total'),
-        y: axisConfig()
+        x: axisConfig(),
+        y: axisConfig('Processos'),
+        y1: {
+          ...axisConfig('Valores (R$)'),
+          position: 'right',
+          grid: { drawOnChartArea: false }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            padding: 16,
+            font: { size: 12 }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.dataset.label || '';
+              if (label === 'Valores (R$)') {
+                return label + ': R$ ' + new Intl.NumberFormat('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                }).format(context.parsed.y);
+              }
+              return label + ': ' + context.parsed.y;
+            }
+          }
+        }
       }
     }
   });
@@ -536,9 +1101,16 @@ if (liquidacoesData && liquidacoesData.length) {
       datasets: [buildDataset({ label: 'Liquidações', data: liquidacoesData.map(item => item.total), color: palette.warn, type: 'line', fill: true })]
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: axisConfig(),
         y: axisConfig('Total')
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
       }
     }
   });
@@ -569,5 +1141,34 @@ if (progressoData && progressoData.length) {
     }
   });
 }
+
+// Formatação de valores monetários nos KPIs
+document.addEventListener('DOMContentLoaded', function() {
+    function formatCurrency(value) {
+        // Garantir que é um número
+        const num = parseFloat(value) || 0;
+
+        // Formatar para BRL com pontos e vírgulas
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(num);
+    }
+
+    // Selecionar todos os elementos com data-money
+    const moneyElements = document.querySelectorAll('[data-money]');
+
+    moneyElements.forEach(element => {
+        const value = element.getAttribute('data-money');
+        if (value && !isNaN(value)) {
+            element.textContent = formatCurrency(value);
+        }
+    });
+
+    // Inicializar tabela de ranking com paginação
+    renderRankingTable();
+});
 </script>
 {% endblock %}

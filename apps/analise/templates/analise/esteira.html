@@ -13,146 +13,180 @@
 
   <!-- KPIs Dashboard -->
   <div class="mb-6">
-    <div class="ds-card p-4">
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        
-        <!-- Processos Pendentes -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-orange-50 border border-orange-200">
-          <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    <section style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+      
+      <!-- Processos Pendentes -->
+      <article>
+        <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.pendentes.label }}</p>
+            <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">{{ kpis.pendentes.valor }}</p>
+            {% if kpis.pendentes.variacao > 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--danger);">
+                +{{ kpis.pendentes.variacao }}%
+              </span>
+            {% elif kpis.pendentes.variacao < 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--success);">
+                {{ kpis.pendentes.variacao }}%
+              </span>
+            {% else %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--muted);">
+                0%
+              </span>
+            {% endif %}
+          </div>
+          <div style="background: rgba(251, 146, 60, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(251, 146, 60, 0.2);">
+            <svg style="width: 1.25rem; height: 1.25rem; color: #fb923c;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-orange-700 truncate">{{ kpis.pendentes.label }}</p>
-            <p class="text-lg font-bold text-orange-900">{{ kpis.pendentes.valor }}</p>
-            <div class="flex items-center text-xs">
-              {% if kpis.pendentes.variacao > 0 %}
-                <span class="text-red-600">+{{ kpis.pendentes.variacao }}%</span>
-              {% elif kpis.pendentes.variacao < 0 %}
-                <span class="text-green-600">{{ kpis.pendentes.variacao }}%</span>
-              {% else %}
-                <span class="text-gray-500">0%</span>
-              {% endif %}
-            </div>
-          </div>
         </div>
+      </article>
 
-        <!-- Em Análise -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-          <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      <!-- Em Análise -->
+      <article>
+        <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.em_analise.label }}</p>
+            <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">{{ kpis.em_analise.valor }}</p>
+            {% if kpis.em_analise.variacao > 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--info);">
+                +{{ kpis.em_analise.variacao }}%
+              </span>
+            {% elif kpis.em_analise.variacao < 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--info);">
+                {{ kpis.em_analise.variacao }}%
+              </span>
+            {% else %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--muted);">
+                0%
+              </span>
+            {% endif %}
+          </div>
+          <div style="background: rgba(96, 165, 250, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(96, 165, 250, 0.2);">
+            <svg style="width: 1.25rem; height: 1.25rem; color: #60a5fa;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
           </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-blue-700 truncate">{{ kpis.em_analise.label }}</p>
-            <p class="text-lg font-bold text-blue-900">{{ kpis.em_analise.valor }}</p>
-            <div class="flex items-center text-xs">
-              {% if kpis.em_analise.variacao > 0 %}
-                <span class="text-blue-600">+{{ kpis.em_analise.variacao }}%</span>
-              {% elif kpis.em_analise.variacao < 0 %}
-                <span class="text-blue-600">{{ kpis.em_analise.variacao }}%</span>
-              {% else %}
-                <span class="text-gray-500">0%</span>
-              {% endif %}
-            </div>
-          </div>
         </div>
+      </article>
 
-        <!-- Aprovados -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-green-50 border border-green-200">
-          <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      <!-- Aprovados -->
+      <article>
+        <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.aprovados.label }}</p>
+            <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">{{ kpis.aprovados.valor }}</p>
+            {% if kpis.aprovados.variacao > 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--success);">
+                +{{ kpis.aprovados.variacao }}%
+              </span>
+            {% elif kpis.aprovados.variacao < 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--danger);">
+                {{ kpis.aprovados.variacao }}%
+              </span>
+            {% else %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--muted);">
+                0%
+              </span>
+            {% endif %}
+          </div>
+          <div style="background: rgba(34, 197, 94, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(34, 197, 94, 0.2);">
+            <svg style="width: 1.25rem; height: 1.25rem; color: #22c55e;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 13l4 4L19 7"/>
             </svg>
           </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-green-700 truncate">{{ kpis.aprovados.label }}</p>
-            <p class="text-lg font-bold text-green-900">{{ kpis.aprovados.valor }}</p>
-            <div class="flex items-center text-xs">
-              {% if kpis.aprovados.variacao > 0 %}
-                <span class="text-green-600">+{{ kpis.aprovados.variacao }}%</span>
-              {% elif kpis.aprovados.variacao < 0 %}
-                <span class="text-red-600">{{ kpis.aprovados.variacao }}%</span>
-              {% else %}
-                <span class="text-gray-500">0%</span>
-              {% endif %}
-            </div>
-          </div>
         </div>
+      </article>
 
-        <!-- Tempo Médio -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
-          <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      <!-- Tempo Médio -->
+      <article>
+        <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.tempo_medio.label }}</p>
+            <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">{{ kpis.tempo_medio.valor }}{{ kpis.tempo_medio.sufixo|default:"" }}</p>
+            {% if kpis.tempo_medio.variacao > 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--danger);">
+                +{{ kpis.tempo_medio.variacao }}%
+              </span>
+            {% elif kpis.tempo_medio.variacao < 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--success);">
+                {{ kpis.tempo_medio.variacao }}%
+              </span>
+            {% else %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--muted);">
+                0%
+              </span>
+            {% endif %}
+          </div>
+          <div style="background: rgba(168, 85, 247, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(168, 85, 247, 0.2);">
+            <svg style="width: 1.25rem; height: 1.25rem; color: #a855f7;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-purple-700 truncate">{{ kpis.tempo_medio.label }}</p>
-            <p class="text-lg font-bold text-purple-900">{{ kpis.tempo_medio.valor }}{{ kpis.tempo_medio.sufixo|default:"" }}</p>
-            <div class="flex items-center text-xs">
-              {% if kpis.tempo_medio.variacao > 0 %}
-                <span class="text-red-600">+{{ kpis.tempo_medio.variacao }}%</span>
-              {% elif kpis.tempo_medio.variacao < 0 %}
-                <span class="text-green-600">{{ kpis.tempo_medio.variacao }}%</span>
-              {% else %}
-                <span class="text-gray-500">0%</span>
-              {% endif %}
-            </div>
-          </div>
         </div>
+      </article>
 
-        <!-- Taxa de Aprovação -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
-          <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+      <!-- Taxa de Aprovação -->
+      <article>
+        <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.taxa_aprovacao.label }}</p>
+            <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">{{ kpis.taxa_aprovacao.valor }}{{ kpis.taxa_aprovacao.sufixo|default:"" }}</p>
+            {% if kpis.taxa_aprovacao.variacao > 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--success);">
+                +{{ kpis.taxa_aprovacao.variacao }}%
+              </span>
+            {% elif kpis.taxa_aprovacao.variacao < 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--danger);">
+                {{ kpis.taxa_aprovacao.variacao }}%
+              </span>
+            {% else %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--muted);">
+                0%
+              </span>
+            {% endif %}
+          </div>
+          <div style="background: rgba(99, 102, 241, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(99, 102, 241, 0.2);">
+            <svg style="width: 1.25rem; height: 1.25rem; color: #6366f1;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
           </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-indigo-700 truncate">{{ kpis.taxa_aprovacao.label }}</p>
-            <p class="text-lg font-bold text-indigo-900">{{ kpis.taxa_aprovacao.valor }}{{ kpis.taxa_aprovacao.sufixo|default:"" }}</p>
-            <div class="flex items-center text-xs">
-              {% if kpis.taxa_aprovacao.variacao > 0 %}
-                <span class="text-green-600">+{{ kpis.taxa_aprovacao.variacao }}%</span>
-              {% elif kpis.taxa_aprovacao.variacao < 0 %}
-                <span class="text-red-600">{{ kpis.taxa_aprovacao.variacao }}%</span>
-              {% else %}
-                <span class="text-gray-500">0%</span>
-              {% endif %}
-            </div>
-          </div>
         </div>
+      </article>
 
-        <!-- Em Atraso -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-red-50 border border-red-200">
-          <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+      <!-- Em Atraso -->
+      <article>
+        <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.em_atraso.label }}</p>
+            <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">{{ kpis.em_atraso.valor }}</p>
+            {% if kpis.em_atraso.variacao > 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--danger);">
+                +{{ kpis.em_atraso.variacao }}%
+              </span>
+            {% elif kpis.em_atraso.variacao < 0 %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--success);">
+                {{ kpis.em_atraso.variacao }}%
+              </span>
+            {% else %}
+              <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; color: var(--muted);">
+                0%
+              </span>
+            {% endif %}
+          </div>
+          <div style="background: rgba(239, 68, 68, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(239, 68, 68, 0.2);">
+            <svg style="width: 1.25rem; height: 1.25rem; color: #ef4444;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
             </svg>
           </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-red-700 truncate">{{ kpis.em_atraso.label }}</p>
-            <p class="text-lg font-bold text-red-900">{{ kpis.em_atraso.valor }}</p>
-            <div class="flex items-center text-xs">
-              {% if kpis.em_atraso.variacao > 0 %}
-                <span class="text-red-600">+{{ kpis.em_atraso.variacao }}%</span>
-              {% elif kpis.em_atraso.variacao < 0 %}
-                <span class="text-green-600">{{ kpis.em_atraso.variacao }}%</span>
-              {% else %}
-                <span class="text-gray-500">0%</span>
-              {% endif %}
-            </div>
-          </div>
         </div>
+      </article>
 
-      </div>
-    </div>
+    </section>
   </div>
 
- <!-- Filtros Rápidos -->
+  <!-- Filtros Rápidos -->
 <div class="mb-4">
   <div class="ds-pills">
     <a href="{% url 'analise:esteira' %}"

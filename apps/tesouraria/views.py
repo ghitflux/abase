@@ -378,7 +378,9 @@ def processos_tesouraria(request):
     # KPIs baseados no queryset filtrado
     total_processos = ProcessoTesouraria.objects.count()
     pendentes = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.PENDENTE).count()
+    # em_validacao_video count is used in the template
     em_validacao_video = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.EM_VALIDACAO_VIDEO).count()
+    # em_averbacao count is used in the template
     em_averbacao = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.EM_AVERBACAO).count()
     processados = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.PROCESSADO).count()
     rejeitados = ProcessoTesouraria.objects.filter(status=StatusProcessoTesouraria.REJEITADO).count()
@@ -539,7 +541,7 @@ def detalhe_processo_tesouraria(request, processo_id):
         'is_page_view': True,  # Flag para distinguir da view modal
     }
 
-    return render(request, 'tesouraria/detalhe_processo_pagina.html', context)
+    return render(request, 'tesouraria/detalhe_processo.html', context)
 
 
 @login_required

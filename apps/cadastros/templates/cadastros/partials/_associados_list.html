@@ -1,0 +1,126 @@
+<div class="card" style="padding:0">
+  <div style="padding:1rem 1rem 0"><div class="section-title">Associados Cadastrados</div></div>
+  <div style="overflow-x:auto; padding:1rem">
+    <table class="table table--dark">
+      <thead>
+        <tr>
+          <th>Associado</th>
+          <th>CPF/CNPJ</th>
+          <th>Status</th>
+          <th>Agente</th>
+          <th>Data Cadastro</th>
+          <th class="text-muted">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cadastro in cadastros %}
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center; gap:.75rem">
+                <div style="width:40px;height:40px;border-radius:999px;background:#1f2937;display:flex;align-items:center;justify-content:center;">
+                  <span class="fw-600">{{ cadastro.nome_completo|first|upper }}</span>
+                </div>
+                <div>
+                  <div class="name-strong">{{ cadastro.nome_completo|truncatechars:30 }}</div>
+                  <div class="text-muted">{{ cadastro.email|default:"Sem email" }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="name-strong">
+              {% if cadastro.tipo_pessoa == 'PF' %}
+                {{ cadastro.cpf|default:"Não informado" }}
+              {% else %}
+                {{ cadastro.cnpj|default:"Não informado" }}
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge {{ cadastro.status|status_class }}">
+                {{ cadastro.get_current_status_display }}
+              </span>
+            </td>
+            <td class="text-muted">{{ cadastro.agente_responsavel.get_full_name|default:cadastro.agente_responsavel.username }}</td>
+            <td class="text-muted">{{ cadastro.created_at|date:"d/m/Y H:i" }}</td>
+            <td style="text-align:right">
+              <a href="{% url 'cadastros:agente-detail' cadastro.id %}" class="btn btn-accent">Ver Detalhes</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" style="text-align:center; padding:2rem; color:#6b7280;">
+              Nenhum associado encontrado com os filtros aplicados.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginação -->
+  {% if is_paginated %}
+    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+      <div class="flex-1 flex justify-between sm:hidden">
+        {% if page_obj.has_previous %}
+          <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" 
+             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            Anterior
+          </a>
+        {% endif %}
+        {% if page_obj.has_next %}
+          <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" 
+             class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            Próximo
+          </a>
+        {% endif %}
+      </div>
+      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm text-gray-700">
+            Mostrando
+            <span class="font-medium">{{ page_obj.start_index }}</span>
+            a
+            <span class="font-medium">{{ page_obj.end_index }}</span>
+            de
+            <span class="font-medium">{{ paginator.count }}</span>
+            resultados
+          </p>
+        </div>
+        <div>
+          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            {% if page_obj.has_previous %}
+              <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" 
+                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">Anterior</span>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-indigo-50 text-sm font-medium text-indigo-600">
+                  {{ num }}
+                </span>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}" 
+                   class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  {{ num }}
+                </a>
+              {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+              <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" 
+                 class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">Próximo</span>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+              </a>
+            {% endif %}
+          </nav>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>

@@ -25,7 +25,7 @@ body {
 .theme-dark h4,
 .theme-dark h5,
 .theme-dark h6 {
-  color: var(--heading);
+  color: var(--heading) !important;
 }
 
 .theme-dark p,
@@ -34,7 +34,7 @@ body {
 .theme-dark small,
 .theme-dark dt,
 .theme-dark dd {
-  color: var(--text);
+  color: var(--text) !important;
 }
 
 .theme-dark .text-gray-900,
@@ -44,6 +44,36 @@ body {
 .theme-dark .text-black,
 .theme-dark .text-slate-900 {
   color: var(--text) !important;
+}
+
+/* Additional dark theme text corrections */
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700,
+.dark .text-gray-600,
+.dark .text-black,
+.dark .text-slate-900 {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Specific corrections for common dark text classes */
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-gray-800,
+[data-theme="dark"] .text-gray-700,
+[data-theme="dark"] .text-gray-600,
+[data-theme="dark"] .text-black,
+[data-theme="dark"] .text-slate-900 {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Force light text on dark backgrounds globally */
+body[data-theme="dark"] .text-gray-900,
+body[data-theme="dark"] .text-gray-800,
+body[data-theme="dark"] .text-gray-700,
+body[data-theme="dark"] .text-gray-600,
+body[data-theme="dark"] .text-black,
+body[data-theme="dark"] .text-slate-900 {
+  color: hsl(var(--foreground)) !important;
 }
 
 .theme-dark .bg-white,
@@ -180,8 +210,8 @@ body {
 }
 
 .sidebar__brand-icon {
-  width: 2rem;
-  height: 2rem;
+  width: 3rem;
+  height: 3rem;
   border-radius: 1rem;
   display: flex;
   align-items: center;
@@ -193,8 +223,8 @@ body {
 }
 
 .sidebar__brand-icon svg {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
 }
 
 .sidebar__brand-text h2 {
@@ -324,7 +354,7 @@ body {
 
 .form-input {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.5rem;
   border: 1px solid hsl(var(--border));
   border-radius: 0.5rem;
   font-size: 0.875rem;

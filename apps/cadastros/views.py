@@ -7,6 +7,9 @@ from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.contrib.auth import get_user_model
 
 from apps.accounts.decorators import group_required
 from apps.analise.models import HistoricoAnalise, StatusAnalise
@@ -16,6 +19,8 @@ from apps.documentos.views import ensure_draft_token
 from .choices import StatusCadastro, StatusParcela
 from .forms import CadastroForm
 from .models import Cadastro, ParcelaAntecipacao
+
+User = get_user_model()
 
 
 # -----------------------------
@@ -505,3 +510,77 @@ def renovar_cadastro(request, cadastro_id):
 
     messages.success(request, "Renovação iniciada. Revise os dados e envie para análise.")
     return redirect("cadastros:agente-list")
+
+
+# -----------------------------
+# Todos os Associados (Admin/Tesouraria/Analista)
+# -----------------------------
+@login_required
+@group_required(['ADMIN', 'TESOURARIA', 'ANALISTA'])
+def todos_associados(request):
+    """
+    Lista todos os associados cadastrados no sistema com filtros.
+    Acessível para administradores, tesoureiros e analistas.
+    """
+    # Base queryset
+    cadastros = Cadastro.objects.select_related('agente_responsavel').order_by('-created_at')
+    
+    # Aplicar filtros
+    status_filter = request.GET.get('status')
+    if status_filter:
+        cadastros = cadastros.filter(status=status_filter)
+    
+    agente_filter = request.GET.get('agente')
+    if agente_filter:
+        cadastros = cadastros.filter(agente_responsavel_id=agente_filter)
+    
+    data_inicio = request.GET.get('data_inicio')
+    if data_inicio:
+        cadastros = cadastros.filter(created_at__date__gte=data_inicio)
+    
+    data_fim = request.GET.get('data_fim')
+    if data_fim:
+        cadastros = cadastros.filter(created_at__date__lte=data_fim)
+    
+    search = request.GET.get('search')
+    if search:
+        cadastros = cadastros.filter(
+            Q(nome_completo__icontains=search) |
+            Q(cpf__icontains=search) |
+            Q(cnpj__icontains=search)
+        )
+    
+    # Calcular KPIs
+    total_cadastros = Cadastro.objects.count()
+    kpis = {
+        'rascunhos': {'valor': Cadastro.objects.filter(status=StatusCadastro.DRAFT).count()},
+        'em_analise': {'valor': Cadastro.objects.filter(status=StatusCadastro.SENT_REVIEW).count()},
+        'aprovados': {'valor': Cadastro.objects.filter(status=StatusCadastro.APPROVED_REVIEW).count()},
+        'efetivados': {'valor': Cadastro.objects.filter(status=StatusCadastro.EFFECTIVATED).count()},
+        'pendentes': {'valor': Cadastro.objects.filter(status__in=[StatusCadastro.PENDING_AGENT, StatusCadastro.PAYMENT_PENDING]).count()},
+        'cancelados': {'valor': Cadastro.objects.filter(status=StatusCadastro.CANCELLED).count()},
+    }
+    
+    # Paginação
+    paginator = Paginator(cadastros, 25)  # 25 cadastros por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Lista de usuários para o filtro
+    users = User.objects.filter(groups__name='AGENTE').order_by('first_name', 'last_name', 'username')
+    
+    context = {
+        'cadastros': page_obj,
+        'users': users,
+        'count_total': total_cadastros,
+        'kpis': kpis,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'is_paginated': page_obj.has_other_pages(),
+    }
+    
+    # Se for requisição HTMX, retornar apenas a lista
+    if request.headers.get('HX-Request') == 'true':
+        return render(request, "cadastros/partials/_associados_list.html", context)
+    
+    return render(request, "cadastros/todos_associados.html", context)

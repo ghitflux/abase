@@ -14,91 +14,97 @@
   </div>
 
   <!-- KPIs Dashboard -->
-  <div class="mb-6">
-    <div class="ds-card p-4">
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        
-        <!-- Total de Processos -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-          <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-            </svg>
-          </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-blue-700 truncate">{{ kpis.total_processos.label }}</p>
-            <p class="text-lg font-bold text-blue-900">{{ kpis.total_processos.valor }}</p>
-          </div>
+  <section class="row" style="margin-bottom: 2rem;">
+    <!-- Total de Processos -->
+    <article class="col-2">
+      <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.total_processos.label }}</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">{{ kpis.total_processos.valor }}</p>
         </div>
-
-        <!-- Pendentes -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
-          <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-yellow-700 truncate">{{ kpis.pendentes.label }}</p>
-            <p class="text-lg font-bold text-yellow-900">{{ kpis.pendentes.valor }}</p>
-          </div>
+        <div style="background: rgba(96, 165, 250, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(96, 165, 250, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #60a5fa;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+          </svg>
         </div>
-
-        <!-- Processados -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-green-50 border border-green-200">
-          <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-green-700 truncate">{{ kpis.processados.label }}</p>
-            <p class="text-lg font-bold text-green-900">{{ kpis.processados.valor }}</p>
-          </div>
-        </div>
-
-        <!-- Rejeitados -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-red-50 border border-red-200">
-          <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-red-700 truncate">{{ kpis.rejeitados.label }}</p>
-            <p class="text-lg font-bold text-red-900">{{ kpis.rejeitados.valor }}</p>
-          </div>
-        </div>
-
-        <!-- Valor Total Liberado -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-green-50 border border-green-200">
-          <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-green-700 truncate">{{ kpis.valor_liberado.label }}</p>
-            <p class="text-lg font-bold text-green-900">R$ {{ kpis.valor_liberado.valor|floatformat:2 }}</p>
-          </div>
-        </div>
-
-        <!-- Auxílio aos Agentes -->
-        <div class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-          <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
-            </svg>
-          </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-blue-700 truncate">{{ kpis.valor_auxilio.label }}</p>
-            <p class="text-lg font-bold text-blue-900">R$ {{ kpis.valor_auxilio.valor|floatformat:2 }}</p>
-          </div>
-        </div>
-
       </div>
-    </div>
-  </div>
+    </article>
+
+    <!-- Pendentes -->
+    <article class="col-2">
+      <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.pendentes.label }}</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">{{ kpis.pendentes.valor }}</p>
+        </div>
+        <div style="background: rgba(251, 191, 36, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(251, 191, 36, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #fbbf24;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+      </div>
+    </article>
+
+    <!-- Processados -->
+    <article class="col-2">
+      <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.processados.label }}</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">{{ kpis.processados.valor }}</p>
+        </div>
+        <div style="background: rgba(34, 197, 94, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(34, 197, 94, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #22c55e;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+      </div>
+    </article>
+
+    <!-- Rejeitados -->
+    <article class="col-2">
+      <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.rejeitados.label }}</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">{{ kpis.rejeitados.valor }}</p>
+        </div>
+        <div style="background: rgba(239, 68, 68, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(239, 68, 68, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #ef4444;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+      </div>
+    </article>
+
+    <!-- Valor Total Liberado -->
+    <article class="col-2">
+      <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.valor_liberado.label }}</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">R$ {{ kpis.valor_liberado.valor|floatformat:2 }}</p>
+        </div>
+        <div style="background: rgba(34, 197, 94, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(34, 197, 94, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #22c55e;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+      </div>
+    </article>
+
+    <!-- Auxílio aos Agentes -->
+    <article class="col-2">
+      <div class="card" style="padding: 1rem; height: 120px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <p style="color: var(--muted); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem;">{{ kpis.valor_auxilio.label }}</p>
+          <p style="color: var(--heading); font-size: 1.5rem; font-weight: 700;">R$ {{ kpis.valor_auxilio.valor|floatformat:2 }}</p>
+        </div>
+        <div style="background: rgba(96, 165, 250, 0.15); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(96, 165, 250, 0.2);">
+          <svg style="width: 1.25rem; height: 1.25rem; color: #60a5fa;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
+          </svg>
+        </div>
+      </div>
+    </article>
+  </section>
 
   <!-- Filtros -->
   <div class="ds-card p-6 mb-6" x-data="{ 
@@ -1136,6 +1142,121 @@
       setTimeout(() => {
         modal.remove();
       }, 300);
+    }
+  }
+
+  // Função para upload de comprovantes (disponível globalmente para o modal)
+  async function uploadComprovantes(processoId) {
+    const form = document.getElementById('comprovantes-form');
+    const btn = document.getElementById('btn-upload-comprovantes');
+    const comprovanteAssociado = document.getElementById('comprovante_associado');
+    const comprovanteAgente = document.getElementById('comprovante_agente');
+
+    // Verificar se pelo menos um arquivo foi selecionado
+    if (!comprovanteAssociado?.files[0] && !comprovanteAgente?.files[0]) {
+        alert('Por favor, selecione pelo menos um comprovante para enviar.');
+        return;
+    }
+
+    // Preparar FormData
+    const formData = new FormData();
+    const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+    formData.append('csrfmiddlewaretoken', csrfToken);
+
+    if (comprovanteAssociado?.files[0]) {
+        formData.append('comprovante_associado', comprovanteAssociado.files[0]);
+    }
+
+    if (comprovanteAgente?.files[0]) {
+        formData.append('comprovante_agente', comprovanteAgente.files[0]);
+    }
+
+    // Desabilitar botão durante upload
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="w-4 h-4 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4M4.929 4.929l2.828 2.828m8.486 8.486l2.828 2.828M2 12h4m12 0h4M4.929 19.071l2.828-2.828m8.486-8.486l2.828-2.828"></path></svg>Enviando...';
+
+    try {
+        const response = await fetch(`/tesouraria/processos/${processoId}/upload-comprovantes/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            // Sucesso
+            alert('Comprovantes enviados com sucesso!');
+
+            // Limpar formulário
+            comprovanteAssociado.value = '';
+            comprovanteAgente.value = '';
+            const previewAssociado = document.getElementById('preview-associado');
+            const previewAgente = document.getElementById('preview-agente');
+            if (previewAssociado) previewAssociado.classList.add('hidden');
+            if (previewAgente) previewAgente.classList.add('hidden');
+
+            // Recarregar modal para mostrar comprovantes salvos
+            openProcessoModal(processoId);
+
+        } else {
+            // Erro
+            alert(result.message || 'Erro ao enviar comprovantes. Tente novamente.');
+        }
+
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro de conexão. Tente novamente.');
+
+    } finally {
+        // Reabilitar botão
+        btn.disabled = false;
+        btn.innerHTML = '<svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>Enviar Comprovantes';
+    }
+  }
+
+  // Função para salvar observações (disponível globalmente para o modal)
+  async function salvarObservacoes(processoId) {
+    const form = document.getElementById('observacoes-form');
+    const textarea = form.querySelector('textarea[name="observacoes_tesouraria"]');
+    const btn = form.querySelector('button');
+
+    const formData = new FormData();
+    const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    formData.append('observacoes_tesouraria', textarea.value);
+
+    // Desabilitar botão durante salvamento
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
+    try {
+        const response = await fetch(`/tesouraria/processos/${processoId}/salvar-observacoes/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            showNotification('Observações salvas com sucesso!', '', 'success', 3000);
+        } else {
+            alert(result.message || 'Erro ao salvar observações. Tente novamente.');
+        }
+
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro de conexão. Tente novamente.');
+
+    } finally {
+        // Reabilitar botão
+        btn.disabled = false;
+        btn.textContent = 'Salvar Observações';
     }
   }
 </script>

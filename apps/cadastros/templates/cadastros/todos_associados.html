@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% load static %}
+{% load ui %}
+
+{% block title %}Todos os Associados{% endblock %}
+
+{% block content %}
+<div class="p-6">
+  <!-- Header -->
+  <div class="card" style="padding:1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+    <div class="section-title">Todos os Associados Cadastrados</div>
+    <div class="text-muted">{{ count_total }} associados no total</div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="row" style="margin-bottom:1rem">
+    <div class="col-2 col-lg-6"><div class="kpi"><div>Rascunhos</div><div class="value-strong">{{ kpis.rascunhos.valor|default:0 }}</div></div></div>
+    <div class="col-2 col-lg-6"><div class="kpi"><div>Em Análise</div><div class="value-strong">{{ kpis.em_analise.valor|default:0 }}</div></div></div>
+    <div class="col-2 col-lg-6"><div class="kpi"><div>Aprovados</div><div class="value-strong">{{ kpis.aprovados.valor|default:0 }}</div></div></div>
+    <div class="col-2 col-lg-6"><div class="kpi"><div>Efetivados</div><div class="value-strong">{{ kpis.efetivados.valor|default:0 }}</div></div></div>
+    <div class="col-2 col-lg-6"><div class="kpi"><div>Pendentes</div><div class="value-strong">{{ kpis.pendentes.valor|default:0 }}</div></div></div>
+    <div class="col-2 col-lg-6"><div class="kpi"><div>Cancelados</div><div class="value-strong">{{ kpis.cancelados.valor|default:0 }}</div></div></div>
+  </div>
+
+  <!-- Filtros Rápidos por Status -->
+  <div class="card" style="padding:1.5rem; margin-bottom:1.5rem;">
+    <div class="section-title" style="margin-bottom:1rem;">Filtros Rápidos</div>
+    <div style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+      <a href="{% url 'cadastros:todos_associados' %}" class="ds-pill {% if not request.GET.status %}is-active{% endif %}">Todos</a>
+      <a href="?status=DRAFT" class="ds-pill {% if request.GET.status == 'DRAFT' %}is-active{% endif %}">Rascunhos</a>
+      <a href="?status=SENT_REVIEW" class="ds-pill {% if request.GET.status == 'SENT_REVIEW' %}is-active{% endif %}">Enviado para Análise</a>
+      <a href="?status=PENDING_AGENT" class="ds-pill {% if request.GET.status == 'PENDING_AGENT' %}is-active{% endif %}">Pendência com Agente</a>
+      <a href="?status=RESUBMITTED" class="ds-pill {% if request.GET.status == 'RESUBMITTED' %}is-active{% endif %}">Reenviado</a>
+      <a href="?status=APPROVED_REVIEW" class="ds-pill {% if request.GET.status == 'APPROVED_REVIEW' %}is-active{% endif %}">Aprovado em Análise</a>
+      <a href="?status=PAYMENT_PENDING" class="ds-pill {% if request.GET.status == 'PAYMENT_PENDING' %}is-active{% endif %}">Pendente de Pagamento</a>
+      <a href="?status=EFFECTIVATED" class="ds-pill {% if request.GET.status == 'EFFECTIVATED' %}is-active{% endif %}">Efetivados</a>
+      <a href="?status=CANCELLED" class="ds-pill {% if request.GET.status == 'CANCELLED' %}is-active{% endif %}">Cancelados</a>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card" style="padding:1rem; margin-bottom:1rem;">
+    <div class="section-title" style="margin-bottom:0.75rem;">Filtros de Busca</div>
+    <form id="filtros" method="get" hx-get="{% url 'cadastros:todos_associados' %}" hx-target="#associados-list" hx-trigger="submit" hx-indicator="#loading">
+      <div class="row" style="gap:0.75rem;">
+        <div class="col-3 col-lg-6 col-md-12">
+          <label for="agente" class="form-label">Agente Responsável</label>
+          <select name="agente" id="agente" class="form-input">
+            <option value="">Todos os agentes</option>
+            {% for user in users %}
+              <option value="{{ user.id }}" {% if user.id|stringformat:"s" == request.GET.agente %}selected{% endif %}>{{ user.get_full_name|default:user.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-3 col-lg-6 col-md-12">
+          <label for="data_inicio" class="form-label">Data de Início</label>
+          <input type="date" name="data_inicio" id="data_inicio" value="{{ request.GET.data_inicio }}" class="form-input">
+        </div>
+        <div class="col-3 col-lg-6 col-md-12">
+          <label for="data_fim" class="form-label">Data de Fim</label>
+          <input type="date" name="data_fim" id="data_fim" value="{{ request.GET.data_fim }}" class="form-input">
+        </div>
+        <div class="col-3 col-lg-6 col-md-12">
+          <label for="search" class="form-label">Busca Geral</label>
+          <input type="text" name="search" id="search" value="{{ request.GET.search }}" placeholder="Nome, CPF, CNPJ, Email..." class="form-input">
+        </div>
+      </div>
+      <div class="row" style="margin-top:1rem;">
+        <div class="col-12">
+          <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+            <a href="{% url 'cadastros:todos_associados' %}" class="btn btn--outline">Limpar Filtros</a>
+            <button type="submit" class="btn btn--primary">
+              <span id="loading" class="htmx-indicator">⏳</span>
+              Aplicar Filtros
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Lista de Associados -->
+   {% if cadastros %}
+   <div id="associados-list">
+     <div class="card" style="padding:0">
+       <div style="padding:1rem 1rem 0"><div class="section-title">Associados Cadastrados</div></div>
+       <div style="overflow-x:auto; padding:1rem">
+         <table class="table table--dark">
+           <thead>
+             <tr>
+               <th>Associado</th>
+               <th>CPF/CNPJ</th>
+               <th>Status</th>
+               <th>Agente</th>
+               <th>Data Cadastro</th>
+               <th class="text-muted">Ações</th>
+             </tr>
+           </thead>
+           <tbody>
+             {% for cadastro in cadastros %}
+               <tr>
+                 <td>
+                   <div style="display:flex; align-items:center; gap:.75rem">
+                     <div style="width:40px;height:40px;border-radius:999px;background:#1f2937;display:flex;align-items:center;justify-content:center;">
+                       <span class="fw-600">{{ cadastro.nome_completo|first|upper }}</span>
+                     </div>
+                     <div>
+                       <div class="name-strong">{{ cadastro.nome_completo|truncatechars:30 }}</div>
+                       <div class="text-muted">{{ cadastro.email|default:"Sem email" }}</div>
+                     </div>
+                   </div>
+                 </td>
+                 <td class="name-strong">
+                   {% if cadastro.tipo_pessoa == 'PF' %}
+                     {{ cadastro.cpf|default:"Não informado" }}
+                   {% else %}
+                     {{ cadastro.cnpj|default:"Não informado" }}
+                   {% endif %}
+                 </td>
+                 <td>
+                   <span class="badge {{ cadastro.status|status_class }}">
+                     {{ cadastro.get_current_status_display }}
+                   </span>
+                 </td>
+                 <td class="text-muted">{{ cadastro.agente_responsavel.get_full_name|default:cadastro.agente_responsavel.username }}</td>
+                 <td class="text-muted">{{ cadastro.created_at|date:"d/m/Y H:i" }}</td>
+                 <td style="text-align:right">
+                   <a href="{% url 'cadastros:agente-detail' cadastro.id %}" class="btn btn-accent">Ver Detalhes</a>
+                 </td>
+               </tr>
+             {% empty %}
+               <tr>
+                 <td colspan="6" style="text-align:center; padding:2rem; color:#6b7280;">
+                   Nenhum associado encontrado com os filtros aplicados.
+                 </td>
+               </tr>
+             {% endfor %}
+           </tbody>
+         </table>
+       </div>
+
+       <!-- Paginação -->
+       {% if is_paginated %}
+         <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+           <div class="flex-1 flex justify-between sm:hidden">
+             {% if page_obj.has_previous %}
+               <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" 
+                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                 Anterior
+               </a>
+             {% endif %}
+             {% if page_obj.has_next %}
+               <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" 
+                  class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                 Próximo
+               </a>
+             {% endif %}
+           </div>
+           <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+             <div>
+               <p class="text-sm text-gray-700">
+                 Mostrando
+                 <span class="font-medium">{{ page_obj.start_index }}</span>
+                 a
+                 <span class="font-medium">{{ page_obj.end_index }}</span>
+                 de
+                 <span class="font-medium">{{ paginator.count }}</span>
+                 resultados
+               </p>
+             </div>
+             <div>
+               <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                 {% if page_obj.has_previous %}
+                   <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" 
+                      class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                     <span class="sr-only">Anterior</span>
+                     <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                       <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                     </svg>
+                   </a>
+                 {% endif %}
+                 
+                 {% for num in page_obj.paginator.page_range %}
+                   {% if page_obj.number == num %}
+                     <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-indigo-50 text-sm font-medium text-indigo-600">
+                       {{ num }}
+                     </span>
+                   {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                     <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}" 
+                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                       {{ num }}
+                     </a>
+                   {% endif %}
+                 {% endfor %}
+                 
+                 {% if page_obj.has_next %}
+                   <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" 
+                      class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                     <span class="sr-only">Próximo</span>
+                     <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                       <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                     </svg>
+                   </a>
+                 {% endif %}
+               </nav>
+             </div>
+           </div>
+         </div>
+       {% endif %}
+     </div>
+   </div>
+   {% else %}
+   <div class="bg-white shadow rounded-lg">
+     <div class="p-6">
+       <div class="text-center py-12">
+         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+         </svg>
+         <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum associado encontrado</h3>
+         <p class="mt-1 text-sm text-gray-500">Nenhum associado foi encontrado com os filtros aplicados.</p>
+       </div>
+     </div>
+   </div>
+   {% endif %}
+
+</div>
+
+</div>
+{% endblock %}

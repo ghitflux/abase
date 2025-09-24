@@ -137,12 +137,12 @@ class ReconciliacaoLog(models.Model):
 
 
 class StatusProcessoTesouraria(models.TextChoices):
-    """Status possíveis para processos na tesouraria"""
-    PENDENTE = 'pendente', 'Pendente de Processamento'
+    """Choices para status dos processos da tesouraria"""
+    PENDENTE = 'pendente', 'Pendentes'
     EM_PROCESSAMENTO = 'em_processamento', 'Em Processamento'
-    EM_VALIDACAO_VIDEO = 'em_validacao_video', 'Em Validação Vídeo'
+    EM_VALIDACAO_VIDEO = 'em_validacao_video', 'Validação Vídeo'
     EM_AVERBACAO = 'em_averbacao', 'Em Averbação'
-    PROCESSADO = 'processado', 'Efetivado'
+    PROCESSADO = 'processado', 'Processados'
     REJEITADO = 'rejeitado', 'Rejeitado'
     
 

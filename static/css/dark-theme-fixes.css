@@ -1,0 +1,127 @@
+/* Dark Theme Text Contrast Fixes */
+/* This file ensures proper text contrast in dark mode */
+
+/* Global text color fixes for dark backgrounds */
+body {
+  color: var(--text, #e5e7eb);
+}
+
+/* Fix dark text classes that become invisible on dark backgrounds */
+.text-gray-900,
+.text-gray-800,
+.text-gray-700,
+.text-gray-600,
+.text-black,
+.text-slate-900,
+.text-slate-800,
+.text-slate-700 {
+  color: var(--text, #e5e7eb) !important;
+}
+
+/* Ensure headings are always visible */
+h1, h2, h3, h4, h5, h6,
+.text-xl, .text-2xl, .text-3xl, .text-4xl, .text-5xl, .text-6xl {
+  color: var(--heading, #ffffff) !important;
+}
+
+/* Fix form labels and small text */
+label,
+.text-sm,
+.text-xs,
+small {
+  color: var(--text, #e5e7eb) !important;
+}
+
+/* Fix table text */
+table th,
+table td {
+  color: var(--text, #e5e7eb) !important;
+}
+
+/* Fix button text */
+button,
+.btn {
+  color: var(--text, #e5e7eb);
+}
+
+.btn-primary {
+  color: #ffffff !important;
+}
+
+/* Fix link colors */
+a {
+  color: var(--accent-200, #f4d6e3);
+}
+
+a:hover {
+  color: var(--accent, #7a1340);
+}
+
+/* Fix modal and card text */
+.modal,
+.card,
+.bg-white,
+.bg-gray-50,
+.bg-gray-100 {
+  color: var(--text, #e5e7eb) !important;
+}
+
+/* Fix input placeholders */
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted, #cbd5e1) !important;
+}
+
+/* Fix dropdown options */
+select option {
+  background: var(--surface, #121826) !important;
+  color: var(--text, #e5e7eb) !important;
+}
+
+/* Fix status badges text */
+.badge,
+.status-badge {
+  color: inherit !important;
+}
+
+/* Specific fixes for common problematic elements */
+.font-medium,
+.font-semibold,
+.font-bold {
+  color: inherit !important;
+}
+
+/* Fix pagination text */
+.pagination a,
+.pagination span {
+  color: var(--text, #e5e7eb) !important;
+}
+
+/* Fix breadcrumb text */
+.breadcrumb,
+.breadcrumb a {
+  color: var(--muted, #cbd5e1) !important;
+}
+
+/* Fix alert text */
+.alert {
+  color: var(--text, #e5e7eb) !important;
+}
+
+/* Fix tooltip text */
+.tooltip {
+  color: var(--text, #e5e7eb) !important;
+  background: var(--surface, #121826) !important;
+}
+
+/* Media query for system dark mode preference */
+@media (prefers-color-scheme: dark) {
+  .text-gray-900,
+  .text-gray-800,
+  .text-gray-700,
+  .text-gray-600,
+  .text-black,
+  .text-slate-900 {
+    color: #e5e7eb !important;
+  }
+}

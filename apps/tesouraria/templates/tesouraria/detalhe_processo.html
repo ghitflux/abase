@@ -182,20 +182,20 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
       <div class="rounded-lg p-4 bg-primary/10">
         <span class="modal-field-label text-primary">Valor Disponível (70%)</span>
-        <p class="modal-field-value text-primary text-xl font-bold">R$ {{ processo.cadastro.disponivel|floatformat:2|default:"0,00" }}</p>
+        <p class="modal-field-value text-primary text-xl font-bold">R$ {{ processo.cadastro.disponivel|floatformat:2|default:"000.000,00" }}</p>
       </div>
       <div class="rounded-lg p-4 bg-amber-500/10">
         <span class="modal-field-label text-amber-300">Doação Associado (30%)</span>
-        <p class="modal-field-value text-amber-200 text-lg font-semibold">R$ {{ processo.cadastro.doacao_associado|floatformat:2|default:"0,00" }}</p>
+        <p class="modal-field-value text-amber-200 text-lg font-semibold">R$ {{ processo.cadastro.doacao_associado|floatformat:2|default:"000.000,00" }}</p>
       </div>
       <div class="rounded-lg p-4 bg-sky-500/10">
         <span class="modal-field-label text-sky-300">Auxílio Agente (10%)</span>
-        <p class="modal-field-value text-sky-200 text-lg font-semibold">R$ {{ processo.cadastro.auxilio_agente_valor|floatformat:2|default:"0,00" }}</p>
+        <p class="modal-field-value text-sky-200 text-lg font-semibold">R$ {{ processo.cadastro.auxilio_agente_valor|floatformat:2|default:"000.000,00" }}</p>
       </div>
       <div class="rounded-lg p-4 bg-purple-500/10">
         <span class="modal-field-label text-purple-300">Mensalidade (3x Parcelas)</span>
-        <p class="modal-field-value text-purple-200 text-lg font-semibold">R$ {{ processo.cadastro.mensalidade_associativa|floatformat:2|default:"0,00" }}</p>
-        <p class="text-xs text-purple-300 mt-1">Total 3x: R$ {{ processo.cadastro.valor_total_antecipacao|floatformat:2|default:"0,00" }}</p>
+        <p class="modal-field-value text-purple-200 text-lg font-semibold">R$ {{ processo.cadastro.mensalidade_associativa|floatformat:2|default:"000.000,00" }}</p>
+        <p class="text-xs text-purple-300 mt-1">Total 3x: R$ {{ processo.cadastro.valor_total_antecipacao|floatformat:2|default:"000.000,00" }}</p>
       </div>
     </div>
   </div>
@@ -448,74 +448,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Função para upload de comprovantes
-async function uploadComprovantes(processoId) {
-    const form = document.getElementById('comprovantes-form');
-    const btn = document.getElementById('btn-upload-comprovantes');
-    const comprovanteAssociado = document.getElementById('comprovante_associado');
-    const comprovanteAgente = document.getElementById('comprovante_agente');
-
-    // Verificar se pelo menos um arquivo foi selecionado
-    if (!comprovanteAssociado?.files[0] && !comprovanteAgente?.files[0]) {
-        alert('Por favor, selecione pelo menos um comprovante para enviar.');
-        return;
-    }
-
-    // Preparar FormData
-    const formData = new FormData();
-    const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
-    formData.append('csrfmiddlewaretoken', csrfToken);
-
-    if (comprovanteAssociado?.files[0]) {
-        formData.append('comprovante_associado', comprovanteAssociado.files[0]);
-    }
-
-    if (comprovanteAgente?.files[0]) {
-        formData.append('comprovante_agente', comprovanteAgente.files[0]);
-    }
-
-    // Desabilitar botão durante upload
-    btn.disabled = true;
-    btn.innerHTML = '<svg class="w-4 h-4 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4M4.929 4.929l2.828 2.828m8.486 8.486l2.828 2.828M2 12h4m12 0h4M4.929 19.071l2.828-2.828m8.486-8.486l2.828-2.828"></path></svg>Enviando...';
-
-    try {
-        const response = await fetch(`/tesouraria/processos/${processoId}/upload-comprovantes/`, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            }
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            // Sucesso
-            alert('Comprovantes enviados com sucesso!');
-
-            // Limpar formulário
-            comprovanteAssociado.value = '';
-            comprovanteAgente.value = '';
-            document.getElementById('preview-associado').classList.add('hidden');
-            document.getElementById('preview-agente').classList.add('hidden');
-
-            // Recarregar modal para mostrar comprovantes salvos
-            location.reload();
-
-        } else {
-            // Erro
-            alert(result.message || 'Erro ao enviar comprovantes. Tente novamente.');
-        }
-
-    } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro de conexão. Tente novamente.');
-
-    } finally {
-        // Reabilitar botão
-        btn.disabled = false;
-        btn.innerHTML = '<svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>Enviar Comprovantes';
-    }
-}
+// Nota: As funções uploadComprovantes e salvarObservacoes estão definidas no arquivo principal processos_lista.html
+// para que estejam disponíveis globalmente quando o modal é carregado via AJAX
 </script>
 

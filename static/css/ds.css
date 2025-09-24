@@ -20,7 +20,29 @@
 .col-4 { grid-column: span 4 !important; }
 .col-3 { grid-column: span 3 !important; }
 .col-2 { grid-column: span 2 !important; }
+
+/* Global dark theme text corrections */
 :root{ color-scheme:dark }
+
+/* Force light text on dark backgrounds for common text classes */
+.text-gray-900,
+.text-gray-800,
+.text-gray-700,
+.text-gray-600,
+.text-black,
+.text-slate-900 {
+  color: var(--text) !important;
+}
+
+/* Ensure headings are visible */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--heading) !important;
+}
+
+/* Ensure paragraphs and labels are visible */
+p, span, label, small, dt, dd {
+  color: var(--text) !important;
+}
 html,body{height:100%}
 body{background:var(--bg);color:var(--text);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 p{color:var(--text)}
