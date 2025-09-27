@@ -43,6 +43,7 @@ LOCAL_APPS = [
     'apps.documentos',
     'apps.tesouraria',  # Inclui funcionalidades de mensalidades e reconciliação
     'apps.importador',
+    'apps.importar_cadastros',  # Nova app para importação de cadastros
     'apps.notificacoes',
     'apps.relatorios',
     'apps.common',

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block breadcrumbs %}
+    {% if breadcrumbs %}
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    {% if breadcrumb.url %}
+                        <li class="breadcrumb-item">
+                            <a href="{{ breadcrumb.url }}">{{ breadcrumb.name }}</a>
+                        </li>
+                    {% else %}
+                        <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb.name }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-eye me-2"></i>
+                        Preview da Importação - Lote #{{ batch.id }}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Informações do Lote -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold">Informações do Lote</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Tipo:</strong> {{ batch.get_tipo_display }}</li>
+                                <li><strong>Arquivo:</strong> {{ batch.planilha.name }}</li>
+                                <li><strong>Status:</strong> 
+                                    <span class="badge bg-info">{{ batch.get_status_display }}</span>
+                                </li>
+                                <li><strong>Criado em:</strong> {{ batch.created_at|date:"d/m/Y H:i" }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold">Resultados do Preview</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Total de linhas:</strong> {{ results.total_linhas|default:0 }}</li>
+                                <li><strong>Sucessos:</strong> 
+                                    <span class="text-success">{{ results.linhas_sucesso|default:0 }}</span>
+                                </li>
+                                <li><strong>Erros:</strong> 
+                                    <span class="text-danger">{{ results.linhas_erro|default:0 }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Resultados -->
+                    {% if results.success %}
+                        <div class="alert alert-success" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Preview concluído com sucesso!</strong>
+                            {{ results.linhas_sucesso }} linha(s) serão importadas.
+                        </div>
+                        
+                        <!-- Botões de Ação -->
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% url 'importar_cadastros:index' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Voltar
+                            </a>
+                            <form method="post" action="{% url 'importar_cadastros:confirm' %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="batch_id" value="{{ batch.id }}">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check me-1"></i>
+                                    Confirmar Importação
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Erro no preview:</strong>
+                            {{ results.error|default:"Erro desconhecido" }}
+                        </div>
+                        
+                        <!-- Detalhes dos Erros -->
+                        {% if error_rows %}
+                            <div class="mt-4">
+                                <h6 class="fw-semibold">Detalhes dos Erros:</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Linha</th>
+                                                <th>Erro</th>
+                                                <th>Dados</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for error in error_rows %}
+                                                <tr>
+                                                    <td>{{ error.linha|default:"-" }}</td>
+                                                    <td class="text-danger">{{ error.erro }}</td>
+                                                    <td>
+                                                        <small class="text-muted">
+                                                            {{ error.dados|truncatechars:50 }}
+                                                        </small>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Botão Voltar -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <a href="{% url 'importar_cadastros:index' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Voltar e Corrigir
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

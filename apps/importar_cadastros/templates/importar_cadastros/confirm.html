@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block breadcrumbs %}
+    {% if breadcrumbs %}
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    {% if breadcrumb.url %}
+                        <li class="breadcrumb-item">
+                            <a href="{{ breadcrumb.url }}">{{ breadcrumb.name }}</a>
+                        </li>
+                    {% else %}
+                        <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb.name }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Importação Concluída - Lote #{{ batch.id }}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Informações do Lote -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold">Informações do Lote</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Tipo:</strong> {{ batch.get_tipo_display }}</li>
+                                <li><strong>Arquivo:</strong> {{ batch.planilha.name }}</li>
+                                <li><strong>Status:</strong> 
+                                    <span class="badge bg-success">{{ batch.get_status_display }}</span>
+                                </li>
+                                <li><strong>Processado em:</strong> {{ batch.updated_at|date:"d/m/Y H:i" }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold">Resultados da Importação</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Total de linhas:</strong> {{ results.total_linhas|default:0 }}</li>
+                                <li><strong>Sucessos:</strong> 
+                                    <span class="text-success fw-bold">{{ results.linhas_sucesso|default:0 }}</span>
+                                </li>
+                                <li><strong>Erros:</strong> 
+                                    <span class="text-danger fw-bold">{{ results.linhas_erro|default:0 }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Resultado -->
+                    {% if results.success %}
+                        <div class="alert alert-success" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Importação concluída com sucesso!</strong>
+                            {{ results.linhas_sucesso }} cadastro(s) foram importados.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Importação concluída com erros:</strong>
+                            {{ results.error|default:"Alguns registros não puderam ser importados" }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Estatísticas Detalhadas -->
+                    {% if results.linhas_sucesso or results.linhas_erro %}
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                        <h4 class="text-success">{{ results.linhas_sucesso|default:0 }}</h4>
+                                        <p class="mb-0">Cadastros Importados</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-danger">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                                        <h4 class="text-danger">{{ results.linhas_erro|default:0 }}</h4>
+                                        <p class="mb-0">Erros Encontrados</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Ações -->
+                    <div class="d-flex gap-2 justify-content-between">
+                        <div>
+                            <a href="{% url 'importar_cadastros:index' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>
+                                Nova Importação
+                            </a>
+                        </div>
+                        <div>
+                            <a href="{% url 'importar_cadastros:batch_detail' batch.id %}" class="btn btn-outline-info">
+                                <i class="fas fa-eye me-1"></i>
+                                Ver Detalhes
+                            </a>
+                            <a href="{% url 'cadastros:todos_associados' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-users me-1"></i>
+                                Ver Cadastros
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -37,6 +37,7 @@ urlpatterns = [
     path('tesouraria/', include('apps.tesouraria.urls')),
     path('relatorios/', include(('apps.relatorios.urls', 'relatorios'), namespace='relatorios')),
     path("importador/", include(("apps.importador.urls","importador"), namespace="importador")),
+    path("importar-cadastros/", include(("apps.importar_cadastros.urls", "importar_cadastros"), namespace="importar_cadastros")),
     path('auditoria/', include(('apps.auditoria.urls', 'auditoria'), namespace='auditoria')),
     path('notificacoes/', include(('apps.notificacoes.urls', 'notificacoes'), namespace='notificacoes')),
     path('p/', include(('apps.documentos.urls', 'documentos'), namespace='documentos')),

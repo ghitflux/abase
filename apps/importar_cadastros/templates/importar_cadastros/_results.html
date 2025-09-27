@@ -1,0 +1,245 @@
+<!-- Template parcial para resultados da importação (usado com HTMX) -->
+
+{% if results.success %}
+    <!-- Resultados de Sucesso -->
+    <div class="alert alert-success" role="alert">
+        <h5 class="alert-heading">
+            <i class="fas fa-check-circle me-2"></i>
+            {% if results.dry_run %}
+                Preview da Importação Concluído
+            {% else %}
+                Importação Concluída com Sucesso!
+            {% endif %}
+        </h5>
+        <hr>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3 class="text-success mb-1">{{ results.total_linhas }}</h3>
+                    <small class="text-muted">Total de Linhas</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3 class="text-success mb-1">{{ results.linhas_sucesso }}</h3>
+                    <small class="text-muted">Processadas com Sucesso</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3 class="{% if results.linhas_erro > 0 %}text-warning{% else %}text-success{% endif %} mb-1">
+                        {{ results.linhas_erro }}
+                    </h3>
+                    <small class="text-muted">Erros Encontrados</small>
+                </div>
+            </div>
+        </div>
+        
+        {% if results.dry_run %}
+            <hr>
+            <p class="mb-0">
+                <strong>Atenção:</strong> Este foi apenas um preview. Nenhum dado foi salvo no banco de dados.
+                {% if results.linhas_erro == 0 %}
+                    Você pode prosseguir com a importação definitiva.
+                {% else %}
+                    Corrija os erros antes de prosseguir.
+                {% endif %}
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Progresso Visual -->
+    {% if results.total_linhas > 0 %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h6 class="card-title">Progresso da Importação</h6>
+                <div class="progress mb-2" style="height: 25px;">
+                    {% with success_percent=results.linhas_sucesso|floatformat:0|add:0 total=results.total_linhas|floatformat:0|add:0 %}
+                        {% with success_pct=success_percent|div:total|mul:100 %}
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ success_pct }}%" 
+                                 aria-valuenow="{{ success_pct }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ results.linhas_sucesso }} OK
+                            </div>
+                        {% endwith %}
+                    {% endwith %}
+                    
+                    {% if results.linhas_erro > 0 %}
+                        {% with error_percent=results.linhas_erro|floatformat:0|add:0 total=results.total_linhas|floatformat:0|add:0 %}
+                            {% with error_pct=error_percent|div:total|mul:100 %}
+                                <div class="progress-bar bg-warning" role="progressbar" 
+                                     style="width: {{ error_pct }}%" 
+                                     aria-valuenow="{{ error_pct }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ results.linhas_erro }} Erros
+                                </div>
+                            {% endwith %}
+                        {% endwith %}
+                    {% endif %}
+                </div>
+                <small class="text-muted">
+                    Taxa de sucesso: 
+                    {% widthratio results.linhas_sucesso results.total_linhas 100 %}%
+                </small>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Lista de Erros -->
+    {% if results.linhas_erro > 0 and error_rows %}
+        <div class="card mb-3">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Erros Encontrados ({{ results.linhas_erro }} de {{ results.total_linhas }})
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width: 80px;">Linha</th>
+                                <th style="width: 200px;">Erro</th>
+                                <th>Dados</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for error in error_rows %}
+                                <tr>
+                                    <td class="text-center">
+                                        <span class="badge bg-warning text-dark">{{ error.linha }}</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-danger">{{ error.erro|truncatechars:100 }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted font-monospace">
+                                            {% for key, value in error.dados.items %}
+                                                <strong>{{ key }}:</strong> {{ value|truncatechars:30 }}{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if results.linhas_erro > error_rows|length %}
+                    <div class="card-footer text-muted text-center">
+                        <small>
+                            Mostrando {{ error_rows|length }} de {{ results.linhas_erro }} erros.
+                            <a href="{% url 'importar_cadastros:batch_detail' batch.id %}">Ver todos os erros</a>
+                        </small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Botões de Ação -->
+    <div class="d-flex justify-content-between align-items-center">
+        <a href="{% url 'importar_cadastros:index' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>
+            Nova Importação
+        </a>
+        
+        {% if results.dry_run %}
+            {% if results.linhas_erro == 0 %}
+                <!-- Botão para confirmar importação -->
+                <form method="post" action="{% url 'importar_cadastros:confirm' %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="batch_id" value="{{ batch.id }}">
+                    <button type="submit" class="btn btn-success" 
+                            onclick="this.disabled=true; this.innerHTML='<i class=\'fas fa-spinner fa-spin me-1\'></i>Importando...'">
+                        <i class="fas fa-check me-1"></i>
+                        Confirmar Importação
+                    </button>
+                </form>
+            {% else %}
+                <button type="button" class="btn btn-warning" disabled>
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Corrija os Erros Primeiro
+                </button>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'importar_cadastros:batch_detail' batch.id %}" class="btn btn-primary">
+                <i class="fas fa-eye me-1"></i>
+                Ver Detalhes Completos
+            </a>
+        {% endif %}
+    </div>
+
+{% else %}
+    <!-- Erro na Importação -->
+    <div class="alert alert-danger" role="alert">
+        <h5 class="alert-heading">
+            <i class="fas fa-times-circle me-2"></i>
+            Erro na Importação
+        </h5>
+        <hr>
+        <p class="mb-0">
+            <strong>Erro:</strong> {{ results.error|default:"Erro desconhecido durante o processamento." }}
+        </p>
+        <hr>
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'importar_cadastros:index' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>
+                Tentar Novamente
+            </a>
+            <button type="button" class="btn btn-outline-danger" onclick="window.location.reload()">
+                <i class="fas fa-redo me-1"></i>
+                Recarregar Página
+            </button>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Informações do Lote -->
+<div class="card mt-3">
+    <div class="card-header bg-light">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Informações do Lote #{{ batch.id }}
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Tipo:</dt>
+                    <dd class="col-sm-7">{{ batch.get_tipo_display }}</dd>
+                    
+                    <dt class="col-sm-5">Status:</dt>
+                    <dd class="col-sm-7">
+                        <span class="badge bg-{{ batch.get_status_color }}">
+                            {{ batch.get_status_display }}
+                        </span>
+                    </dd>
+                    
+                    <dt class="col-sm-5">Usuário:</dt>
+                    <dd class="col-sm-7">{{ batch.usuario.get_full_name|default:batch.usuario.username }}</dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Criado em:</dt>
+                    <dd class="col-sm-7">{{ batch.created_at|date:"d/m/Y H:i:s" }}</dd>
+                    
+                    {% if batch.started_at %}
+                        <dt class="col-sm-5">Iniciado em:</dt>
+                        <dd class="col-sm-7">{{ batch.started_at|date:"d/m/Y H:i:s" }}</dd>
+                    {% endif %}
+                    
+                    {% if batch.completed_at %}
+                        <dt class="col-sm-5">Concluído em:</dt>
+                        <dd class="col-sm-7">{{ batch.completed_at|date:"d/m/Y H:i:s" }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

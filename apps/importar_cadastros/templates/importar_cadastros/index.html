@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .mapping-json {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+    }
+    
+    .file-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 0.375rem;
+        padding: 2rem;
+        text-align: center;
+        transition: border-color 0.15s ease-in-out;
+    }
+    
+    .file-upload-area:hover {
+        border-color: #0d6efd;
+    }
+    
+    .file-upload-area.dragover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    
+    .batch-card {
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .batch-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .status-badge {
+        font-size: 0.75em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Breadcrumbs -->
+    {% if breadcrumbs %}
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            {% for crumb in breadcrumbs %}
+                {% if crumb.url %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                    </li>
+                {% else %}
+                    <li class="breadcrumb-item active" aria-current="page">{{ crumb.name }}</li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Formulário de Importação -->
+        <div class="col-12 col-xl-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-upload me-2"></i>
+                        Nova Importação
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" id="import-form" action="{% url 'importar_cadastros:dry_run' %}">
+                        {% csrf_token %}
+                        
+                        <!-- Tipo de Importação -->
+                        <div class="mb-4">
+                            <label for="{{ form.tipo.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.tipo.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.tipo }}
+                            {% if form.tipo.help_text %}
+                                <div class="form-text">{{ form.tipo.help_text }}</div>
+                            {% endif %}
+                            {% if form.tipo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tipo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Upload da Planilha -->
+                        <div class="mb-4">
+                            <label for="{{ form.planilha.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.planilha.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="file-upload-area" id="planilha-upload-area">
+                                {{ form.planilha }}
+                                <div class="mt-3">
+                                    <i class="fas fa-file-excel fa-2x text-muted mb-3"></i>
+                                    <p class="mb-2 fw-medium">Clique para selecionar ou arraste o arquivo aqui</p>
+                                    <small class="text-muted">Formatos aceitos: CSV, XLSX, XLS (máx. 50MB)</small>
+                                </div>
+                            </div>
+                            {% if form.planilha.help_text %}
+                                <div class="form-text mt-2">{{ form.planilha.help_text }}</div>
+                            {% endif %}
+                            {% if form.planilha.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.planilha.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Upload do ZIP de Anexos -->
+                        <div class="mb-4">
+                            <label for="{{ form.anexos_zip.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.anexos_zip.label }}
+                            </label>
+                            <div class="file-upload-area" id="anexos-upload-area">
+                                {{ form.anexos_zip }}
+                                <div class="mt-3">
+                                    <i class="fas fa-file-archive fa-2x text-muted mb-3"></i>
+                                    <p class="mb-2 fw-medium">Clique para selecionar ou arraste o arquivo ZIP aqui</p>
+                                    <small class="text-muted">Arquivo ZIP com pastas nomeadas pelo CPF (máx. 500MB)</small>
+                                </div>
+                            </div>
+                            {% if form.anexos_zip.help_text %}
+                                <div class="form-text mt-2">{{ form.anexos_zip.help_text }}</div>
+                            {% endif %}
+                            {% if form.anexos_zip.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.anexos_zip.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Mapeamento JSON -->
+                        <div class="mb-4">
+                            <label for="{{ form.mapping_json_text.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.mapping_json_text.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <small class="text-muted">Configure como as colunas da planilha serão mapeadas</small>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="reset-mapping">
+                                    <i class="fas fa-undo me-1"></i>
+                                    Resetar Padrão
+                                </button>
+                            </div>
+                            <div class="position-relative">
+                                <textarea 
+                                    class="form-control font-monospace" 
+                                    id="{{ form.mapping_json_text.id_for_label }}" 
+                                    name="mapping_json_text" 
+                                    rows="12" 
+                                    placeholder="Cole aqui o JSON de mapeamento ou deixe vazio para usar o padrão..."
+                                    style="font-size: 13px; line-height: 1.5; resize: vertical; min-height: 300px;">{{ default_mapping_json }}</textarea>
+                                <small class="position-absolute top-0 end-0 mt-2 me-2 text-muted bg-white px-1" style="font-size: 11px;">JSON</small>
+                            </div>
+                            {% if form.mapping_json_text.help_text %}
+                                <div class="form-text mt-2">{{ form.mapping_json_text.help_text }}</div>
+                            {% endif %}
+                            {% if form.mapping_json_text.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.mapping_json_text.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-3 border-top">
+                            <button type="button" class="btn btn-outline-secondary me-md-2" onclick="window.location.reload()">
+                                <i class="fas fa-times me-1"></i>
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary px-4" id="submit-btn">
+                                <i class="fas fa-eye me-1"></i>
+                                Visualizar Preview
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lotes Recentes -->
+        <div class="col-12 col-xl-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Importações Recentes
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_batches %}
+                        <div class="list-group list-group-flush">
+                            {% for batch in recent_batches %}
+                                <div class="list-group-item batch-card">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">
+                                            <a href="{% url 'importar_cadastros:batch_detail' batch.id %}" class="text-decoration-none">
+                                                Lote #{{ batch.id }}
+                                            </a>
+                                        </h6>
+                                        <small class="text-muted">{{ batch.created_at|date:"d/m/Y H:i" }}</small>
+                                    </div>
+                                    <p class="mb-1">
+                                        <span class="badge bg-{{ batch.get_status_color }} status-badge">
+                                            {{ batch.get_status_display }}
+                                        </span>
+                                        <span class="ms-2 text-muted">{{ batch.get_tipo_display }}</span>
+                                    </p>
+                                    {% if batch.total_linhas %}
+                                        <small class="text-muted">
+                                            {{ batch.linhas_sucesso|default:0 }}/{{ batch.total_linhas }} linhas processadas
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="p-3 text-center text-muted">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p class="mb-0">Nenhuma importação realizada ainda</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Ajuda -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        Como Usar
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0 small">
+                        <li class="mb-2">Selecione o tipo de importação (Cadastros ou Efetivados)</li>
+                        <li class="mb-2">Faça upload da planilha CSV ou Excel</li>
+                        <li class="mb-2">Opcionalmente, adicione um ZIP com documentos organizados por CPF</li>
+                        <li class="mb-2">Configure o mapeamento JSON das colunas</li>
+                        <li class="mb-0">Clique em "Visualizar Preview" para testar antes de importar</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Drag and drop para upload de arquivos
+    function setupFileUpload(areaId, inputId) {
+        const area = document.getElementById(areaId);
+        const input = document.getElementById(inputId);
+        
+        if (!area || !input) return;
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            area.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            area.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            area.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight(e) {
+            area.classList.add('dragover');
+        }
+        
+        function unhighlight(e) {
+            area.classList.remove('dragover');
+        }
+        
+        area.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                input.files = files;
+                updateFileName(input, area);
+            }
+        }
+        
+        // Atualiza nome do arquivo quando selecionado
+        input.addEventListener('change', function() {
+            updateFileName(input, area);
+        });
+    }
+    
+    function updateFileName(input, area) {
+        const fileName = input.files[0]?.name;
+        if (fileName) {
+            const fileInfo = area.querySelector('.mt-2 p');
+            if (fileInfo) {
+                fileInfo.textContent = `Arquivo selecionado: ${fileName}`;
+                fileInfo.classList.add('text-success');
+            }
+        }
+    }
+    
+    // Setup para ambos os uploads
+    setupFileUpload('planilha-upload-area', '{{ form.planilha.id_for_label }}');
+    setupFileUpload('anexos-upload-area', '{{ form.anexos_zip.id_for_label }}');
+    
+    // Reset do mapeamento JSON
+    document.getElementById('reset-mapping')?.addEventListener('click', function() {
+        const defaultMapping = {{ default_mapping_json|safe }};
+        
+        const textarea = document.getElementById('{{ form.mapping_json_text.id_for_label }}');
+        if (textarea) {
+            textarea.value = JSON.stringify(defaultMapping, null, 2);
+        }
+    });
+    
+    // Validação do formulário
+    document.getElementById('import-form')?.addEventListener('submit', function(e) {
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processando...';
+        }
+    });
+});
+</script>
+{% endblock %}
